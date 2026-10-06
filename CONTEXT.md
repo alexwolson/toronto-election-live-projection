@@ -46,3 +46,13 @@ _Avoid_: Backtest, simulation (the projection's own draws are simulations)
 **Tally Baseline**:
 The Live Tally read as a forecast of the complete count: every candidate finishes at their counted share and the current leader wins with certainty. An office level's Election-Night Projection goes live only by beating it in Replays.
 _Avoid_: Naive model, current shares
+
+### On the night
+
+**Withdrawal**:
+An Election-Night Projection withheld from a race or an office level during the night by an integrity check or a switch, leaving the Live Tally. Unlike a level that failed its gate, it is temporary and can lift.
+_Avoid_: Kill, outage, count only
+
+**Night Close**:
+The declared end of election night, after which the City's count is treated as no longer changing and the page shows its final unofficial state. The City's feed has no completion signal, so it is declared, never inferred.
+_Avoid_: Freeze, end of count, count complete
