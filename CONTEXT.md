@@ -37,6 +37,10 @@ _Avoid_: Percent reported, polls reported, completeness
 A race's partial unofficial count as the latest Count Snapshot publishes it: each candidate's counted votes and shares, with the race's Reporting Progress.
 _Avoid_: Live results, current results
 
+**Ward Ballot**:
+The races a voter in one City ward may find on their ballot: mayor, that ward's councillor, and the trustee area covering the ward on each school board. Any one voter votes in only one board's trustee race.
+_Avoid_: Your ballot, ballot (alone; the Final Ballot is a set of candidates)
+
 ### Going live
 
 **Replay**:
