@@ -47,6 +47,20 @@ _Avoid_: Backtest, simulation (the projection's own draws are simulations)
 The Live Tally read as a forecast of the complete count: every candidate finishes at their counted share and the current leader wins with certainty. An office level's Election-Night Projection goes live only by beating it in Replays.
 _Avoid_: Naive model, current shares
 
+### Rehearsing
+
+**Rehearsal**:
+An end-to-end run of the night's system, from reading the count to the page readers see, against a Mock Feed before election night. Unlike a Replay, it tests how the system runs, not how accurate the projection is.
+_Avoid_: Dry run, replay, test
+
+**Mock Feed**:
+A stand-in for the City's two election-night results files, serving Count Snapshots in their exact shape and on the night's clock for a Rehearsal. Its counts are invented for the purpose and never presented as real.
+_Avoid_: Test feed (the City's own zeroed files), fake feed
+
+**Deploy Freeze**:
+The cut-off after which the night's code, image and page no longer change, apart from one scheduled forecast-only release before election day. After it, only the count changes what readers see.
+_Avoid_: Freeze (alone; Night Close is not a freeze), code freeze
+
 ### On the night
 
 **Withdrawal**:
