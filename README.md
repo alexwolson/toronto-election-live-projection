@@ -10,4 +10,29 @@ only if it passes pre-registered historical replays. Race calls are out of scope
 - Research findings: [docs/research/](docs/research/).
 - Vocabulary: [CONTEXT.md](CONTEXT.md).
 
+## Development
+
+The election-night code is the `election_night` Python package in `src/`, managed with
+[uv](https://docs.astral.sh/uv/) (Python 3.14).
+
+```bash
+uv sync                        # install the package and dev tools
+uv run pytest                  # run the tests
+uv run ruff check .            # lint
+uv run ruff format --check .   # formatting
+```
+
+Tests that need Redis use the server at `REDIS_URL` and are skipped when it is unset. To run them
+locally:
+
+```bash
+brew install redis
+redis-server --port 6379 &
+REDIS_URL=redis://localhost:6379/0 uv run pytest
+```
+
+CI (`.github/workflows/ci.yml`) runs the lint, format and test checks on pushes to `main` and on
+pull requests, with a Redis service container. In CI a missing `REDIS_URL` fails the Redis tests
+instead of skipping them.
+
 This is an independent Git repository within the Toronto election workspace.
