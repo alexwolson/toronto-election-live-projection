@@ -41,6 +41,10 @@ _Avoid_: Live results, current results
 The races a voter in one City ward may find on their ballot: mayor, that ward's councillor, and the trustee area covering the ward on each school board. Any one voter votes in only one board's trustee race.
 _Avoid_: Your ballot, ballot (alone; the Final Ballot is a set of candidates)
 
+**Ballot Name**:
+A candidate's name as the City prints it on the ballot and publishes it in the count, in the given-name and last-name parts the candidate filed. A single-name candidate has only a last name.
+_Avoid_: Display name, feed name, registered name
+
 ### Going live
 
 **Replay**:
