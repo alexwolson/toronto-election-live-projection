@@ -39,7 +39,7 @@ def _election_day(night: Night, kind: str, rng: np.random.Generator) -> list[int
         return sequence
     shuffled = rng.permutation(units).tolist()
     if kind in ("size_largest_first", "size_smallest_first"):
-        mayor = night.races[0]
+        mayor = night.mayor
         size = dict(zip(mayor.units, mayor.votes.sum(axis=1).tolist()))
         sign = -1 if kind == "size_largest_first" else 1
         return sorted(shuffled, key=lambda i: sign * size[night.units[i].key])  # stable: ties stay
@@ -88,6 +88,9 @@ def orders(night: Night, prereg: dict) -> list[tuple[str, int, np.ndarray]]:
     """Every pre-registered order for the night: the timing patterns, then the stress orders."""
     arrival = prereg["arrival_orders"]
     patterns = list(arrival["ward_aggregates"]["timing_patterns"])
+    weights = arrival["ward_aggregates"]["pattern_weights"]
+    if sorted(weights) != sorted(patterns) or len(set(weights.values())) != 1:
+        raise ValueError("unequal pattern weights would need unequal order counts")
     per_pattern = arrival["orders_per_pattern"]
     if per_pattern * len(patterns) != arrival["orders_per_night"]:
         raise ValueError("orders_per_pattern doesn't add up to orders_per_night")

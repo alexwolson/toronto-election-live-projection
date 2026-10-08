@@ -12,6 +12,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from election_night.feed import COUNCILLOR_OFFICE_ID
 from election_night.gates import load_preregistration
 from election_night.payload import build_payload
 from election_night.replay.captures import real_captures
@@ -23,7 +24,7 @@ ROOT = Path(__file__).parent.parent
 PREREG = load_preregistration(ROOT / "gates" / "preregistration.json")
 
 # Research 03 § 2 (OBSERVED from the same workbooks): contests, candidacies and valid votes per
-# office, and the night's regular (< 96) and special (>= 96) units.
+# office, and the night's units below 96 and from 96 up.
 COVERAGE = {
     2014: {1: (1, 65, 981_054), 2: (44, 358, 931_336), 3: (22, 127, 661_731), 4: (12, 42, 172_323)},
     2018: {1: (1, 35, 755_493), 2: (25, 242, 749_427), 3: (22, 156, 534_447), 4: (12, 53, 126_296)},
@@ -74,13 +75,17 @@ def test_ward_aggregates_are_the_pre_registered_codes_and_96_is_election_day(nig
 
 def test_2014_runs_on_its_44_wards(nights):
     assert len(nights[2014].wards) == 44
-    assert sum(1 for r in nights[2014].races if r.office_id == 2) == 44
+    assert sum(1 for r in nights[2014].races if r.office_id == COUNCILLOR_OFFICE_ID) == 44
+
+
+KINDS = PREREG["arrival_orders"]["seeds"]["kinds"]
 
 
 @pytest.mark.parametrize("year", YEARS)
-def test_the_final_snapshot_equals_the_certified_totals(nights, year):
+@pytest.mark.parametrize("kind", KINDS)
+def test_the_final_snapshot_equals_the_certified_totals(nights, year, kind):
     night = nights[year]
-    order = arrival_order(night, PREREG, "interleaved", 0)
+    order = arrival_order(night, PREREG, kind, 0)
     (final,) = snapshots(night, order, steps=[len(order)])
 
     rows = _races(final.all_office)
@@ -91,7 +96,7 @@ def test_the_final_snapshot_equals_the_certified_totals(nights, year):
         row = rows[(race.office_id, race.num)]
         assert row["pollsReceived"] == row["polls"] == str(len(race.units))
 
-    mayor = next(r for r in night.races if r.office_id == 1)
+    mayor = night.mayor
     office = json.loads(final.ward_by_ward)["office"]
     assert {c["name"]: int(c["votesReceived"]) for c in office["candidate"]} == dict(
         zip(mayor.candidates, mayor.certified.tolist())
@@ -100,12 +105,15 @@ def test_the_final_snapshot_equals_the_certified_totals(nights, year):
 
 
 @pytest.mark.parametrize("year", YEARS)
-def test_every_snapshot_reads_as_the_night_does(nights, year):
+@pytest.mark.parametrize("kind", KINDS)
+def test_every_snapshot_reads_as_the_night_does(nights, year, kind):
     night = nights[year]
     bundle = night_bundle(night)
-    order = arrival_order(night, PREREG, "early", 3)
-    # Every step of the smallest night; a spread of steps elsewhere, to keep the suite quick.
-    steps = list(range(len(order) + 1)) if year == 2023 else [*range(0, len(order), 97), len(order)]
+    order = arrival_order(night, PREREG, kind, 3)
+    # Every step of one order of the smallest night; a spread of steps elsewhere, to keep the
+    # suite quick.
+    every = year == 2023 and kind == "late"
+    steps = list(range(len(order) + 1)) if every else [*range(0, len(order), 97), len(order)]
 
     seen = []
     for snap in snapshots(night, order, steps=steps):
@@ -241,7 +249,7 @@ def test_ward_clustered_keeps_each_wards_election_day_units_together(nights, yea
 @pytest.mark.parametrize("kind", ("size_largest_first", "size_smallest_first"))
 def test_size_orders_sort_election_day_units_by_mayoral_votes(nights, kind):
     night = nights[2018]
-    mayor = next(r for r in night.races if r.office_id == 1)
+    mayor = night.mayor
     size = dict(zip(mayor.units, mayor.votes.sum(axis=1).tolist()))
     order = arrival_order(night, PREREG, kind, 0)
     sizes = [size[night.units[i].key] for i in order if not night.units[i].ward_aggregate]
@@ -262,6 +270,7 @@ def test_the_real_captures_are_named_checkpoints_in_the_replays_names(nights):
         payload = json.loads(
             build_payload(capture.all_office, capture.ward_by_ward, night_bundle(night))
         )
+        assert payload["seq"]["all_office"] != payload["seq"]["ward_by_ward"]
         bundle_names = {
             r["id"]: {c["key"] for c in r["candidates"]} for r in night_bundle(night)["races"]
         }

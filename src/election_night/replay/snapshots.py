@@ -4,7 +4,8 @@ Step k of an order is the pair published once its first k Reporting Units are in
 night's zeroed pair, and the last step holds the certified totals. Both files take the City's
 shape (string counts, candidates re-sorted by votes, separate `seq`s), so the payload function
 reads a Replay exactly as it reads the night. `totalVoters` is "0" throughout: electors are not
-loaded yet, and the payload never reads them.
+loaded yet, and the payload never reads them. The French boards have no workbooks, so a Replay
+carries mayor, councillor, TDSB and TCDSB only.
 """
 
 import json
@@ -15,14 +16,16 @@ from datetime import datetime
 import numpy as np
 
 from election_night.bundle import build_bundle
+from election_night.feed import COUNCILLOR_OFFICE_ID, MAYOR_OFFICE_ID
 from election_night.replay.historical import Night, Race
 
 OFFICE_NAMES = {
-    1: "Mayor",
-    2: "Councillor",
+    MAYOR_OFFICE_ID: "Mayor",
+    COUNCILLOR_OFFICE_ID: "Councillor",
     3: "Toronto District School Board",
     4: "Toronto Catholic District School Board",
 }
+NAMED_ROWS = {MAYOR_OFFICE_ID, COUNCILLOR_OFFICE_ID}  # school-board rows carry no name
 STEP_MS = 60_000  # one step a minute after the opening time
 WARD_BY_WARD_LAG_MS = 30_000  # the ward-by-ward file's own seq, half a step later
 
@@ -59,10 +62,10 @@ def _ranked(candidates: tuple[str, ...], votes: np.ndarray) -> list[int]:
     return sorted(range(len(candidates)), key=lambda c: (-votes[c], c))
 
 
-def _row(race: Race, cum: _Cumulative, step: int, name: bool) -> dict:
+def _row(race: Race, cum: _Cumulative, step: int, with_name: bool) -> dict:
     votes = cum.votes[step]
     total = int(votes.sum())
-    row = {"name": race.name} if name else {}
+    row = {"name": race.name} if with_name else {}
     row |= {
         "num": race.num,
         "polls": str(cum.polls),
@@ -93,7 +96,7 @@ def snapshots(
     if sorted(order.tolist()) != list(range(len(night.units))):
         raise ValueError("the order must be a permutation of the night's units")
     cums = [_Cumulative(race, night, order) for race in night.races]
-    mayor = night.races[0]
+    mayor = night.mayor
     wards = [(num, name, _Cumulative(mayor, night, order, ward=num)) for num, name in night.wards]
     opening = _opening_ms(night)
 
@@ -108,10 +111,12 @@ def snapshots(
                 offices.append(
                     {"id": race.office_id, "name": OFFICE_NAMES[race.office_id], "ward": []}
                 )
-            offices[-1]["ward"].append(_row(race, cum, step, name=race.office_id <= 2))
+            offices[-1]["ward"].append(
+                _row(race, cum, step, with_name=race.office_id in NAMED_ROWS)
+            )
         all_office = {"electionDesc": night.election_desc, "office": offices, "seq": str(a_seq)}
 
-        citywide = _row(mayor, cums[0], step, name=True)
+        citywide = _row(mayor, cums[0], step, with_name=True)
         ward_rows = {
             c: [
                 {

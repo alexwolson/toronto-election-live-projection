@@ -20,7 +20,9 @@ import numpy as np
 import openpyxl
 import xlrd
 
-ROOT = Path(__file__).resolve().parents[3]
+from election_night.feed import COUNCILLOR_OFFICE_ID, MAYOR_OFFICE_ID
+from election_night.gates import ROOT
+
 RESULTS = ROOT / "data" / "historical" / "results"
 
 YEARS = (2014, 2018, 2022, 2023)
@@ -94,6 +96,10 @@ class Night:
     units: tuple[Unit, ...]  # every Reporting Unit, by City ward then code
     wards: tuple[tuple[int, str | None], ...]  # City ward number and name
     races: tuple[Race, ...]  # mayor, then councillor, TDSB and TCDSB by number
+
+    @property
+    def mayor(self) -> Race:
+        return self.races[0]
 
 
 @dataclass
@@ -212,17 +218,17 @@ def _ward_name(rows: list[list]) -> str | None:
 def _office_races(office_id: int, path: Path) -> tuple[list[Race], dict[int, str | None]]:
     races, names = [], {}
     sheets = [(n, rows) for n, rows in _sheets(path) if _sheet_num(n) is not None]
-    if office_id == 1:
+    if office_id == MAYOR_OFFICE_ID:
         blocks = []
         for title, rows in sheets:
             where = f"{path.name} {title}"
             sheet_blocks = _blocks(rows, where)
             blocks += sheet_blocks
             names[sheet_blocks[0].ward] = _ward_name(rows)
-        return [_race(1, "0", "City-wide", blocks, path.name)], names
+        return [_race(MAYOR_OFFICE_ID, "0", "City-wide", blocks, path.name)], names
     for title, rows in sorted(sheets, key=lambda s: int(_sheet_num(s[0]))):
         num, where = _sheet_num(title), f"{path.name} {title}"
-        name = _ward_name(rows) if office_id == 2 else None
+        name = _ward_name(rows) if office_id == COUNCILLOR_OFFICE_ID else None
         races.append(_race(office_id, num, name, _blocks(rows, where), where))
     return races, names
 
