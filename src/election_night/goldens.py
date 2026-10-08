@@ -1,15 +1,20 @@
 """Golden payloads: one per reader state the payload function can reach so far.
 
-Each golden is built from real City files (tests/fixtures/feed). The Frontend copies them into its
-fixtures and its validator must accept every one (#17 § Schema skew).
+Each golden is built from real City files (tests/fixtures/feed), or from a short Replay of the
+certified 2022 counts (#28). The Frontend copies them into its fixtures and its validator must
+accept every one (#17 § Schema skew).
 """
 
 import json
 from pathlib import Path
 
 from election_night.bundle import OPENING_2026, build_bundle
+from election_night.gates import ROOT, load_preregistration
 from election_night.names import NameInputs
 from election_night.payload import build_payload
+from election_night.replay.historical import load_night
+from election_night.replay.orders import arrival_order
+from election_night.replay.snapshots import night_bundle, snapshots
 
 # 2026-10-26 20:01:00 EDT, one minute after the 2026 opening time.
 AFTER_OPENING_2026 = 1793059260000
@@ -71,6 +76,15 @@ def _faulted(data: dict) -> None:
     data["office"][2]["ward"].pop(4)
 
 
+def _replay_midpoint(year: int) -> tuple[bytes, bytes, dict]:
+    """A short Replay: the night's first interleaved order, halfway through its units."""
+    prereg = load_preregistration(ROOT / "gates" / "preregistration.json")
+    night = load_night(year, prereg)
+    order = arrival_order(night, prereg, "interleaved", 0)
+    (snap,) = snapshots(night, order, steps=[len(order) // 2])
+    return snap.all_office, snap.ward_by_ward, night_bundle(night)
+
+
 def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
     """Golden payload bytes by name, built from the feed fixtures directory.
 
@@ -125,6 +139,8 @@ def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
                 opening_time="2022-10-24T20:00:00-04:00",
             ),
         ),
+        # A Replay of 2022 halfway through: every level counting, the mayor in all 25 wards.
+        "replay-counting-2022": _replay_midpoint(2022),
         # 2018's final pair: every race with all units in.
         "all-units-in-2018": (
             ao_2018,

@@ -88,4 +88,6 @@ published: the `council-counting-2022` golden carries MonAvenir 4 at 539 of 0 un
   rejected by `check_status` before the body is read.
 
 Golden payloads for each reachable state are in `goldens/payload/`, emitted by
-`uv run election-night goldens` from the real City files in `tests/fixtures/feed/`.
+`uv run election-night goldens` from the real City files in `tests/fixtures/feed/` and, for
+`replay-counting-2022`, from a short Replay of the certified 2022 counts (#28). Replay payloads
+key candidates by the workbooks' Ballot Names (`Tory John`) and carry no registry fields.
