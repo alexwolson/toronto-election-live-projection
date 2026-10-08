@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Live results and Election-Night Projection for the 2026 Toronto municipal election"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "redis>=8.1.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.9.28,<0.10.0"]
@@ -22,7 +24,6 @@ testpaths = ["tests"]
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
-    "redis>=8.1.0",
     "ruff>=0.16.10",
 ]
 

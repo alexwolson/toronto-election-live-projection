@@ -32,6 +32,13 @@ uv run election-night goldens            # rewrite the golden payloads in golden
 
 The payload's field layout is in [docs/payload.md](docs/payload.md).
 
+```bash
+FEED_BASE_URL=... REDIS_URL=... uv run election-night pipeline --name fly --stagger 0
+```
+
+runs a pipeline: every 60 s it reads the City's two files and publishes the payload and its
+heartbeat to the store. The store's keys and the newest-pair rule are in [docs/store.md](docs/store.md).
+
 Tests that need Redis use the server at `REDIS_URL` and are skipped when it is unset. To run them
 locally:
 

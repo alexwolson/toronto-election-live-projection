@@ -2,18 +2,22 @@
 
 import argparse
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
 
+import redis
+
 from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write_bundle
 from election_night.feed import check_status
 from election_night.goldens import write_goldens
 from election_night.payload import build_payload
+from election_night.pipeline import FILES, Pipeline, Watchdog, run
+from election_night.store import PIPELINES, Store
 
 CITY_FEED = "https://mediaresults.toronto.ca/results"
-FILES = ("unofficialresult.json", "unofficialresult-wardbyward.json")
 # Defaults resolve against the repo root, wherever the command is run from.
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "tests" / "fixtures" / "feed"
@@ -50,6 +54,21 @@ def cmd_payload(args) -> None:
     sys.stdout.buffer.write(body + b"\n")
 
 
+def _env(name: str) -> str:
+    value = os.environ.get(name)
+    if not value:
+        sys.exit(f"{name} must be set")
+    return value
+
+
+def cmd_pipeline(args) -> None:
+    # Only the feed base URL and the store credentials come from the environment.
+    base_url, redis_url = _env("FEED_BASE_URL"), _env("REDIS_URL")
+    client = redis.Redis.from_url(redis_url, socket_timeout=10, socket_connect_timeout=10)
+    pipeline = Pipeline(args.name, base_url, load_bundle(args.bundle), Store(client))
+    run(pipeline, args.stagger, Watchdog())
+
+
 def cmd_bundle(args) -> None:
     city = args.fixtures / "city-2026"
     bundle = build_bundle(
@@ -74,6 +93,14 @@ def main(argv: list[str] | None = None) -> None:
     payload.add_argument("--cache-dir", type=Path, default=ROOT / ".cache" / "feed")
     payload.add_argument("--pretty", action="store_true")
     payload.set_defaults(run=cmd_payload)
+
+    pipe = commands.add_parser(
+        "pipeline", help="poll the City feed every 60 s; publish to the store"
+    )
+    pipe.add_argument("--name", choices=PIPELINES, required=True)
+    pipe.add_argument("--stagger", type=float, default=0.0, help="seconds past each minute")
+    pipe.add_argument("--bundle", type=Path, default=BUNDLE)
+    pipe.set_defaults(run=cmd_pipeline)
 
     bundle = commands.add_parser("bundle", help="build Night Bundle v0 from the City test files")
     bundle.add_argument("--fixtures", type=Path, default=FIXTURES)
