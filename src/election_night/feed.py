@@ -18,6 +18,12 @@ OFFICES = {
     6: ("monavenir", "french_trustee"),
 }
 MAYOR_OFFICE_ID = 1
+COUNCILLOR_OFFICE_ID = 2
+
+
+def race_id(office_id: int, num: str) -> str:
+    prefix = OFFICES[office_id][0]
+    return prefix if office_id == MAYOR_OFFICE_ID else f"{prefix}-{num}"
 
 
 class UnreadableFile(ValueError):

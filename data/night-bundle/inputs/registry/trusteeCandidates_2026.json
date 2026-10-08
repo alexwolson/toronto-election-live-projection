@@ -1,0 +1,1054 @@
+{
+ "seq": "1791428880902",
+ "schoolBoard": [
+  {
+   "id": 3,
+   "ward": [
+    {
+     "name": "1",
+     "num": "1",
+     "candidate": [
+      {
+       "name": "Bryan, Rosemarie",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Rosemarie",
+       "lastName": "Bryan"
+      },
+      {
+       "name": "Clarke, Antonius",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Antonius",
+       "lastName": "Clarke"
+      },
+      {
+       "name": "de Dovitiis, Matias",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Matias",
+       "lastName": "de Dovitiis"
+      },
+      {
+       "name": "Hastings, Dennis",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Dennis",
+       "lastName": "Hastings"
+      },
+      {
+       "name": "Henry, Amberley Ryan",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Amberley Ryan",
+       "lastName": "Henry"
+      },
+      {
+       "name": "Kang, Lakhan",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Lakhan",
+       "lastName": "Kang"
+      }
+     ],
+     "n": 1
+    },
+    {
+     "name": "2",
+     "num": "2",
+     "candidate": [
+      {
+       "name": "Ellis, Timothy",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Timothy",
+       "lastName": "Ellis"
+      },
+      {
+       "name": "Voitsytskyi, Ivan",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Ivan",
+       "lastName": "Voitsytskyi"
+      },
+      {
+       "name": "Zaffino, Matthew",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Matthew",
+       "lastName": "Zaffino"
+      }
+     ],
+     "n": 2
+    },
+    {
+     "name": "3",
+     "num": "3",
+     "candidate": [
+      {
+       "name": "Banninga, Matt",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Matt",
+       "lastName": "Banninga"
+      },
+      {
+       "name": "Choi, Daniel",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Daniel",
+       "lastName": "Choi"
+      },
+      {
+       "name": "Dawson, Alexis",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Alexis",
+       "lastName": "Dawson"
+      },
+      {
+       "name": "Gural, Christina",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Christina",
+       "lastName": "Gural"
+      },
+      {
+       "name": "Ishraq, Fatin",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Fatin",
+       "lastName": "Ishraq"
+      },
+      {
+       "name": "Mensah, Justin",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Justin",
+       "lastName": "Mensah"
+      },
+      {
+       "name": "Waters, Andrew",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Andrew",
+       "lastName": "Waters"
+      },
+      {
+       "name": "Webster, Jennifer",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Jennifer",
+       "lastName": "Webster"
+      }
+     ],
+     "n": 3
+    },
+    {
+     "name": "4",
+     "num": "4",
+     "candidate": [
+      {
+       "name": "Andrusyak, Ivanna",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Ivanna",
+       "lastName": "Andrusyak"
+      },
+      {
+       "name": "Choi, Brandon",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Brandon",
+       "lastName": "Choi"
+      },
+      {
+       "name": "Delpero, Anthony",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Anthony",
+       "lastName": "Delpero"
+      },
+      {
+       "name": "Pei, Weidong",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Weidong",
+       "lastName": "Pei"
+      }
+     ],
+     "n": 4
+    },
+    {
+     "name": "5",
+     "num": "5",
+     "candidate": [
+      {
+       "name": "Feyginberg, Elina",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Elina",
+       "lastName": "Feyginberg"
+      },
+      {
+       "name": "Gregory, Andrene",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Andrene",
+       "lastName": "Gregory"
+      },
+      {
+       "name": "Gulyas, David",
+       "office": 3,
+       "status": "Active",
+       "firstName": "David",
+       "lastName": "Gulyas"
+      },
+      {
+       "name": "Kolb, Jared",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Jared",
+       "lastName": "Kolb"
+      },
+      {
+       "name": "Larkin, Maureen",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Maureen",
+       "lastName": "Larkin"
+      },
+      {
+       "name": "Massey, Andrew",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Andrew",
+       "lastName": "Massey"
+      },
+      {
+       "name": "Stefanis, Gus",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Gus",
+       "lastName": "Stefanis"
+      },
+      {
+       "name": "Viret, Janine",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Janine",
+       "lastName": "Viret"
+      },
+      {
+       "name": "Volk, Jennifer",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Jennifer",
+       "lastName": "Volk"
+      }
+     ],
+     "n": 5
+    },
+    {
+     "name": "6",
+     "num": "6",
+     "candidate": [
+      {
+       "name": "Cline, Stacey",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Stacey",
+       "lastName": "Cline"
+      },
+      {
+       "name": "Osman, Saherla",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Saherla",
+       "lastName": "Osman"
+      },
+      {
+       "name": "Smithies, Sarah",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Sarah",
+       "lastName": "Smithies"
+      },
+      {
+       "name": "Vassal, John",
+       "office": 3,
+       "status": "Active",
+       "firstName": "John",
+       "lastName": "Vassal"
+      }
+     ],
+     "n": 6
+    },
+    {
+     "name": "7",
+     "num": "7",
+     "candidate": [
+      {
+       "name": "Arvizu, Axel",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Axel",
+       "lastName": "Arvizu"
+      },
+      {
+       "name": "Cherrington, Gladstone",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Gladstone",
+       "lastName": "Cherrington"
+      },
+      {
+       "name": "Golding, Adam",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Adam",
+       "lastName": "Golding"
+      },
+      {
+       "name": "Kheiriddin, Tasha",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Tasha",
+       "lastName": "Kheiriddin"
+      },
+      {
+       "name": "Mohammad, Nasir",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Nasir",
+       "lastName": "Mohammad"
+      },
+      {
+       "name": "Nalir, Shaffni",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Shaffni",
+       "lastName": "Nalir"
+      },
+      {
+       "name": "Nazary, Theo",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Theo",
+       "lastName": "Nazary"
+      },
+      {
+       "name": "Williams, Deborah",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Deborah",
+       "lastName": "Williams"
+      }
+     ],
+     "n": 7
+    },
+    {
+     "name": "8",
+     "num": "8",
+     "candidate": [
+      {
+       "name": "Haddleton, Tracey",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Tracey",
+       "lastName": "Haddleton"
+      },
+      {
+       "name": "Hatia, Ibrahim",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Ibrahim",
+       "lastName": "Hatia"
+      },
+      {
+       "name": "Kapoglis, Spiros",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Spiros",
+       "lastName": "Kapoglis"
+      },
+      {
+       "name": "Khan, Imran",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Imran",
+       "lastName": "Khan"
+      },
+      {
+       "name": "Lee III, Dewitt",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Dewitt",
+       "lastName": "Lee III"
+      },
+      {
+       "name": "McGirr, Christine",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Christine",
+       "lastName": "McGirr"
+      },
+      {
+       "name": "Rajwani, Farzana",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Farzana",
+       "lastName": "Rajwani"
+      }
+     ],
+     "n": 8
+    },
+    {
+     "name": "9",
+     "num": "9",
+     "candidate": [
+      {
+       "name": "De Pass, Carey",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Carey",
+       "lastName": "De Pass"
+      },
+      {
+       "name": "Mammoliti, Christopher",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Christopher",
+       "lastName": "Mammoliti"
+      },
+      {
+       "name": "Wu, Bill",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Bill",
+       "lastName": "Wu"
+      },
+      {
+       "name": "Yeung, Sonny",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Sonny",
+       "lastName": "Yeung"
+      }
+     ],
+     "n": 9
+    },
+    {
+     "name": "10",
+     "num": "10",
+     "candidate": [
+      {
+       "name": "Ahmad, Malik",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Malik",
+       "lastName": "Ahmad"
+      },
+      {
+       "name": "Dewan, Azim",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Azim",
+       "lastName": "Dewan"
+      },
+      {
+       "name": "Emerson, Karen",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Karen",
+       "lastName": "Emerson"
+      },
+      {
+       "name": "Hassan, Ahnaaf",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Ahnaaf",
+       "lastName": "Hassan"
+      },
+      {
+       "name": "Islam, Md Sazibul",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Md Sazibul",
+       "lastName": "Islam"
+      },
+      {
+       "name": "Kremp, Glenn",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Glenn",
+       "lastName": "Kremp"
+      },
+      {
+       "name": "Li, Shawn",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Shawn",
+       "lastName": "Li"
+      },
+      {
+       "name": "Poirier, Jocelyne",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Jocelyne",
+       "lastName": "Poirier"
+      },
+      {
+       "name": "Sterling, Marisa",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Marisa",
+       "lastName": "Sterling"
+      }
+     ],
+     "n": 10
+    },
+    {
+     "name": "11",
+     "num": "11",
+     "candidate": [
+      {
+       "name": "Deus, Dedan",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Dedan",
+       "lastName": "Deus"
+      },
+      {
+       "name": "Grant, Angus",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Angus",
+       "lastName": "Grant"
+      },
+      {
+       "name": "Halstead, Dameon",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Dameon",
+       "lastName": "Halstead"
+      },
+      {
+       "name": "Jack, Curtis",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Curtis",
+       "lastName": "Jack"
+      },
+      {
+       "name": "Mohammed, Abdul Azeem",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Abdul Azeem",
+       "lastName": "Mohammed"
+      },
+      {
+       "name": "Ravinthiran, Ravicha",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Ravicha",
+       "lastName": "Ravinthiran"
+      }
+     ],
+     "n": 11
+    },
+    {
+     "name": "12",
+     "num": "12",
+     "candidate": [
+      {
+       "name": "Ansari, Safiya",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Safiya",
+       "lastName": "Ansari"
+      },
+      {
+       "name": "Frake, Darren",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Darren",
+       "lastName": "Frake"
+      },
+      {
+       "name": "Garcia, Aria",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Aria",
+       "lastName": "Garcia"
+      },
+      {
+       "name": "McBean, Gary",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Gary",
+       "lastName": "McBean"
+      },
+      {
+       "name": "Nantheeswarar, Vimuththan",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Vimuththan",
+       "lastName": "Nantheeswarar"
+      },
+      {
+       "name": "Purohit, Ketan",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Ketan",
+       "lastName": "Purohit"
+      },
+      {
+       "name": "Sriskandarajah, Anu",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Anu",
+       "lastName": "Sriskandarajah"
+      },
+      {
+       "name": "Williams, Sherri",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Sherri",
+       "lastName": "Williams"
+      },
+      {
+       "name": "Wilson, Marcia",
+       "office": 3,
+       "status": "Active",
+       "firstName": "Marcia",
+       "lastName": "Wilson"
+      }
+     ],
+     "n": 12
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "ward": [
+    {
+     "name": "1",
+     "num": "1",
+     "candidate": [
+      {
+       "name": "Di Francesco, Jennifer",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Jennifer",
+       "lastName": "Di Francesco"
+      },
+      {
+       "name": "Dias, Maria",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Maria",
+       "lastName": "Dias"
+      },
+      {
+       "name": "Pella, Robert",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Robert",
+       "lastName": "Pella"
+      }
+     ],
+     "n": 1
+    },
+    {
+     "name": "2",
+     "num": "2",
+     "candidate": [
+      {
+       "name": "Concordia, Sara",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Sara",
+       "lastName": "Concordia"
+      },
+      {
+       "name": "de Domenico, Markus",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Markus",
+       "lastName": "de Domenico"
+      }
+     ],
+     "n": 2
+    },
+    {
+     "name": "3",
+     "num": "3",
+     "candidate": [
+      {
+       "name": "Li Preti, Ida",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Ida",
+       "lastName": "Li Preti"
+      },
+      {
+       "name": "Munoz Plasencia, Susel",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Susel",
+       "lastName": "Munoz Plasencia"
+      }
+     ],
+     "n": 3
+    },
+    {
+     "name": "4",
+     "num": "4",
+     "candidate": [
+      {
+       "name": "Borreca, Maria",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Maria",
+       "lastName": "Borreca"
+      },
+      {
+       "name": "Fracassi, Peter",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Peter",
+       "lastName": "Fracassi"
+      },
+      {
+       "name": "Lubinski, Teresa",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Teresa",
+       "lastName": "Lubinski"
+      }
+     ],
+     "n": 4
+    },
+    {
+     "name": "5",
+     "num": "5",
+     "candidate": [
+      {
+       "name": "Cristiano, Gianfranco",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Gianfranco",
+       "lastName": "Cristiano"
+      },
+      {
+       "name": "Rizzo, Maria",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Maria",
+       "lastName": "Rizzo"
+      }
+     ],
+     "n": 5
+    },
+    {
+     "name": "6",
+     "num": "6",
+     "candidate": [
+      {
+       "name": "DAmico, Frank",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Frank",
+       "lastName": "D'Amico"
+      }
+     ],
+     "n": 6
+    },
+    {
+     "name": "7",
+     "num": "7",
+     "candidate": [
+      {
+       "name": "DiNova, Celine",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Celine",
+       "lastName": "DiNova"
+      },
+      {
+       "name": "Largo, Marissa",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Marissa",
+       "lastName": "Largo"
+      },
+      {
+       "name": "Rodriguez, Gregory",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Gregory",
+       "lastName": "Rodriguez"
+      }
+     ],
+     "n": 7
+    },
+    {
+     "name": "8",
+     "num": "8",
+     "candidate": [
+      {
+       "name": "Allen, Carla",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Carla",
+       "lastName": "Allen"
+      },
+      {
+       "name": "Paul, Mary Cury",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Mary Cury",
+       "lastName": "Paul"
+      },
+      {
+       "name": "Tanuan, Garry",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Garry",
+       "lastName": "Tanuan"
+      }
+     ],
+     "n": 8
+    },
+    {
+     "name": "9",
+     "num": "9",
+     "candidate": [
+      {
+       "name": "Bonavota, Rosina",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Rosina",
+       "lastName": "Bonavota"
+      },
+      {
+       "name": "Fallico, Renato",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Renato",
+       "lastName": "Fallico"
+      },
+      {
+       "name": "Le, David",
+       "office": 4,
+       "status": "Active",
+       "firstName": "David",
+       "lastName": "Le"
+      },
+      {
+       "name": "Santos, Jonathan",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Jonathan",
+       "lastName": "Santos"
+      }
+     ],
+     "n": 9
+    },
+    {
+     "name": "10",
+     "num": "10",
+     "candidate": [
+      {
+       "name": "Araujo, Rosanna",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Rosanna",
+       "lastName": "Araujo"
+      },
+      {
+       "name": "Colonna, Teresa",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Teresa",
+       "lastName": "Colonna"
+      },
+      {
+       "name": "Loor Ruiz, Stephanie",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Stephanie",
+       "lastName": "Loor Ruiz"
+      },
+      {
+       "name": "Piccininni, Sal",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Sal",
+       "lastName": "Piccininni"
+      },
+      {
+       "name": "Salvatori, Paul",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Paul",
+       "lastName": "Salvatori"
+      }
+     ],
+     "n": 10
+    },
+    {
+     "name": "11",
+     "num": "11",
+     "candidate": [
+      {
+       "name": "Kennedy, Angela",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Angela",
+       "lastName": "Kennedy"
+      },
+      {
+       "name": "Perera, Anton",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Anton",
+       "lastName": "Perera"
+      }
+     ],
+     "n": 11
+    },
+    {
+     "name": "12",
+     "num": "12",
+     "candidate": [
+      {
+       "name": "Crawford, Nancy",
+       "office": 4,
+       "status": "Active",
+       "firstName": "Nancy",
+       "lastName": "Crawford"
+      }
+     ],
+     "n": 12
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "ward": [
+    {
+     "name": "2",
+     "num": "2",
+     "candidate": [
+      {
+       "name": "Fortin, Benoit",
+       "office": 5,
+       "status": "Active",
+       "firstName": "Benoit",
+       "lastName": "Fortin"
+      }
+     ],
+     "n": 2
+    },
+    {
+     "name": "3",
+     "num": "3",
+     "candidate": [
+      {
+       "name": "LHeureux, Jean Francois",
+       "office": 5,
+       "status": "Active",
+       "firstName": "Jean-François",
+       "lastName": "L'Heureux"
+      },
+      {
+       "name": "Ruszkowski, Anna Karyna",
+       "office": 5,
+       "status": "Active",
+       "firstName": "Anna-Karyna",
+       "lastName": "Ruszkowski"
+      }
+     ],
+     "n": 3
+    },
+    {
+     "name": "4",
+     "num": "4",
+     "candidate": [
+      {
+       "name": "Oger, Genevieve",
+       "office": 5,
+       "status": "Active",
+       "firstName": "Geneviève",
+       "lastName": "Oger"
+      }
+     ],
+     "n": 4
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "ward": [
+    {
+     "name": "3",
+     "num": "3",
+     "candidate": [
+      {
+       "name": "Aboungono, Josiane",
+       "office": 6,
+       "status": "Active",
+       "firstName": "Josiane",
+       "lastName": "Aboungono"
+      },
+      {
+       "name": "Nichilo, Yelena",
+       "office": 6,
+       "status": "Active",
+       "firstName": "Yelena",
+       "lastName": "Nichilo"
+      },
+      {
+       "name": "Ogang, Angela",
+       "office": 6,
+       "status": "Active",
+       "firstName": "Angela",
+       "lastName": "Ogang"
+      }
+     ],
+     "n": 3
+    },
+    {
+     "name": "4",
+     "num": "4",
+     "candidate": [
+      {
+       "name": "Dechaine, Rhea",
+       "office": 6,
+       "status": "Active",
+       "firstName": "Rhea",
+       "lastName": "Dechaine"
+      },
+      {
+       "name": "Gustave, Clescadine",
+       "office": 6,
+       "status": "Active",
+       "firstName": "Clescadine",
+       "lastName": "Gustave"
+      },
+      {
+       "name": "McNulty, Derek",
+       "office": 6,
+       "status": "Active",
+       "firstName": "Derek",
+       "lastName": "McNulty"
+      }
+     ],
+     "n": 4
+    }
+   ]
+  }
+ ]
+}

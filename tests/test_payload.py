@@ -8,10 +8,12 @@ import pytest
 from election_night.bundle import OPENING_2026, build_bundle
 from election_night.feed import UnreadableFile, check_status
 from election_night.goldens import AFTER_OPENING_2026
+from election_night.name_inputs import load_name_inputs
 from election_night.payload import build_payload
 
 FEED = Path(__file__).parent / "fixtures" / "feed"
 CITY_2026 = FEED / "city-2026"
+NAME_INPUTS = Path(__file__).parent.parent / "data" / "night-bundle" / "inputs"
 
 
 def city_2026():
@@ -354,3 +356,20 @@ def test_a_mayor_race_with_no_figures_has_no_wards():
     )
 
     assert race(payload, "mayor")["wards"] == []
+
+
+def test_the_payload_carries_each_candidates_names_and_ids_from_the_bundle():
+    names = load_name_inputs(NAME_INPUTS)
+    bundle = build_bundle(*city_2026(), opening_time=OPENING_2026, names=names)
+    payload = payload_of(*city_2026(), bundle)
+
+    chow = next(c for c in race(payload, "mayor")["candidates"] if c["key"] == "Olivia Chow")
+    assert chow["full_name"] == "Olivia Chow"
+    assert chow["short_label"] == "Olivia Chow"  # Braeden Chow shares the last name
+    assert chow["candidacy_id"] == names.canonical["mayor"]["Olivia Chow"][0]
+    assert chow["candidate_id"] == "per_a4291ca7539b53e2acc1c4f108bc73e6"
+    di_francesco = race(payload, "tcdsb-1")["candidates"]
+    assert {c["key"]: c["short_label"] for c in di_francesco}["Jennifer Di Francesco"] == (
+        "Di Francesco"
+    )
+    assert all(c["candidate_id"] is None for c in race(payload, "councillor-25")["candidates"])

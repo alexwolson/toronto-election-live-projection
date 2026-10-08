@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from election_night.bundle import OPENING_2026, build_bundle
+from election_night.names import NameInputs
 from election_night.payload import build_payload
 
 # 2026-10-26 20:01:00 EDT, one minute after the 2026 opening time.
@@ -70,13 +71,16 @@ def _faulted(data: dict) -> None:
     data["office"][2]["ward"].pop(4)
 
 
-def goldens(fixtures: Path) -> dict[str, bytes]:
-    """Golden payload bytes by name, built from the feed fixtures directory."""
+def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
+    """Golden payload bytes by name, built from the feed fixtures directory.
+
+    The 2026 goldens use the named Night Bundle; the historical ones have no registry.
+    """
     city = fixtures / "city-2026"
     wayback = fixtures / "wayback"
     ao_2026 = (city / "unofficialresult.json").read_bytes()
     wb_2026 = (city / "unofficialresult-wardbyward.json").read_bytes()
-    bundle_2026 = build_bundle(ao_2026, wb_2026, opening_time=OPENING_2026)
+    bundle_2026 = build_bundle(ao_2026, wb_2026, opening_time=OPENING_2026, names=names)
 
     ao_2018 = (wayback / "2018-20181029172648-all-office.json").read_bytes()
     wb_2018 = (wayback / "2018-20181029172755-wardbyward.json").read_bytes()
@@ -131,10 +135,10 @@ def goldens(fixtures: Path) -> dict[str, bytes]:
     return {name: build_payload(*pair) for name, pair in pairs.items()}
 
 
-def write_goldens(fixtures: Path, out: Path) -> list[Path]:
+def write_goldens(fixtures: Path, names: NameInputs, out: Path) -> list[Path]:
     out.mkdir(parents=True, exist_ok=True)
     written = []
-    for name, body in goldens(fixtures).items():
+    for name, body in goldens(fixtures, names).items():
         path = out / f"{name}.json"
         path.write_bytes(body)
         written.append(path)

@@ -1,0 +1,32 @@
+{
+ "fetched_at": "2026-10-08T03:28:24+00:00",
+ "registry": {
+  "mayorCandidates_2026.json": {
+   "url": "https://www.toronto.ca/data/elections/candidate_list/mayorCandidates_2026.json",
+   "seq": 1791428880902,
+   "sha256": "1d0fa03f1b38ddb6da4036091a5dcdeae8c8b0c39285be35daaa1a7e5ea412a5"
+  },
+  "councilorCandidates_2026.json": {
+   "url": "https://www.toronto.ca/data/elections/candidate_list/councilorCandidates_2026.json",
+   "seq": 1791428880902,
+   "sha256": "f61bbbaa4c1df74b910ae20aee07eac9de3809794217460013e1b13df0b70a46"
+  },
+  "trusteeCandidates_2026.json": {
+   "url": "https://www.toronto.ca/data/elections/candidate_list/trusteeCandidates_2026.json",
+   "seq": 1791428880902,
+   "sha256": "eceabfef876c4873efad07ee2663d5c1f9ad95823c4b4ae8d1a3f56230737f07"
+  }
+ },
+ "results": {
+  "repository": "alexwolson/toronto-election-results",
+  "release": "results-2026-10-07.1",
+  "asset": "election_results.csv",
+  "sha256": "142718b4b30a8d12452b9ac454f0e35c333eb9dd750821f24e39fc61e08c1a9f"
+ },
+ "forecast": {
+  "repository": "alexwolson/toronto-election-poll-tracker-backend",
+  "release": "backend-2026-10-07.2",
+  "asset": "mayoral_forecast.json",
+  "sha256": "690f921768e06625cdd5c2252de465e4756c34692c709da8e95d4266b2893bf2"
+ }
+}

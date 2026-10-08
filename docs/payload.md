@@ -6,7 +6,7 @@ The payload is the one citywide JSON file each pipeline publishes per Count Snap
 compact, with keys in the order below. The Frontend validator pins `schema_version`; a change to
 this layout bumps it.
 
-Fields marked *v0 null* are in the layout now and filled by later tickets (#27 names, #46 forecast,
+Fields marked *v0 null* are in the layout now and filled by later tickets (#46 forecast,
 #33/#36/#41 projections).
 
 ## Top level
@@ -61,9 +61,9 @@ Race states:
 |---|---|---|
 | `key` | string | The Ballot Name exactly as the feed writes it; unique within the race |
 | `full_name` | string | The Ballot Name as written, for display |
-| `short_label` | string or null | The registry `lastName`, or the full Ballot Name when there is none or it repeats in the race. *v0 null* |
-| `candidacy_id` | string or null | The canonical results' `candidacy_id`. *v0 null* |
-| `candidate_id` | string or null | The forecast's `candidate_id`, on forecast-named mayoral rows only. *v0 null* |
+| `short_label` | string or null | The registry `lastName`, or the full Ballot Name when there is none or it repeats in the race. Null only for a name the bundle doesn't hold |
+| `candidacy_id` | string or null | The canonical results' `candidacy_id`. Null only for a name the bundle doesn't hold |
+| `candidate_id` | string or null | The forecast's `candidate_id`, on the final forecast's leader and challenger only (its `pairwise_margin`: today Chow and Bradford); null on every other row |
 | `votes` | int or null | Counted votes; null before results |
 | `share` | number or null | 100 × votes / the race's summed candidate votes, 2 dp; null before results or with no votes |
 
