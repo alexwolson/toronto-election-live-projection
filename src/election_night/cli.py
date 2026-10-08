@@ -14,6 +14,7 @@ from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write
 from election_night.feed import check_status
 from election_night.gates import s3_record
 from election_night.goldens import write_goldens
+from election_night.names import fetch_name_inputs, load_name_inputs
 from election_night.payload import build_payload
 from election_night.pipeline import FILES, Pipeline, Watchdog, run
 from election_night.store import PIPELINES, Store
@@ -25,6 +26,7 @@ FIXTURES = ROOT / "tests" / "fixtures" / "feed"
 BUNDLE = ROOT / "data" / "night-bundle" / "night-bundle.json"
 BACKEND_REPO = "alexwolson/toronto-election-poll-tracker-backend"
 OUTCOMES_PATH = "data/raw/elections/mayoral_outcomes.csv"
+NAME_INPUTS = ROOT / "data" / "night-bundle" / "inputs"
 
 
 def fetch(url: str, cache: Path) -> bytes:
@@ -75,20 +77,28 @@ def cmd_pipeline(args) -> None:
 def cmd_bundle(args) -> None:
     city = args.fixtures / "city-2026"
     bundle = build_bundle(
-        (city / FILES[0]).read_bytes(), (city / FILES[1]).read_bytes(), args.opening_time
+        (city / FILES[0]).read_bytes(),
+        (city / FILES[1]).read_bytes(),
+        args.opening_time,
+        names=load_name_inputs(args.names),
     )
     write_bundle(bundle, args.out)
     print(args.out)
 
 
 def cmd_goldens(args) -> None:
-    for path in write_goldens(args.fixtures, args.out):
+    for path in write_goldens(args.fixtures, load_name_inputs(args.names), args.out):
         print(path)
 
 
 def cmd_s3_shift(args) -> None:
     source = {"repo": BACKEND_REPO, "path": OUTCOMES_PATH, "commit": args.outcomes_commit}
     print(json.dumps(s3_record(args.forecasts, args.outcomes, source), indent=2, sort_keys=True))
+
+
+def cmd_name_inputs(args) -> None:
+    source = fetch_name_inputs(args.backend_release, args.out)
+    print(json.dumps(source, indent=1))
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -110,14 +120,18 @@ def main(argv: list[str] | None = None) -> None:
     pipe.add_argument("--bundle", type=Path, default=BUNDLE)
     pipe.set_defaults(run=cmd_pipeline)
 
-    bundle = commands.add_parser("bundle", help="build Night Bundle v0 from the City test files")
+    bundle = commands.add_parser(
+        "bundle", help="build the Night Bundle from the City test files and the name inputs"
+    )
     bundle.add_argument("--fixtures", type=Path, default=FIXTURES)
+    bundle.add_argument("--names", type=Path, default=NAME_INPUTS)
     bundle.add_argument("--opening-time", default=OPENING_2026)
     bundle.add_argument("--out", type=Path, default=BUNDLE)
     bundle.set_defaults(run=cmd_bundle)
 
     golden = commands.add_parser("goldens", help="write the golden payloads")
     golden.add_argument("--fixtures", type=Path, default=FIXTURES)
+    golden.add_argument("--names", type=Path, default=NAME_INPUTS)
     golden.add_argument("--out", type=Path, default=ROOT / "goldens" / "payload")
     golden.set_defaults(run=cmd_goldens)
 
@@ -135,6 +149,14 @@ def main(argv: list[str] | None = None) -> None:
         "--outcomes-commit", required=True, help="the Backend commit that last changed that file"
     )
     s3.set_defaults(run=cmd_s3_shift)
+
+    inputs = commands.add_parser(
+        "name-inputs",
+        help="vendor the registry, and the forecast's ids and Results candidacies, for the bundle",
+    )
+    inputs.add_argument("--backend-release", required=True, help="the pinned forecast's release")
+    inputs.add_argument("--out", type=Path, default=NAME_INPUTS)
+    inputs.set_defaults(run=cmd_name_inputs)
 
     args = parser.parse_args(argv)
     args.run(args)

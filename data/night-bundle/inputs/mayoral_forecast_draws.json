@@ -1,0 +1,28 @@
+{
+  "release_tag": "backend-2026-10-07.2",
+  "election_cycle_id": "toronto_2026",
+  "forecast": "mayoral_forecast.json",
+  "forecast_sha256": "690f921768e06625cdd5c2252de465e4756c34692c709da8e95d4266b2893bf2",
+  "candidates": [
+    {
+      "candidate_id": "per_a4291ca7539b53e2acc1c4f108bc73e6",
+      "name": "Olivia Chow"
+    },
+    {
+      "candidate_id": "per_d8dfddfb642358e299f4b428292666bf",
+      "name": "Brad Bradford"
+    },
+    {
+      "candidate_id": "per_345dd6a9ee645c0bb5a8ade615f91579",
+      "name": "Chris Alexander"
+    }
+  ],
+  "draws": 16000,
+  "npz": "mayoral_forecast_draws.npz",
+  "npz_sha256": "5ef6b630e4c0e18a3f3433e941d4be11cb52e744e9b287ee50dea4a56f24f6e1",
+  "arrays": {
+    "candidate_ids": "the named candidates, in column order",
+    "full_ballot": "draws x named candidates: each one's share of valid votes",
+    "residual_pool": "per draw, the share of every other candidate on the ballot; full_ballot plus residual_pool sums to 1"
+  }
+}

@@ -26,11 +26,17 @@ The `election-night` command:
 
 ```bash
 uv run election-night payload --pretty   # fetch the City's two files once (conditional GET), print the payload
+uv run election-night name-inputs --backend-release backend-YYYY-MM-DD.N
+                                         # vendor the registry and the forecast's ids and candidacies
 uv run election-night bundle             # rebuild data/night-bundle/night-bundle.json from the City test files
 uv run election-night goldens            # rewrite the golden payloads in goldens/payload/
 ```
 
 The payload's field layout is in [docs/payload.md](docs/payload.md).
+
+The bundle names every 2026 candidate from inputs vendored in `data/night-bundle/inputs/`
+([README](data/night-bundle/inputs/README.md)), and fails unless the City test file, the registry
+and the canonical name the same candidates in every race.
 
 ```bash
 FEED_BASE_URL=... REDIS_URL=... uv run election-night pipeline --name fly --stagger 0

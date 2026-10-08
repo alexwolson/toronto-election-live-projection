@@ -1,0 +1,376 @@
+{
+ "seq": "1791427980814",
+ "candidates": [
+  {
+   "name": "Abdulkadir, Imad",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Imad",
+   "lastName": "Abdulkadir"
+  },
+  {
+   "name": "Abdulsalam, Bahira",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Bahira",
+   "lastName": "Abdulsalam"
+  },
+  {
+   "name": "Alexander, Chris",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Chris",
+   "lastName": "Alexander"
+  },
+  {
+   "name": "Atkinson, Jamie",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Jamie",
+   "lastName": "Atkinson"
+  },
+  {
+   "name": "Bradford, Brad",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Brad",
+   "lastName": "Bradford"
+  },
+  {
+   "name": "Brown, Darrell",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Darrell",
+   "lastName": "Brown"
+  },
+  {
+   "name": "Buffey, Brian",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Brian",
+   "lastName": "Buffey"
+  },
+  {
+   "name": "Chow, Braeden",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Braeden",
+   "lastName": "Chow"
+  },
+  {
+   "name": "Chow, Olivia",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Olivia",
+   "lastName": "Chow"
+  },
+  {
+   "name": "Choy, Logan",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Logan",
+   "lastName": "Choy"
+  },
+  {
+   "name": "Clarke, Kevin",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Kevin",
+   "lastName": "Clarke"
+  },
+  {
+   "name": "Collins, Paul",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Paul",
+   "lastName": "Collins"
+  },
+  {
+   "name": "Cruze, Alex",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Alex",
+   "lastName": "Cruze"
+  },
+  {
+   "name": "Curto, Roberto",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Roberto",
+   "lastName": "Curto"
+  },
+  {
+   "name": "Dean, Laura",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Laura",
+   "lastName": "Dean"
+  },
+  {
+   "name": "Desai, Habiba",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Habiba",
+   "lastName": "Desai"
+  },
+  {
+   "name": "Deville, Cory",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Cory",
+   "lastName": "Deville"
+  },
+  {
+   "name": "Dorville, Wincess",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Wincess",
+   "lastName": "Dorville"
+  },
+  {
+   "name": "Ellis, Laura",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Laura",
+   "lastName": "Ellis"
+  },
+  {
+   "name": "Fraser, Martin",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Martin",
+   "lastName": "Fraser"
+  },
+  {
+   "name": "Frederick, Alton",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Alton",
+   "lastName": "Frederick"
+  },
+  {
+   "name": "Gong, Edward",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Edward",
+   "lastName": "Gong"
+  },
+  {
+   "name": "Haider, Faizan",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Faizan",
+   "lastName": "Haider"
+  },
+  {
+   "name": "Hall, Thomas",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Thomas",
+   "lastName": "Hall"
+  },
+  {
+   "name": "Handjis, Peter",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Peter",
+   "lastName": "Handjis"
+  },
+  {
+   "name": "Hartley, Jack",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Jack",
+   "lastName": "Hartley"
+  },
+  {
+   "name": "He, Heather",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Heather",
+   "lastName": "He"
+  },
+  {
+   "name": "Kaaki, Mohamad",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Mohamad",
+   "lastName": "Kaaki"
+  },
+  {
+   "name": "Kalkounis, Georgios",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Georgios",
+   "lastName": "Kalkounis"
+  },
+  {
+   "name": "Kyrlangitses, Isidoros",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Isidoros",
+   "lastName": "Kyrlangitses"
+  },
+  {
+   "name": "Lamoureux, Michael",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Michael",
+   "lastName": "Lamoureux"
+  },
+  {
+   "name": "Lee, Rick",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Rick",
+   "lastName": "Lee"
+  },
+  {
+   "name": "Levermany, Reagan",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Reagan",
+   "lastName": "Levermany"
+  },
+  {
+   "name": "Mayanja, Eddie",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Eddie",
+   "lastName": "Mayanja"
+  },
+  {
+   "name": "McVie, Sarah",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Sarah",
+   "lastName": "McVie"
+  },
+  {
+   "name": "Mercieca, Francis",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Francis",
+   "lastName": "Mercieca"
+  },
+  {
+   "name": "Osuji, Joseph",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Joseph",
+   "lastName": "Osuji"
+  },
+  {
+   "name": "Parker, Odessa Paloma",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Odessa Paloma",
+   "lastName": "Parker"
+  },
+  {
+   "name": "Prokos, Gus",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Gus",
+   "lastName": "Prokos"
+  },
+  {
+   "name": "Razi, Faisal",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Faisal",
+   "lastName": "Razi"
+  },
+  {
+   "name": "Rosen, Amy",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Amy",
+   "lastName": "Rosen"
+  },
+  {
+   "name": "Sanders, Lyall",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Lyall",
+   "lastName": "Sanders"
+  },
+  {
+   "name": "Sayers, Naomi",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Naomi",
+   "lastName": "Sayers"
+  },
+  {
+   "name": "Shusterman, Robert",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Robert",
+   "lastName": "Shusterman"
+  },
+  {
+   "name": "Srivastava, Sandeep",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Sandeep",
+   "lastName": "Srivastava"
+  },
+  {
+   "name": "Tang, Weizhen",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Weizhen",
+   "lastName": "Tang"
+  },
+  {
+   "name": "Thompson, Joshua",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Joshua",
+   "lastName": "Thompson"
+  },
+  {
+   "name": "Tong, Kuo Yu",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Kuo Yu",
+   "lastName": "Tong"
+  },
+  {
+   "name": "Tunney, Jeffery",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Jeffery",
+   "lastName": "Tunney"
+  },
+  {
+   "name": "Weenen, Jack",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Jack",
+   "lastName": "Weenen"
+  },
+  {
+   "name": "Yohannes, Henoke",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Henoke",
+   "lastName": "Yohannes"
+  },
+  {
+   "name": "Yohannes, Leila",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Leila",
+   "lastName": "Yohannes"
+  },
+  {
+   "name": "Zandkarimi, Mostafa",
+   "office": 1,
+   "status": "Active",
+   "firstName": "Mostafa",
+   "lastName": "Zandkarimi"
+  }
+ ]
+}

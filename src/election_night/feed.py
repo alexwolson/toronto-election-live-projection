@@ -20,6 +20,11 @@ OFFICES = {
 MAYOR_OFFICE_ID = 1
 
 
+def race_id(office_id: int, num: str) -> str:
+    prefix = OFFICES[office_id][0]
+    return prefix if office_id == MAYOR_OFFICE_ID else f"{prefix}-{num}"
+
+
 class UnreadableFile(ValueError):
     """A City file that can't be read at all, so its pair is rejected."""
 
