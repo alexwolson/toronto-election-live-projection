@@ -12,6 +12,7 @@ import redis
 
 from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write_bundle
 from election_night.feed import check_status
+from election_night.gates import s3_record
 from election_night.goldens import write_goldens
 from election_night.payload import build_payload
 from election_night.pipeline import FILES, Pipeline, Watchdog, run
@@ -22,6 +23,8 @@ CITY_FEED = "https://mediaresults.toronto.ca/results"
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "tests" / "fixtures" / "feed"
 BUNDLE = ROOT / "data" / "night-bundle" / "night-bundle.json"
+BACKEND_REPO = "alexwolson/toronto-election-poll-tracker-backend"
+OUTCOMES_PATH = "data/raw/elections/mayoral_outcomes.csv"
 
 
 def fetch(url: str, cache: Path) -> bytes:
@@ -83,6 +86,11 @@ def cmd_goldens(args) -> None:
         print(path)
 
 
+def cmd_s3_shift(args) -> None:
+    source = {"repo": BACKEND_REPO, "path": OUTCOMES_PATH, "commit": args.outcomes_commit}
+    print(json.dumps(s3_record(args.forecasts, args.outcomes, source), indent=2, sort_keys=True))
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="election-night")
     commands = parser.add_subparsers(required=True)
@@ -112,6 +120,21 @@ def main(argv: list[str] | None = None) -> None:
     golden.add_argument("--fixtures", type=Path, default=FIXTURES)
     golden.add_argument("--out", type=Path, default=ROOT / "goldens" / "payload")
     golden.set_defaults(run=cmd_goldens)
+
+    s3 = commands.add_parser(
+        "s3-shift", help="print the stress-test shift block of the pre-registration (S3)"
+    )
+    s3.add_argument("--forecasts", type=Path, default=ROOT / "data" / "forecasts" / "holdout-1d")
+    s3.add_argument(
+        "--outcomes",
+        type=Path,
+        required=True,
+        help=f"the Backend's {OUTCOMES_PATH}",
+    )
+    s3.add_argument(
+        "--outcomes-commit", required=True, help="the Backend commit that last changed that file"
+    )
+    s3.set_defaults(run=cmd_s3_shift)
 
     args = parser.parse_args(argv)
     args.run(args)

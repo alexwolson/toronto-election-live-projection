@@ -1,0 +1,455 @@
+{
+  "about": {
+    "decided_in": [
+      "#6",
+      "#7",
+      "#9",
+      "#17 grilling 2026-10-07 (S2, S3, S5)",
+      "#23 (2026-10-08)"
+    ],
+    "frozen": "Committed before any replay code reads real data. Nothing in this file may change after the first replay run (ADR 0005, ADR 0030). Gate Results cite this file's sha256.",
+    "spec": "https://github.com/alexwolson/toronto-election-live-projection/issues/17 (Pre-registered gates)",
+    "ticket": "https://github.com/alexwolson/toronto-election-live-projection/issues/23",
+    "title": "Pre-registered gates for the 2026 election-night projection"
+  },
+  "arrival_orders": {
+    "election_day_units": "uniformly random order",
+    "orders_per_night": 60,
+    "orders_per_pattern": 20,
+    "orders_rationale": "Set by Monte Carlo noise and compute time, never by score (#6), and chosen before any replay ran (#23, Alex, 2026-10-08). Compute (INFERRED from #6's per-projection estimate): mayor is 4 nights x 19 checkpoints x 60 orders = 4,560 projections per variant at about 1 s each, about 76 core-minutes, and about three times that for count-only, forecast-weighted and shifted-forecast together (about 25 minutes on 10 cores); council and trustee are faster. Noise (INFERRED, not measured: no replay may run before this file is frozen): the effective sample for a pass/fail gate is close to the number of nights (research 03), so the noise from orders, falling as 1/sqrt(20) per pattern, is taken to be second-order to the between-night variation. 30 and 120 per night were the alternatives considered.",
+    "seeds": {
+      "derivation": "numpy.random.SeedSequence(root, spawn_key=(year, kind_index, order_index)); kind_index follows the order of kinds: 0 early, 1 interleaved, 2 late, 3 ward_clustered, 4 size_largest_first, 5 size_smallest_first",
+      "kinds": [
+        "early",
+        "interleaved",
+        "late",
+        "ward_clustered",
+        "size_largest_first",
+        "size_smallest_first"
+      ],
+      "projection_draws": "seeded as on the night, from both Count Snapshot seqs and the model version (#17 Payload: a pure function of the Count Snapshot pair and the Night Bundle)",
+      "root": 20261026
+    },
+    "stress_orders": {
+      "kinds": {
+        "size_largest_first": {
+          "orders_per_night": 20,
+          "rule": "election-day units by final total votes, largest first; ties in uniformly random order"
+        },
+        "size_smallest_first": {
+          "orders_per_night": 20,
+          "rule": "election-day units by final total votes, smallest first; ties in uniformly random order"
+        },
+        "ward_clustered": {
+          "orders_per_night": 20,
+          "rule": "wards in uniformly random order; each ward's election-day units contiguous, in uniformly random order within the ward"
+        }
+      },
+      "reported_only": true,
+      "ward_aggregate_timing": "interleaved"
+    },
+    "unit_of_order": "subdivision; one simulated order per night, shared across offices",
+    "ward_aggregates": {
+      "block": "each Ward Aggregate (one ward, one code) enters as one block",
+      "codes": [
+        97,
+        98,
+        99
+      ],
+      "pattern_weights": {
+        "early": 1,
+        "interleaved": 1,
+        "late": 1
+      },
+      "timing_patterns": {
+        "early": "all blocks before any election-day unit, in uniformly random order among themselves",
+        "interleaved": "each block at a uniformly random position among the election-day units",
+        "late": "each block at a uniformly random position after 85% of election-day units (counted by units), as in 2023"
+      },
+      "unit_96": "an ordinary election-day unit"
+    }
+  },
+  "baseline": {
+    "name": "Tally Baseline",
+    "rule": "counted shares taken as final, with the current leader winning for certain"
+  },
+  "checkpoints": {
+    "reporting_progress_percent": [
+      5,
+      10,
+      15,
+      20,
+      25,
+      30,
+      35,
+      40,
+      45,
+      50,
+      55,
+      60,
+      65,
+      70,
+      75,
+      80,
+      85,
+      90,
+      95
+    ],
+    "rule": "each race is scored at the first Count Snapshot at or after each point of its own Reporting Progress",
+    "weighting": "equal"
+  },
+  "fitting": {
+    "draws_per_projection": 10000,
+    "rule": "parameters are re-fitted for each replayed night with that night left out (ADR 0029)"
+  },
+  "forecast_density": {
+    "bandwidth": "Silverman's rule",
+    "computed_in": "log space",
+    "estimator": "Gaussian KDE over the forecast's margin draws",
+    "evaluated_at": "each count-only draw's own final margin between that pair",
+    "id": "S2",
+    "pair": "the forecast's own top two by win probability (each draw's largest named share wins; ties to the earlier candidate), production's pairwise_margin rule",
+    "quantity": "the forecast's signed leader-minus-challenger margin, in points of the full ballot"
+  },
+  "forecast_weighted_variant": {
+    "beats_count_only": {
+      "min_nights": 3,
+      "of_nights": 4,
+      "total_margin_crps": true
+    },
+    "count_only_levels": [
+      "council",
+      "trustee"
+    ],
+    "ess_fallback": {
+      "below": "that refresh uses count-only, or the tally if count-only failed its gate; no hysteresis (#17 Mayor's forecast-weighted variant, from #9)",
+      "including_stress_test": true,
+      "of_draws": 10000,
+      "report": "how often the mayor card would switch",
+      "runs_inside_replays": true,
+      "statistic": "Kish effective sample size of the forecast weights",
+      "threshold": 1000
+    },
+    "historical_forecasts": {
+      "horizon_days": 1,
+      "source": "data/forecasts/holdout-1d (S4: production compact model, production-path holdout driver)",
+      "years": [
+        2014,
+        2018,
+        2022,
+        2023
+      ]
+    },
+    "ladder": [
+      "the variant goes live only if it meets criteria 1-6, the wrong-forecast stress test, and beats count-only on total margin CRPS and on 3 of 4 nights, both on the same orders and draws",
+      "otherwise count-only stands if it meets criteria 1-6",
+      "otherwise mayor shows the tally"
+    ],
+    "levels": [
+      "mayor"
+    ],
+    "rule": "the count-only draws, each weighted by the final Mayoral Forecast's density at that draw (forecast_density)",
+    "wrong_forecast_stress_test": {
+      "counts_toward_pass": true,
+      "must_meet": [
+        4,
+        6
+      ],
+      "shift": "stress_test_shift.shift_points, applied to every forecast margin draw against the eventual winner"
+    }
+  },
+  "gate_result": {
+    "compute": "a smoke trial with a hard timeout first; its extrapolation is shown to Alex before the full run",
+    "forecast_in_hash": false,
+    "holds": [
+      "pass or fail",
+      "the scores",
+      "the model version (a hash of the code plus the frozen parameters)",
+      "this file's sha256"
+    ],
+    "night_checks": "no Mandatory Sensitivity Variants and no Band Stability Gate; runtime integrity failures remain fail-closed (ADR 0032)",
+    "on_fail": "the whole level shows the tally only; a level is never split after the scores are in; no Reporting Progress floor",
+    "per": [
+      "mayor count-only",
+      "mayor forecast-weighted",
+      "council",
+      "trustee"
+    ],
+    "reruns": "after the first run the scoring rules, baseline, thresholds and replay protocol are frozen; the model may change only to fix a defect, each with a failing test and a written reason that doesn't cite replay scores; every Gate Result is kept and reported, with the number of runs"
+  },
+  "nights": {
+    "council": {
+      "races": 94,
+      "years": [
+        2014,
+        2018,
+        2022
+      ]
+    },
+    "every_listed_night_counts": true,
+    "exclusions": [
+      "acclaimed races",
+      "Conseil scolaire Viamonde and MonAvenir (no projection; tally only)"
+    ],
+    "mayor": {
+      "note": "2014 runs on its 44 wards; 2023 is the by-election for mayor",
+      "races": 4,
+      "years": [
+        2014,
+        2018,
+        2022,
+        2023
+      ]
+    },
+    "reported_only_subsets": [
+      "results without 2014",
+      "results without 2023"
+    ],
+    "trustee": {
+      "boards": [
+        "TDSB",
+        "TCDSB"
+      ],
+      "races": 102,
+      "years": [
+        2014,
+        2018,
+        2022
+      ]
+    }
+  },
+  "pass_criteria": {
+    "all_must_hold": true,
+    "criteria": [
+      {
+        "id": 1,
+        "name": "margin CRPS beats the Tally Baseline in total",
+        "rule": "total signed-margin CRPS < Tally Baseline total absolute margin error",
+        "weighting": "nights equally; races equally within a night"
+      },
+      {
+        "id": 2,
+        "min_nights": {
+          "council": 2,
+          "mayor": 3,
+          "trustee": 2
+        },
+        "name": "margin CRPS beats the Tally Baseline in a majority of nights",
+        "of_nights": {
+          "council": 3,
+          "mayor": 4,
+          "trustee": 3
+        },
+        "rule": "per-night signed-margin CRPS < per-night Tally Baseline absolute margin error"
+      },
+      {
+        "id": 3,
+        "name": "winner Brier not worse",
+        "rule": "total multiclass Brier <= Tally Baseline total multiclass Brier",
+        "weighting": "nights equally; races equally within a night"
+      },
+      {
+        "confidence": 0.95,
+        "id": 4,
+        "min_hit_rate": 0.95,
+        "name": "G1, confident calls",
+        "rule": "among candidates given win probability >= 0.95, the share who win >= 0.95",
+        "weighting": "within a night, every (race, checkpoint, order) case is pooled into one rate; the per-night rates are averaged with nights weighted equally (#23, Alex, 2026-10-08); a night with no case at 0.95 or more is left out of the average"
+      },
+      {
+        "applies_to": [
+          "signed margin",
+          "each candidate's share"
+        ],
+        "id": 5,
+        "interval_mass": 0.9,
+        "min_coverage": 0.85,
+        "name": "G2, ranges",
+        "rule": "the central 90% range contains the final value at least 85% of the time, for the signed margin and for each candidate's final share",
+        "weighting": "within a night, every (race, checkpoint, order) case is pooled into one rate; the per-night rates are averaged with nights weighted equally (#23, Alex, 2026-10-08); the margin and the per-candidate shares are each held to 0.85 separately"
+      },
+      {
+        "candidate_id": "per_e42110d6d55c5145b6ff91e7169bffae",
+        "id": 6,
+        "levels": [
+          "mayor"
+        ],
+        "max_win_probability": 0.65,
+        "name": "the Bailão check",
+        "rule": "at 2023 20:26 (the real ward-by-ward capture), in the fold fitted without 2023, Ana Bailão's win probability < 0.65 (at most 'about 6 in 10', ADR 0006)"
+      }
+    ],
+    "threshold_kind": "fixed numbers, not a t-bound (ADR 0041 not used)"
+  },
+  "real_captures": {
+    "council_and_trustee": [
+      {
+        "file": "all-office",
+        "night": 2022,
+        "path": "tests/fixtures/feed/wayback/2022-20221025010923-all-office.json",
+        "sha256": "0f3aae8d86f8cf7e9966b2d53115c79aebdf72437c89f4f24bb64b9aa2dd642f",
+        "time_edt": "2022-10-24T21:09"
+      },
+      {
+        "file": "all-office",
+        "night": 2022,
+        "path": "tests/fixtures/feed/wayback/2022-20221025014628-all-office.json",
+        "sha256": "40ee97066901a5e1dc9588d50a7fc41705696eb40cc57b723e56d3abf0123fe2",
+        "time_edt": "2022-10-24T21:46"
+      },
+      {
+        "file": "all-office",
+        "night": 2022,
+        "path": "tests/fixtures/feed/wayback/2022-20221025030116-all-office.json",
+        "sha256": "927efc4642e129b7ac722ce5ca8fc2a1aeb9bd1116c154dc82a86304fcd5e66d",
+        "time_edt": "2022-10-24T23:01"
+      },
+      {
+        "file": "all-office",
+        "night": 2022,
+        "path": "tests/fixtures/feed/wayback/2022-20221025035548-all-office.json",
+        "sha256": "2aeff3d9e8cf55e92aa75898bfdb79a4e31eab186ac7f97d1458595b74996823",
+        "time_edt": "2022-10-24T23:55"
+      }
+    ],
+    "mayor": [
+      {
+        "file": "ward-by-ward",
+        "night": 2023,
+        "path": "tests/fixtures/feed/wayback/2023-20230627002639-wardbyward.json",
+        "sha256": "6ae19db6ac3b164adf5ce1b5c960fcadf3224d5dc299cf73c4b456d699366726",
+        "time_edt": "2023-06-26T20:26"
+      }
+    ],
+    "rule": "named checkpoints, pooled with the simulated checkpoints; reported, not an extra gate"
+  },
+  "scores": {
+    "baseline_comparator": "the Tally Baseline's absolute signed-margin error (its CRPS, a point mass)",
+    "diagnostic_only": [
+      "share CRPS"
+    ],
+    "primary": "CRPS of the signed margin of the eventual winner over the eventual runner-up, in points; negative in draws where the order is reversed",
+    "winner": "multiclass Brier"
+  },
+  "stress_test_shift": {
+    "applied_as": "a location shift of every forecast margin draw against the eventual winner",
+    "campaigns": [
+      {
+        "absolute_error_points": 0.837642,
+        "actual_margin_points": 5.229993,
+        "campaign": "toronto_2003",
+        "challenger_candidate_id": "per_a9eb70da799659daaa285f92cfed1674",
+        "leader_candidate_id": "per_ad293f1387af572cad45897886519bb6",
+        "median_margin_points": 6.067636
+      },
+      {
+        "absolute_error_points": 17.557498,
+        "actual_margin_points": 24.643446,
+        "campaign": "toronto_2006",
+        "challenger_candidate_id": "per_f82cc356a3c4516388273690b095fe32",
+        "leader_candidate_id": "per_ad293f1387af572cad45897886519bb6",
+        "median_margin_points": 42.200944
+      },
+      {
+        "absolute_error_points": 5.317799,
+        "actual_margin_points": 11.507474,
+        "campaign": "toronto_2010",
+        "challenger_candidate_id": "per_58016e26ffa55f6bbdc8f7490273a4a5",
+        "leader_candidate_id": "per_85286126260c5826bb10831e39d8b19f",
+        "median_margin_points": 6.189675
+      },
+      {
+        "absolute_error_points": 4.990908,
+        "actual_margin_points": 6.535624,
+        "campaign": "toronto_2014",
+        "challenger_candidate_id": "per_15643a9d6a59549bb8e536af298a4b2c",
+        "leader_candidate_id": "per_a9eb70da799659daaa285f92cfed1674",
+        "median_margin_points": 11.526532
+      },
+      {
+        "absolute_error_points": 9.436748,
+        "actual_margin_points": 39.903216,
+        "campaign": "toronto_2018",
+        "challenger_candidate_id": "per_49a098eb192452f988a3a579ef7f9cca",
+        "leader_candidate_id": "per_a9eb70da799659daaa285f92cfed1674",
+        "median_margin_points": 30.466467
+      },
+      {
+        "absolute_error_points": 5.869011,
+        "actual_margin_points": 44.14521,
+        "campaign": "toronto_2022",
+        "challenger_candidate_id": "per_77e692e7548a5e4e98e842b5bb38b8a9",
+        "leader_candidate_id": "per_a9eb70da799659daaa285f92cfed1674",
+        "median_margin_points": 38.276199
+      },
+      {
+        "absolute_error_points": 8.251473,
+        "actual_margin_points": 4.719184,
+        "campaign": "toronto_2023",
+        "challenger_candidate_id": "per_e42110d6d55c5145b6ff91e7169bffae",
+        "leader_candidate_id": "per_a4291ca7539b53e2acc1c4f108bc73e6",
+        "median_margin_points": 12.970657
+      }
+    ],
+    "id": "S3",
+    "rule": "90th percentile (linear interpolation) of the absolute errors in the 1-day held-out forecasts' median leader-minus-challenger margin, over all seven historical campaigns; leader and challenger are the forecast's top two by win probability",
+    "shift_points": 12.685048,
+    "sources": {
+      "command": "uv run election-night s3-shift --outcomes <backend>/data/raw/elections/mayoral_outcomes.csv --outcomes-commit eb400a9ff5a68c0119df276efaccae872147d381",
+      "forecasts": {
+        "toronto_2003.json": "d0f923c1910efca7863a75bb337246e8b25c99b31349117acdfb1d82469eb4b3",
+        "toronto_2006.json": "6d798ebdb48fae2f842d0e840be17fa0fb40f6989ec611feb83ffc51eeea944c",
+        "toronto_2010.json": "615d9038f1f715f60ec52cee06d0de7a19a5c42867d9e18c33a78758551bd34a",
+        "toronto_2014.json": "5b7df7dbcbeeab58e949578c755faf8ba60cde7652025dfd63a500211abc090a",
+        "toronto_2018.json": "8aa9502773d1df54b40701d6fcfe6aedf948d5637f28fc4cd7bf34d71a4751a3",
+        "toronto_2022.json": "04aa03c296597a9416f20c3e1c8f964b2eea4e299f1766dbec29f5285f5c7218",
+        "toronto_2023.json": "24d376a8f4b41e491742cd3cf79d8b1b708b5919aa9dbc508dde7cb51eed3e0f"
+      },
+      "forecasts_dir": "data/forecasts/holdout-1d",
+      "outcomes": {
+        "commit": "eb400a9ff5a68c0119df276efaccae872147d381",
+        "path": "data/raw/elections/mayoral_outcomes.csv",
+        "repo": "alexwolson/toronto-election-poll-tracker-backend",
+        "sha256": "d72b534a1cb77750c2037673580e55706aacfd6ef7f7c35ef8b3cf5e0bf90a71"
+      }
+    }
+  },
+  "ward_aggregate_paths": {
+    "id": "S5",
+    "ladder": [
+      "a ward table, if one was released before the night",
+      "else the citywide figure, split by historical ward shares",
+      "else historical shares alone"
+    ],
+    "mail_97": "always historical shares",
+    "nights": {
+      "2014": {
+        "advance_voters": 161147,
+        "path": "citywide",
+        "published": "2014-10-20",
+        "publisher": "The Globe and Mail, reporting City figures"
+      },
+      "2018": {
+        "advance_voters": 124306,
+        "path": "citywide",
+        "published": "2018-10-15",
+        "publisher": "CBC News, reporting City figures"
+      },
+      "2022": {
+        "advance_voters": 115911,
+        "path": "citywide",
+        "published": "2022-10-15",
+        "publisher": "City of Toronto"
+      },
+      "2023": {
+        "advance_voters": 129745,
+        "path": "ward_table",
+        "published": "2023-06-15",
+        "publisher": "City of Toronto"
+      }
+    },
+    "press_reports_count": "yes: a dated pre-election report of the City's figure counts as released (#23, Alex, 2026-10-08), as for 2018",
+    "source": "data/historical/advance_turnout/advance_turnout_as_released.csv",
+    "source_sha256": "8cec92f7cf566ac8fe3c2005fde8b823b9c1a6c9a0f08706f81c2a8a3693647d"
+  }
+}
