@@ -1,0 +1,2916 @@
+{
+ "bundle_version": 0,
+ "model_version": "stub-v0",
+ "forecast_release_tag": null,
+ "opening_time": "2026-10-26T20:00:00-04:00",
+ "source": {
+  "all_office": {
+   "seq": 1790647481807,
+   "sha256": "f5a140e06a8fe53ba1799a84acb1b6b4984d49ae5bb9770d368cb50abadf1f1e"
+  },
+  "ward_by_ward": {
+   "seq": 1790647481787,
+   "sha256": "4e9e8fc0d935386b020f5f95dd97f95ec5938692ca110bef0f6198f488049775"
+  }
+ },
+ "races": [
+  {
+   "id": "mayor",
+   "office_id": 1,
+   "level": "mayor",
+   "num": "0",
+   "name": "City-wide",
+   "polls": 1431,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Imad Abdulkadir",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Bahira Abdulsalam",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Chris Alexander",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jamie Atkinson",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Brad Bradford",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Darrell Brown",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Brian Buffey",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Braeden Chow",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Olivia Chow",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Logan Choy",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Kevin Clarke",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Paul Collins",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Alex Cruze",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Roberto Curto",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Laura Dean",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Habiba Desai",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Cory Deville",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Wincess Dorville",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Laura Ellis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Martin Fraser",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Alton Frederick",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Edward Gong",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Faizan Haider",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Thomas Hall",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Peter Handjis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jack Hartley",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Heather He",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Mohamad Kaaki",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Georgios Kalkounis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Isidoros Kyrlangitses",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Michael Lamoureux",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Rick Lee",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Reagan Levermany",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Eddie Mayanja",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sarah McVie",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Francis Mercieca",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Joseph Osuji",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Odessa Paloma Parker",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Gus Prokos",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Faisal Razi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Amy Rosen",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Lyall Sanders",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Naomi Sayers",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Robert Shusterman",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sandeep Srivastava",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Weizhen Tang",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Joshua Thompson",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Kuo Yu Tong",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jeffery Tunney",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jack Weenen",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Henoke Yohannes",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Leila Yohannes",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Mostafa Zandkarimi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ],
+   "wards": [
+    {
+     "num": "1",
+     "name": "Etobicoke North",
+     "polls": 46
+    },
+    {
+     "num": "2",
+     "name": "Etobicoke Centre",
+     "polls": 67
+    },
+    {
+     "num": "3",
+     "name": "Etobicoke-Lakeshore",
+     "polls": 82
+    },
+    {
+     "num": "4",
+     "name": "Parkdale-High Park",
+     "polls": 67
+    },
+    {
+     "num": "5",
+     "name": "York South-Weston",
+     "polls": 62
+    },
+    {
+     "num": "6",
+     "name": "York Centre",
+     "polls": 50
+    },
+    {
+     "num": "7",
+     "name": "Humber River-Black Creek",
+     "polls": 45
+    },
+    {
+     "num": "8",
+     "name": "Eglinton-Lawrence",
+     "polls": 61
+    },
+    {
+     "num": "9",
+     "name": "Davenport",
+     "polls": 53
+    },
+    {
+     "num": "10",
+     "name": "Spadina-Fort York",
+     "polls": 80
+    },
+    {
+     "num": "11",
+     "name": "University-Rosedale",
+     "polls": 72
+    },
+    {
+     "num": "12",
+     "name": "Toronto-St. Paul's",
+     "polls": 58
+    },
+    {
+     "num": "13",
+     "name": "Toronto Centre",
+     "polls": 78
+    },
+    {
+     "num": "14",
+     "name": "Toronto-Danforth",
+     "polls": 48
+    },
+    {
+     "num": "15",
+     "name": "Don Valley West",
+     "polls": 49
+    },
+    {
+     "num": "16",
+     "name": "Don Valley East",
+     "polls": 62
+    },
+    {
+     "num": "17",
+     "name": "Don Valley North",
+     "polls": 60
+    },
+    {
+     "num": "18",
+     "name": "Willowdale",
+     "polls": 56
+    },
+    {
+     "num": "19",
+     "name": "Beaches-East York",
+     "polls": 53
+    },
+    {
+     "num": "20",
+     "name": "Scarborough Southwest",
+     "polls": 61
+    },
+    {
+     "num": "21",
+     "name": "Scarborough Centre",
+     "polls": 49
+    },
+    {
+     "num": "22",
+     "name": "Scarborough-Agincourt",
+     "polls": 47
+    },
+    {
+     "num": "23",
+     "name": "Scarborough North",
+     "polls": 37
+    },
+    {
+     "num": "24",
+     "name": "Scarborough-Guildwood",
+     "polls": 48
+    },
+    {
+     "num": "25",
+     "name": "Scarborough-Rouge Park",
+     "polls": 40
+    }
+   ]
+  },
+  {
+   "id": "councillor-1",
+   "office_id": 2,
+   "level": "council",
+   "num": "1",
+   "name": "Etobicoke North",
+   "polls": 46,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Abraham Abbey",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ala'a Adib",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Saima Babar",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Chloe Brown",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Vincent Crisanti",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Norman Hamilton",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Joseph Martino",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nathen Masri",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Hard Parmar",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Kristian Santos",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-2",
+   "office_id": 2,
+   "level": "council",
+   "num": "2",
+   "name": "Etobicoke Centre",
+   "polls": 67,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Jennifer Alexander",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Katie Andrachuk",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Stephen Holyday",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-3",
+   "office_id": 2,
+   "level": "council",
+   "num": "3",
+   "name": "Etobicoke-Lakeshore",
+   "polls": 82,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Mihaela Andrei",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Anthony Internicola",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Amber Morley",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ted Opitz",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-4",
+   "office_id": 2,
+   "level": "council",
+   "num": "4",
+   "name": "Parkdale-High Park",
+   "polls": 67,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Michael Corcoran",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nadia Guerrera",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Debbie King",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Diana Chan McNally",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Bridget Ogundipe",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Adam Pham",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Andy Potega",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Vanessa Raponi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Holly Weber",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Steve Yuen",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-5",
+   "office_id": 2,
+   "level": "council",
+   "num": "5",
+   "name": "York South-Weston",
+   "polls": 62,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Sharmarke Ali",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Matthew Boateng",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Daniel Di Giorgio",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Maryama Farah",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ahmed Mawel",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Frances Nunziata",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nekpen Obasogie",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Chiara Padovani",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sileen Phillips",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-6",
+   "office_id": 2,
+   "level": "council",
+   "num": "6",
+   "name": "York Centre",
+   "polls": 50,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Alexander Artamonov",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Conroy Irving",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "James Pasternak",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-7",
+   "office_id": 2,
+   "level": "council",
+   "num": "7",
+   "name": "Humber River-Black Creek",
+   "polls": 45,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Lorna Antwi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Amanda Coombs",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Anthony Perruzza",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-8",
+   "office_id": 2,
+   "level": "council",
+   "num": "8",
+   "name": "Eglinton-Lawrence",
+   "polls": 61,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Mike Colle",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Liz Grade",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Domenico Maiolo",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jason McDonald",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Enzo Torrone",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Daniel Trayes",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-9",
+   "office_id": 2,
+   "level": "council",
+   "num": "9",
+   "name": "Davenport",
+   "polls": 53,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Alejandra Bravo",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ashley Jansen",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Marco Martins",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Neil Simon",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-10",
+   "office_id": 2,
+   "level": "council",
+   "num": "10",
+   "name": "Spadina-Fort York",
+   "polls": 80,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Ian Cunningham",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Xue Ding",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Andi Hoàng-Lefranc",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Bashar Kassir",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ausma Malik",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Paul Nash",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Husain Neemuchwala",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Aanchal Vashistha",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-11",
+   "office_id": 2,
+   "level": "council",
+   "num": "11",
+   "name": "University-Rosedale",
+   "polls": 72,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Keenan Courtis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Terri Hawkes",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Mike Layton",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Karina Lemke",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Alice Li",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Huy Lieu",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Gian Pileri",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Paul Viret",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Diana Yoon",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-12",
+   "office_id": 2,
+   "level": "council",
+   "num": "12",
+   "name": "Toronto-St. Paul's",
+   "polls": 58,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "David Cottrell",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jenny Kalimbet",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ahmed Kamal",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Josh Matlow",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Bob Murphy",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Mina Nadimi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-13",
+   "office_id": 2,
+   "level": "council",
+   "num": "13",
+   "name": "Toronto Centre",
+   "polls": 78,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Joe Cadeau",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Tom Cai",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Victoria Davis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Morgan Harris",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Walied Khogali Ali",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Norman MacLeod",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Cleveland Marshall",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Chris Moise",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Curran Stikuts",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Daniel Tate",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nicki Ward",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-14",
+   "office_id": 2,
+   "level": "council",
+   "num": "14",
+   "name": "Toronto-Danforth",
+   "polls": 48,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Maqsood Ahmad",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Susan Chapelle",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Michael Connor",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Dennis Corcoran",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Robb Dagenais",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Peter De Marco",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sara Ehrhardt",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "George Fawcett",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Mary Fragedakis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "John Kladitis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Michael Mitchell",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Caryma Sa'd",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Dianne Saxe",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Devyn Stackhouse",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jason Stevens",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Christiane Tetreault",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Maria Voutsinas",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Denise Walcott",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-15",
+   "office_id": 2,
+   "level": "council",
+   "num": "15",
+   "name": "Don Valley West",
+   "polls": 49,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Rachel Chernos Lin",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sheena Sharp",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Denis Tsang",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-16",
+   "office_id": 2,
+   "level": "council",
+   "num": "16",
+   "name": "Don Valley East",
+   "polls": 62,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Jon Burnside",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sinan Erdemir",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Didi Moffat",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Stacey Moffatt",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-17",
+   "office_id": 2,
+   "level": "council",
+   "num": "17",
+   "name": "Don Valley North",
+   "polls": 60,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Jeffery Adamson",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Shelley Carroll",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jethro Adir Kavod",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Hassan Mubarak Noor Mohamed",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Roy Samathanam",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Hong Xiao",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sabrina Zuniga",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-18",
+   "office_id": 2,
+   "level": "council",
+   "num": "18",
+   "name": "Willowdale",
+   "polls": 56,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Lily Cheng",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nicole Daneshvar",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "David Magazzinich",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Hamid Shakeri",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nathan Yusifov",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ardeshir Zarezade",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-19",
+   "office_id": 2,
+   "level": "council",
+   "num": "19",
+   "name": "Beaches-East York",
+   "polls": 53,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Syeda Jaana Ali",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "James Dann",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nate Erskine-Smith",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Fatima Ibrahimi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Natalie Johnson",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Kevin Morrison",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Karsten Riedel",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Mohammad Shabani",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Adam Smith",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Austin Vieira",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jeff Wahl",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Devin Wilkins",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jennie Worden",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-20",
+   "office_id": 2,
+   "level": "council",
+   "num": "20",
+   "name": "Scarborough Southwest",
+   "polls": 61,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Laikul Choudhury",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Naser Kaid",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Parthi Kandavel",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ariel-Rachel Karokis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Luigi Lisciandro",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sharmina Nasrin",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Mohammad Ali Reza",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Kevin Rupasinghe",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-21",
+   "office_id": 2,
+   "level": "council",
+   "num": "21",
+   "name": "Scarborough Centre",
+   "polls": 49,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Taiba Ahmed",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Bahareh Barahmand",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Patience Evbagharu",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Uthish Ganesh",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Stella Kargiannakis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Akina Lalla",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nisha Kumari",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Willie Reodica",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Madura Shanmugaratnam",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Michael Thompson",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Krissan Veerasingam",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-22",
+   "office_id": 2,
+   "level": "council",
+   "num": "22",
+   "name": "Scarborough-Agincourt",
+   "polls": 47,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Madhuri Azad",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Bill Chan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jackson Ho",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Serge Khatchadourian",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Rakhee Kotecha",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Aaron Lal",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Dan Lovell",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nick Mantas",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Donny Morgan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sindia Vijayarajan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-23",
+   "office_id": 2,
+   "level": "council",
+   "num": "23",
+   "name": "Scarborough North",
+   "polls": 37,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Shaun Chen",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Han Dong",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sajawal Javed",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Kevin Li",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jamaal Myers",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "John-Mark Oleh",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ronald Phen",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Piravena Sathiyanantham",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-24",
+   "office_id": 2,
+   "level": "council",
+   "num": "24",
+   "name": "Scarborough-Guildwood",
+   "polls": 48,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Paul Ainslie",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Robert Bazil",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jithender Mulamalla",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nachi Ramasamy",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Arun Sivanandan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "An Wu",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "councillor-25",
+   "office_id": 2,
+   "level": "council",
+   "num": "25",
+   "name": "Scarborough-Rouge Park",
+   "polls": 40,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Shawn Allen",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Dharshan Casinathen",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ashan Fernando",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Somas Kaneshapillai",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jannette Lumley",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Zakir Patel",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Dianna Robinson",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Neethan Shan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Kannan S'ree Jr",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Vane Stavrev",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-1",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "1",
+   "name": null,
+   "polls": 91,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Rosemarie Bryan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Antonius Clarke",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Matias de Dovitiis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Dennis Hastings",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Amberley Ryan Henry",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Lakhan Kang",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-2",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "2",
+   "name": null,
+   "polls": 149,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Timothy Ellis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ivan Voitsytskyi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Matthew Zaffino",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-3",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "3",
+   "name": null,
+   "polls": 120,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Matt Banninga",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Daniel Choi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Alexis Dawson",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Christina Gural",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Fatin Ishraq",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Justin Mensah",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Andrew Waters",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jennifer Webster",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-4",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "4",
+   "name": null,
+   "polls": 106,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Ivanna Andrusyak",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Brandon Choi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Anthony Delpero",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Weidong Pei",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-5",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "5",
+   "name": null,
+   "polls": 128,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Elina Feyginberg",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Andrene Gregory",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "David Gulyas",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jared Kolb",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Maureen Larkin",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Andrew Massey",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Gus Stefanis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Janine Viret",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jennifer Volk",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-6",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "6",
+   "name": null,
+   "polls": 123,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Stacey Cline",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Saherla Osman",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sarah Smithies",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "John Vassal",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-7",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "7",
+   "name": null,
+   "polls": 208,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Axel Arvizu",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Gladstone Cherrington",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Adam Golding",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Tasha Kheiriddin",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Nasir Mohammad",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Shaffni Nalir",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Theo Nazary",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Deborah Williams",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-8",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "8",
+   "name": null,
+   "polls": 111,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Tracey Haddleton",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ibrahim Hatia",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Spiros Kapoglis",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Imran Khan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Dewitt Lee III",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Christine McGirr",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Farzana Rajwani",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-9",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "9",
+   "name": null,
+   "polls": 107,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Carey De Pass",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Christopher Mammoliti",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Bill Wu",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sonny Yeung",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-10",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "10",
+   "name": null,
+   "polls": 114,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Malik Ahmad",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Azim Dewan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Karen Emerson",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ahnaaf Hassan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Md Sazibul Islam",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Glenn Kremp",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Shawn Li",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jocelyne Poirier",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Marisa Sterling",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-11",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "11",
+   "name": null,
+   "polls": 86,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Dedan Deus",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Angus Grant",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Dameon Halstead",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Curtis Jack",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Abdul Azeem Mohammed",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ravicha Ravinthiran",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tdsb-12",
+   "office_id": 3,
+   "level": "trustee",
+   "num": "12",
+   "name": null,
+   "polls": 88,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Safiya Ansari",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Darren Frake",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Aria Garcia",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Gary McBean",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Vimuththan Nantheeswarar",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Ketan Purohit",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Anu Sriskandarajah",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sherri Williams",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Marcia Wilson",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-1",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "1",
+   "name": null,
+   "polls": 46,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Jennifer Di Francesco",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Maria Dias",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Robert Pella",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-2",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "2",
+   "name": null,
+   "polls": 67,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Sara Concordia",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Markus de Domenico",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-3",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "3",
+   "name": null,
+   "polls": 45,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Ida Li Preti",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Susel Munoz Plasencia",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-4",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "4",
+   "name": null,
+   "polls": 149,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Maria Borreca",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Peter Fracassi",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Teresa Lubinski",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-5",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "5",
+   "name": null,
+   "polls": 167,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Gianfranco Cristiano",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Maria Rizzo",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-6",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "6",
+   "name": null,
+   "polls": 53,
+   "acclaimed": true,
+   "candidates": [
+    {
+     "key": "Frank D'Amico",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-7",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "7",
+   "name": null,
+   "polls": 96,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Celine DiNova",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Marissa Largo",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Gregory Rodriguez",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-8",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "8",
+   "name": null,
+   "polls": 77,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Carla Allen",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Mary Cury Paul",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Garry Tanuan",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-9",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "9",
+   "name": null,
+   "polls": 288,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Rosina Bonavota",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Renato Fallico",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "David Le",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Jonathan Santos",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-10",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "10",
+   "name": null,
+   "polls": 62,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Rosanna Araujo",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Teresa Colonna",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Stephanie Loor Ruiz",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Sal Piccininni",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Paul Salvatori",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-11",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "11",
+   "name": null,
+   "polls": 272,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Angela Kennedy",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Anton Perera",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "tcdsb-12",
+   "office_id": 4,
+   "level": "trustee",
+   "num": "12",
+   "name": null,
+   "polls": 109,
+   "acclaimed": true,
+   "candidates": [
+    {
+     "key": "Nancy Crawford",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "viamonde-2",
+   "office_id": 5,
+   "level": "french_trustee",
+   "num": "2",
+   "name": null,
+   "polls": 559,
+   "acclaimed": true,
+   "candidates": [
+    {
+     "key": "Benoit Fortin",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "viamonde-3",
+   "office_id": 5,
+   "level": "french_trustee",
+   "num": "3",
+   "name": null,
+   "polls": 389,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Jean-François L'Heureux",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Anna-Karyna Ruszkowski",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "viamonde-4",
+   "office_id": 5,
+   "level": "french_trustee",
+   "num": "4",
+   "name": null,
+   "polls": 483,
+   "acclaimed": true,
+   "candidates": [
+    {
+     "key": "Geneviève Oger",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "monavenir-3",
+   "office_id": 6,
+   "level": "french_trustee",
+   "num": "3",
+   "name": null,
+   "polls": 877,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Josiane Aboungono",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Yelena Nichilo",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Angela Ogang",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  },
+  {
+   "id": "monavenir-4",
+   "office_id": 6,
+   "level": "french_trustee",
+   "num": "4",
+   "name": null,
+   "polls": 554,
+   "acclaimed": false,
+   "candidates": [
+    {
+     "key": "Rhea Dechaine",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Clescadine Gustave",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    },
+    {
+     "key": "Derek McNulty",
+     "short_label": null,
+     "candidacy_id": null,
+     "candidate_id": null
+    }
+   ]
+  }
+ ]
+}

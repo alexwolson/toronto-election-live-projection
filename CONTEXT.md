@@ -55,6 +55,10 @@ _Avoid_: Backtest, simulation (the projection's own draws are simulations)
 The Live Tally read as a forecast of the complete count: every candidate finishes at their counted share and the current leader wins with certainty. An office level's Election-Night Projection goes live only by beating it in Replays.
 _Avoid_: Naive model, current shares
 
+**Night Bundle**:
+The fixed inputs election night runs on, baked into one image before the Deploy Freeze: frozen parameters, Gate Results, expected totals, Ballot Names and the pinned final forecast draws.
+_Avoid_: Config, release
+
 ### Rehearsing
 
 **Rehearsal**:

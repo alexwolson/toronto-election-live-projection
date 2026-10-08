@@ -25,3 +25,6 @@ dev = [
     "redis>=8.1.0",
     "ruff>=0.16.10",
 ]
+
+[project.scripts]
+election-night = "election_night.cli:main"

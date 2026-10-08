@@ -22,6 +22,16 @@ uv run ruff check .            # lint
 uv run ruff format --check .   # formatting
 ```
 
+The `election-night` command:
+
+```bash
+uv run election-night payload --pretty   # fetch the City's two files once (conditional GET), print the payload
+uv run election-night bundle             # rebuild data/night-bundle/night-bundle.json from the City test files
+uv run election-night goldens            # rewrite the golden payloads in goldens/payload/
+```
+
+The payload's field layout is in [docs/payload.md](docs/payload.md).
+
 Tests that need Redis use the server at `REDIS_URL` and are skipped when it is unset. To run them
 locally:
 
