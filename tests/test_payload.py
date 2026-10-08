@@ -3,13 +3,14 @@
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from election_night.bundle import OPENING_2026, build_bundle
 from election_night.feed import UnreadableFile, check_status
 from election_night.goldens import AFTER_OPENING_2026
 from election_night.name_inputs import load_name_inputs
-from election_night.payload import build_payload
+from election_night.payload import build_payload, project
 
 FEED = Path(__file__).parent / "fixtures" / "feed"
 CITY_2026 = FEED / "city-2026"
@@ -269,6 +270,41 @@ def test_a_counting_race_carries_stub_bands_marked_as_stubs():
     assert set(projection["bands"]) == {"count_only", "forecast_weighted"}
     chow = projection["bands"]["count_only"]["Olivia Chow"]
     assert 0 <= chow["low"] <= chow["mid"] == 35.16 <= chow["high"] <= 100
+
+
+def test_the_payload_function_returns_the_draws_its_bands_came_from():
+    inputs = (wayback(AO_2023_2056), wayback(WB_2023_2026), bundle_2023())
+    payload, draws = project(*inputs)
+
+    assert json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode() == (
+        build_payload(*inputs)
+    )
+    mayor = race(payload, "mayor")
+    keys = tuple(c["key"] for c in mayor["candidates"])
+    assert set(draws) == {r["id"] for r in payload["races"] if r["projection"]}
+    assert set(draws["mayor"]) == set(mayor["projection"]["bands"])
+    for variant, (draw_keys, shares) in draws["mayor"].items():
+        bands = mayor["projection"]["bands"][variant]
+        assert draw_keys == keys
+        assert shares.ndim == 2 and shares.shape[1] == len(keys) and shares.shape[0] > 1
+        low = np.array([bands[k]["low"] for k in keys])
+        high = np.array([bands[k]["high"] for k in keys])
+        assert np.all((low <= shares) & (shares <= high))  # the stub draws inside its bands
+
+
+def test_a_race_without_a_projection_has_no_draws():
+    all_office = wayback("2018-20181029172648-all-office.json")
+    ward_by_ward = wayback("2018-20181029172755-wardbyward.json")
+    bundle = build_bundle(all_office, ward_by_ward, opening_time="2018-10-22T20:00:00-04:00")
+
+    assert project(all_office, ward_by_ward, bundle)[1] == {}
+
+
+def test_the_same_inputs_give_the_same_draws():
+    inputs = (wayback(AO_2023_2056), wayback(WB_2023_2026), bundle_2023())
+    first, second = project(*inputs)[1]["mayor"], project(*inputs)[1]["mayor"]
+
+    assert all(np.array_equal(first[v][1], second[v][1]) for v in first)
 
 
 # --- Counts and numbers ---------------------------------------------------------------------

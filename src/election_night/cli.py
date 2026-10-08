@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import signal
 import sys
 import urllib.error
 import urllib.request
@@ -12,11 +13,13 @@ import redis
 
 from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write_bundle
 from election_night.feed import check_status
-from election_night.gates import s3_record
+from election_night.gates import load_preregistration, s3_record
 from election_night.goldens import write_goldens
 from election_night.name_inputs import fetch_name_inputs, load_name_inputs, refresh_forecast
 from election_night.payload import build_payload
 from election_night.pipeline import FILES, Pipeline, Watchdog, run
+from election_night.replay.gate_result import write_gate_result
+from election_night.replay.run import LEVELS, PREREGISTRATION, run_replay
 from election_night.store import PIPELINES, Store
 
 CITY_FEED = "https://mediaresults.toronto.ca/results"
@@ -102,6 +105,42 @@ def cmd_name_inputs(args) -> None:
     print(json.dumps(source, indent=1))
 
 
+def _timed_out(signum, frame):
+    raise TimeoutError
+
+
+def cmd_replay(args) -> None:
+    prereg = load_preregistration(PREREGISTRATION)
+    years = prereg["nights"][LEVELS[args.level].name]["years"]
+    if args.nights and not args.smoke:
+        sys.exit("--nights is for smoke runs: a Gate Result covers every pre-registered night")
+    if not args.smoke and args.timeout is None:
+        sys.exit("a full run needs --timeout, its hard timeout in seconds")
+    if args.nights:
+        years = args.nights
+    elif args.smoke:
+        years = years[-1:]  # the latest night, which holds the real captures
+    out = args.out or ROOT / (".cache/gates-smoke" if args.smoke else "gates/results")
+    timeout = args.timeout if args.timeout is not None else 600
+    signal.signal(signal.SIGALRM, _timed_out)
+    signal.alarm(timeout)
+    try:
+        result, timing = run_replay(args.level, prereg, years, args.smoke)
+    except TimeoutError:
+        sys.exit(f"replay timed out after {timeout} s; no Gate Result written")
+    finally:
+        signal.alarm(0)
+    path = write_gate_result(result, out, args.level)
+    summary = {
+        "gate_result": str(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path),
+        "pass": result["pass"],
+        "criteria": result["criteria"],
+        "cases": result["cases"],
+        "timing": {k: round(v, 1) for k, v in timing.items()},
+    }
+    print(json.dumps(summary, indent=1))
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="election-night")
     commands = parser.add_subparsers(required=True)
@@ -163,6 +202,24 @@ def main(argv: list[str] | None = None) -> None:
     )
     inputs.add_argument("--out", type=Path, default=NAME_INPUTS)
     inputs.set_defaults(run=cmd_name_inputs)
+
+    replay = commands.add_parser(
+        "replay", help="score the Replays for one level and write its Gate Result"
+    )
+    replay.add_argument("--level", choices=LEVELS, required=True)
+    replay.add_argument(
+        "--smoke",
+        action="store_true",
+        help="the latest night, one order per timing pattern; written to .cache/gates-smoke",
+    )
+    replay.add_argument("--nights", type=int, nargs="+", help="the smoke run's nights")
+    replay.add_argument(
+        "--timeout",
+        type=int,
+        help="hard timeout in seconds (smoke default 600; required for a full run)",
+    )
+    replay.add_argument("--out", type=Path, help="where to write the Gate Result")
+    replay.set_defaults(run=cmd_replay)
 
     args = parser.parse_args(argv)
     args.run(args)
