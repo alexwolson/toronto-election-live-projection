@@ -21,9 +21,10 @@ from election_night.gates import load_preregistration, s3_record
 from election_night.goldens import write_goldens
 from election_night.name_inputs import fetch_name_inputs, load_name_inputs, refresh_forecast
 from election_night.payload import build_payload
-from election_night.pipeline import FILES, Pipeline, Watchdog, run
+from election_night.pipeline import FILES, Pipeline, Watchdog, now_ms, run
 from election_night.replay.gate_result import write_gate_result
 from election_night.replay.run import LEVELS, PREREGISTRATION, run_replay
+from election_night.status import read_status, render_status
 from election_night.store import PIPELINES, Store
 
 CITY_FEED = "https://mediaresults.toronto.ca/results"
@@ -97,6 +98,11 @@ def cmd_pipeline(args) -> None:
         alerts=alerts,
     )
     run(pipeline, args.stagger, Watchdog())
+
+
+def cmd_status(args) -> None:
+    client = redis.Redis.from_url(_env("REDIS_URL"), socket_timeout=10, socket_connect_timeout=10)
+    sys.stdout.write(render_status(read_status(client), now_ms()))
 
 
 def cmd_bundle(args) -> None:
@@ -181,6 +187,11 @@ def main(argv: list[str] | None = None) -> None:
     pipe.add_argument("--stagger", type=float, default=0.0, help="seconds past each minute")
     pipe.add_argument("--bundle", type=Path, default=BUNDLE)
     pipe.set_defaults(run=cmd_pipeline)
+
+    status = commands.add_parser(
+        "status", help="print night status from the store at REDIS_URL, as Markdown; read-only"
+    )
+    status.set_defaults(run=cmd_status)
 
     bundle = commands.add_parser(
         "bundle", help="build the Night Bundle from the City test files and the name inputs"
