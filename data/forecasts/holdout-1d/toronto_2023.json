@@ -1,0 +1,112 @@
+{
+  "campaign": "toronto_2023",
+  "horizon_days": 1,
+  "command": "python scripts/run_holdout_forecasts.py --input-manifest data/upstream/input_manifest.json --production-release dist/backend-2026-10-07.1 --holdout toronto_2023 --horizon-days 1 --out dist/holdout-1d",
+  "backend_commit": "c241564ffafdd25c55e92bec53e37327e1e6a3b5",
+  "inputs": {
+    "production_source_commit": "67af1c37f79743232ca70721efd0dd2bcd5ea6bf",
+    "results": {
+      "release": "results-2026-10-07.1",
+      "manifest_sha256": "39aaa071a3fb81839454d95d593d21b8f97c0276ca90fb2697e8a797e4ce8979"
+    },
+    "polling": {
+      "release": "polling-2026-10-07.1",
+      "manifest_sha256": "f23327c047cd3ac02c844a177cb45eaaa4dd2fa72982bc1b178a8489c8ce1f95"
+    },
+    "analysis_cutoff": "2026-10-07T14:27:18.826524-04:00"
+  },
+  "wall_seconds": 177.0,
+  "generated_at": "2026-10-07T23:15:05.520972Z",
+  "election_date": "2023-06-26",
+  "candidates": [
+    {
+      "candidate_id": "per_18786ecd2dc7506794ac10340a5f68f6",
+      "name": "Anthony Perruzza"
+    },
+    {
+      "candidate_id": "per_24f2faac6a7b5335856dc76026775ab7",
+      "name": "Celina Caesar-Chavannes"
+    },
+    {
+      "candidate_id": "per_27c46c62f83c5dbaae44b65d34a178c6",
+      "name": "Anthony Furey"
+    },
+    {
+      "candidate_id": "per_2a0809ffec18563292e0e1363aff66f6",
+      "name": "Rob Davis"
+    },
+    {
+      "candidate_id": "per_3c4c47a1baa15013a01f794c9d2f9194",
+      "name": "Frank D'Angelo"
+    },
+    {
+      "candidate_id": "per_3d3501723d055766800769f77751b3bf",
+      "name": "Chloe Brown"
+    },
+    {
+      "candidate_id": "per_3ec4e3ff861d57519f52e15b4a9449a7",
+      "name": "Giorgio Mammoliti"
+    },
+    {
+      "candidate_id": "per_69529146105a5d85ae577db19104ceed",
+      "name": "Josh Matlow"
+    },
+    {
+      "candidate_id": "per_6c4d13bdb048521e8decad122d81128a",
+      "name": "Mitzie Hunter"
+    },
+    {
+      "candidate_id": "per_6df1a502d1b450369a2cc47794639812",
+      "name": "Mark Saunders"
+    },
+    {
+      "candidate_id": "per_830dd3152c6253f7b9bf701d1527612e",
+      "name": "Blake Acton"
+    },
+    {
+      "candidate_id": "per_a4291ca7539b53e2acc1c4f108bc73e6",
+      "name": "Olivia Chow"
+    },
+    {
+      "candidate_id": "per_a6020eb075f450f2b743fbfc12a07170",
+      "name": "Chris Saccoccia"
+    },
+    {
+      "candidate_id": "per_d8dfddfb642358e299f4b428292666bf",
+      "name": "Brad Bradford"
+    },
+    {
+      "candidate_id": "per_e42110d6d55c5145b6ff91e7169bffae",
+      "name": "Ana Bail\u00e3o"
+    }
+  ],
+  "draws": 16000,
+  "npz": "toronto_2023.npz",
+  "npz_sha256": "6cfa35f25384723d9bd41450467fd1e2ede60daa52770ff2b866937dc7cdb917",
+  "arrays": {
+    "candidate_ids": "the named candidates, in column order",
+    "full_ballot": "draws x named candidates: each one's share of valid votes",
+    "residual_pool": "per draw, the share of every other candidate on the ballot; full_ballot plus residual_pool sums to 1"
+  },
+  "polls_used": 42,
+  "latest_poll_days_before_election": 1,
+  "fit": {
+    "seed": 20260921,
+    "target_accept": 0.95,
+    "retried": false,
+    "warmup": 1000,
+    "chains": 4,
+    "draws_per_chain": 4000,
+    "diagnostics": {
+      "draws_per_chain": 4000,
+      "chains": 4,
+      "divergences": 0,
+      "worst_r_hat": 1.0023247111299436,
+      "min_ess": 1315.9247739072298,
+      "coordinates_over_r_hat": 0,
+      "mean_leapfrog_steps": 255.0,
+      "constant_coordinates_ignored": 52
+    },
+    "elapsed_seconds": 177.0
+  }
+}

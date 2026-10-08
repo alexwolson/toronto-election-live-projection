@@ -1,0 +1,72 @@
+{
+  "campaign": "toronto_2018",
+  "horizon_days": 1,
+  "command": "python scripts/run_holdout_forecasts.py --input-manifest data/upstream/input_manifest.json --production-release dist/backend-2026-10-07.1 --holdout toronto_2018 --horizon-days 1 --out dist/holdout-1d",
+  "backend_commit": "c241564ffafdd25c55e92bec53e37327e1e6a3b5",
+  "inputs": {
+    "production_source_commit": "67af1c37f79743232ca70721efd0dd2bcd5ea6bf",
+    "results": {
+      "release": "results-2026-10-07.1",
+      "manifest_sha256": "39aaa071a3fb81839454d95d593d21b8f97c0276ca90fb2697e8a797e4ce8979"
+    },
+    "polling": {
+      "release": "polling-2026-10-07.1",
+      "manifest_sha256": "f23327c047cd3ac02c844a177cb45eaaa4dd2fa72982bc1b178a8489c8ce1f95"
+    },
+    "analysis_cutoff": "2026-10-07T14:27:18.826524-04:00"
+  },
+  "wall_seconds": 493.8,
+  "generated_at": "2026-10-07T23:55:50.358129Z",
+  "election_date": "2018-10-22",
+  "candidates": [
+    {
+      "candidate_id": "per_49a098eb192452f988a3a579ef7f9cca",
+      "name": "Jennifer Keesmaat"
+    },
+    {
+      "candidate_id": "per_64fc452958e758909ab756ebba731391",
+      "name": "Faith Goldy"
+    },
+    {
+      "candidate_id": "per_79d654cb934c519998b37e8bfc06f367",
+      "name": "Sarah Climenhaga"
+    },
+    {
+      "candidate_id": "per_8ebbc038b64a5e2b80600f5f8f018c84",
+      "name": "Saron Gebresellassi"
+    },
+    {
+      "candidate_id": "per_a9eb70da799659daaa285f92cfed1674",
+      "name": "John Tory"
+    }
+  ],
+  "draws": 16000,
+  "npz": "toronto_2018.npz",
+  "npz_sha256": "a034e77c4ad467c4f5e59dfc38c9fbc6d584efd59456aab1d405c2b45387c42e",
+  "arrays": {
+    "candidate_ids": "the named candidates, in column order",
+    "full_ballot": "draws x named candidates: each one's share of valid votes",
+    "residual_pool": "per draw, the share of every other candidate on the ballot; full_ballot plus residual_pool sums to 1"
+  },
+  "polls_used": 10,
+  "latest_poll_days_before_election": 13,
+  "fit": {
+    "seed": 20260922,
+    "target_accept": 0.99,
+    "retried": true,
+    "warmup": 1000,
+    "chains": 4,
+    "draws_per_chain": 4000,
+    "diagnostics": {
+      "draws_per_chain": 4000,
+      "chains": 4,
+      "divergences": 0,
+      "worst_r_hat": 1.0005989389483712,
+      "min_ess": 5119.596996528755,
+      "coordinates_over_r_hat": 0,
+      "mean_leapfrog_steps": 511.0,
+      "constant_coordinates_ignored": 72
+    },
+    "elapsed_seconds": 324.7
+  }
+}

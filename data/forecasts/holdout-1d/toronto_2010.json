@@ -1,0 +1,72 @@
+{
+  "campaign": "toronto_2010",
+  "horizon_days": 1,
+  "command": "python scripts/run_holdout_forecasts.py --input-manifest data/upstream/input_manifest.json --production-release dist/backend-2026-10-07.1 --holdout toronto_2010 --horizon-days 1 --out dist/holdout-1d",
+  "backend_commit": "c241564ffafdd25c55e92bec53e37327e1e6a3b5",
+  "inputs": {
+    "production_source_commit": "67af1c37f79743232ca70721efd0dd2bcd5ea6bf",
+    "results": {
+      "release": "results-2026-10-07.1",
+      "manifest_sha256": "39aaa071a3fb81839454d95d593d21b8f97c0276ca90fb2697e8a797e4ce8979"
+    },
+    "polling": {
+      "release": "polling-2026-10-07.1",
+      "manifest_sha256": "f23327c047cd3ac02c844a177cb45eaaa4dd2fa72982bc1b178a8489c8ce1f95"
+    },
+    "analysis_cutoff": "2026-10-07T14:27:18.826524-04:00"
+  },
+  "wall_seconds": 491.2,
+  "generated_at": "2026-10-07T23:39:27.297844Z",
+  "election_date": "2010-10-25",
+  "candidates": [
+    {
+      "candidate_id": "per_0e32707dc0ef54e69f20d2ee7c0507aa",
+      "name": "Rocco Rossi"
+    },
+    {
+      "candidate_id": "per_58016e26ffa55f6bbdc8f7490273a4a5",
+      "name": "George Smitherman"
+    },
+    {
+      "candidate_id": "per_85286126260c5826bb10831e39d8b19f",
+      "name": "Rob Ford"
+    },
+    {
+      "candidate_id": "per_d2a78a2d0b1c5d21804593dc11d87914",
+      "name": "Joe Pantalone"
+    },
+    {
+      "candidate_id": "per_e9c195ba937751869154a92d57592773",
+      "name": "Sarah Thomson"
+    }
+  ],
+  "draws": 16000,
+  "npz": "toronto_2010.npz",
+  "npz_sha256": "0cf93c09bab7e4591fcf03c9ef19f35462b7ea865fbfeee565421c5218d1c210",
+  "arrays": {
+    "candidate_ids": "the named candidates, in column order",
+    "full_ballot": "draws x named candidates: each one's share of valid votes",
+    "residual_pool": "per draw, the share of every other candidate on the ballot; full_ballot plus residual_pool sums to 1"
+  },
+  "polls_used": 10,
+  "latest_poll_days_before_election": 4,
+  "fit": {
+    "seed": 20260922,
+    "target_accept": 0.99,
+    "retried": true,
+    "warmup": 1000,
+    "chains": 4,
+    "draws_per_chain": 4000,
+    "diagnostics": {
+      "draws_per_chain": 4000,
+      "chains": 4,
+      "divergences": 0,
+      "worst_r_hat": 1.0012064572654227,
+      "min_ess": 5078.449093433633,
+      "coordinates_over_r_hat": 0,
+      "mean_leapfrog_steps": 511.0,
+      "constant_coordinates_ignored": 72
+    },
+    "elapsed_seconds": 322.4
+  }
+}

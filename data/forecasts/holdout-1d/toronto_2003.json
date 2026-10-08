@@ -1,0 +1,68 @@
+{
+  "campaign": "toronto_2003",
+  "horizon_days": 1,
+  "command": "python scripts/run_holdout_forecasts.py --input-manifest data/upstream/input_manifest.json --production-release dist/backend-2026-10-07.1 --holdout toronto_2003 --horizon-days 1 --out dist/holdout-1d",
+  "backend_commit": "c241564ffafdd25c55e92bec53e37327e1e6a3b5",
+  "inputs": {
+    "production_source_commit": "67af1c37f79743232ca70721efd0dd2bcd5ea6bf",
+    "results": {
+      "release": "results-2026-10-07.1",
+      "manifest_sha256": "39aaa071a3fb81839454d95d593d21b8f97c0276ca90fb2697e8a797e4ce8979"
+    },
+    "polling": {
+      "release": "polling-2026-10-07.1",
+      "manifest_sha256": "f23327c047cd3ac02c844a177cb45eaaa4dd2fa72982bc1b178a8489c8ce1f95"
+    },
+    "analysis_cutoff": "2026-10-07T14:27:18.826524-04:00"
+  },
+  "wall_seconds": 485.7,
+  "generated_at": "2026-10-07T23:23:11.889025Z",
+  "election_date": "2003-11-10",
+  "candidates": [
+    {
+      "candidate_id": "per_7437d8503d715996aeb65671032da866",
+      "name": "John Nunziata"
+    },
+    {
+      "candidate_id": "per_a9eb70da799659daaa285f92cfed1674",
+      "name": "John Tory"
+    },
+    {
+      "candidate_id": "per_ad293f1387af572cad45897886519bb6",
+      "name": "David Miller"
+    },
+    {
+      "candidate_id": "per_b9e75b123d5654f8b4609b846d0647fc",
+      "name": "Barbara Hall"
+    }
+  ],
+  "draws": 16000,
+  "npz": "toronto_2003.npz",
+  "npz_sha256": "e4a065cc3d6352d90351a48d82da450214bef6e57ee1e6a4f5a2c5da046afaef",
+  "arrays": {
+    "candidate_ids": "the named candidates, in column order",
+    "full_ballot": "draws x named candidates: each one's share of valid votes",
+    "residual_pool": "per draw, the share of every other candidate on the ballot; full_ballot plus residual_pool sums to 1"
+  },
+  "polls_used": 3,
+  "latest_poll_days_before_election": 9,
+  "fit": {
+    "seed": 20260922,
+    "target_accept": 0.99,
+    "retried": true,
+    "warmup": 1000,
+    "chains": 4,
+    "draws_per_chain": 4000,
+    "diagnostics": {
+      "draws_per_chain": 4000,
+      "chains": 4,
+      "divergences": 0,
+      "worst_r_hat": 1.0009776852935626,
+      "min_ess": 5108.491109467737,
+      "coordinates_over_r_hat": 0,
+      "mean_leapfrog_steps": 511.0,
+      "constant_coordinates_ignored": 74
+    },
+    "elapsed_seconds": 317.2
+  }
+}
