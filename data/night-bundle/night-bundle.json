@@ -13,22 +13,22 @@
    "sha256": "4e9e8fc0d935386b020f5f95dd97f95ec5938692ca110bef0f6198f488049775"
   },
   "names": {
-   "fetched_at": "2026-10-08T03:15:35+00:00",
+   "fetched_at": "2026-10-08T03:28:24+00:00",
    "registry": {
     "mayorCandidates_2026.json": {
      "url": "https://www.toronto.ca/data/elections/candidate_list/mayorCandidates_2026.json",
-     "seq": 1791427980814,
-     "sha256": "7e8dd7534667891b9d01676f819958bccd9ad3b2c98737ee786692b77b8555ae"
+     "seq": 1791428880902,
+     "sha256": "1d0fa03f1b38ddb6da4036091a5dcdeae8c8b0c39285be35daaa1a7e5ea412a5"
     },
     "councilorCandidates_2026.json": {
      "url": "https://www.toronto.ca/data/elections/candidate_list/councilorCandidates_2026.json",
-     "seq": 1791427980814,
-     "sha256": "d708dc53a7e1bd78558d65c6d5cdba3087bbfe598f56c00c2fe5cb90bb4f4d88"
+     "seq": 1791428880902,
+     "sha256": "f61bbbaa4c1df74b910ae20aee07eac9de3809794217460013e1b13df0b70a46"
     },
     "trusteeCandidates_2026.json": {
      "url": "https://www.toronto.ca/data/elections/candidate_list/trusteeCandidates_2026.json",
-     "seq": 1791427980814,
-     "sha256": "0bafbad4b0da1a796872c61f43fc671c8babdefcf3cc82d0e00e173c55c6e0a8"
+     "seq": 1791428880902,
+     "sha256": "eceabfef876c4873efad07ee2663d5c1f9ad95823c4b4ae8d1a3f56230737f07"
     }
    },
    "results": {
@@ -40,8 +40,15 @@
    "forecast": {
     "repository": "alexwolson/toronto-election-poll-tracker-backend",
     "release": "backend-2026-10-07.2",
-    "asset": "mayoral_forecast_draws.json",
-    "sha256": "51923aa5da4baca20644a031946f170cb13bf473bf9d236f1cda71c2cd36b158"
+    "asset": "mayoral_forecast.json",
+    "sha256": "690f921768e06625cdd5c2252de465e4756c34692c709da8e95d4266b2893bf2"
+   },
+   "vendored_sha256": {
+    "registry/mayorCandidates_2026.json": "9ce217acb0cb6762217ac4932ac3e5be7f2edb9c23448fbcf57fdd21379a955a",
+    "registry/councilorCandidates_2026.json": "7494f895ac1617a31c4634802533172c630186606d871afa359a8a6d92bc85ba",
+    "registry/trusteeCandidates_2026.json": "365cee21aaec7c1e69e069187b8b05392467ce4979c8e06e2169e3cae1c4a62f",
+    "canonical-2026.csv": "2be487c79d979d65b5d22e540221d0483e18305c8df37d3e605a7917d13b0c63",
+    "mayoral_forecast.json": "690f921768e06625cdd5c2252de465e4756c34692c709da8e95d4266b2893bf2"
    }
   }
  },
@@ -71,7 +78,7 @@
      "key": "Chris Alexander",
      "short_label": "Alexander",
      "candidacy_id": "can_b43d9b5795cf5aed9b587a956e49951b",
-     "candidate_id": "per_345dd6a9ee645c0bb5a8ade615f91579"
+     "candidate_id": null
     },
     {
      "key": "Jamie Atkinson",

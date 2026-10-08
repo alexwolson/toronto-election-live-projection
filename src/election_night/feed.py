@@ -18,6 +18,7 @@ OFFICES = {
     6: ("monavenir", "french_trustee"),
 }
 MAYOR_OFFICE_ID = 1
+COUNCILLOR_OFFICE_ID = 2
 
 
 def race_id(office_id: int, num: str) -> str:

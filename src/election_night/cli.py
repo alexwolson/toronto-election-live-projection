@@ -14,7 +14,7 @@ from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write
 from election_night.feed import check_status
 from election_night.gates import s3_record
 from election_night.goldens import write_goldens
-from election_night.names import fetch_name_inputs, load_name_inputs
+from election_night.name_inputs import fetch_name_inputs, load_name_inputs, refresh_forecast
 from election_night.payload import build_payload
 from election_night.pipeline import FILES, Pipeline, Watchdog, run
 from election_night.store import PIPELINES, Store
@@ -97,7 +97,8 @@ def cmd_s3_shift(args) -> None:
 
 
 def cmd_name_inputs(args) -> None:
-    source = fetch_name_inputs(args.backend_release, args.out)
+    fetch = refresh_forecast if args.forecast_only else fetch_name_inputs
+    source = fetch(args.backend_release, args.out)
     print(json.dumps(source, indent=1))
 
 
@@ -155,6 +156,11 @@ def main(argv: list[str] | None = None) -> None:
         help="vendor the registry, and the forecast's ids and Results candidacies, for the bundle",
     )
     inputs.add_argument("--backend-release", required=True, help="the pinned forecast's release")
+    inputs.add_argument(
+        "--forecast-only",
+        action="store_true",
+        help="refresh only the forecast; names are never refreshed by a forecast-only release",
+    )
     inputs.add_argument("--out", type=Path, default=NAME_INPUTS)
     inputs.set_defaults(run=cmd_name_inputs)
 

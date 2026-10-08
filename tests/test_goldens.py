@@ -5,7 +5,7 @@ from pathlib import Path
 
 from election_night.bundle import OPENING_2026, build_bundle, load_bundle
 from election_night.goldens import goldens
-from election_night.names import load_name_inputs
+from election_night.name_inputs import load_name_inputs
 
 ROOT = Path(__file__).parent.parent
 FEED = ROOT / "tests" / "fixtures" / "feed"
@@ -57,4 +57,4 @@ def test_the_2026_goldens_carry_the_ballot_names():
     mayor = next(r for r in body["races"] if r["id"] == "mayor")
 
     assert all(c["candidacy_id"] and c["short_label"] for c in mayor["candidates"])
-    assert sum(1 for c in mayor["candidates"] if c["candidate_id"]) == 3
+    assert sum(1 for c in mayor["candidates"] if c["candidate_id"]) == 2

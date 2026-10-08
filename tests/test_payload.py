@@ -8,7 +8,7 @@ import pytest
 from election_night.bundle import OPENING_2026, build_bundle
 from election_night.feed import UnreadableFile, check_status
 from election_night.goldens import AFTER_OPENING_2026
-from election_night.names import load_name_inputs
+from election_night.name_inputs import load_name_inputs
 from election_night.payload import build_payload
 
 FEED = Path(__file__).parent / "fixtures" / "feed"

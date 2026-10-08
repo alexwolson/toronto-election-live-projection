@@ -63,7 +63,7 @@ Race states:
 | `full_name` | string | The Ballot Name as written, for display |
 | `short_label` | string or null | The registry `lastName`, or the full Ballot Name when there is none or it repeats in the race. Null only for a name the bundle doesn't hold |
 | `candidacy_id` | string or null | The canonical results' `candidacy_id`. Null only for a name the bundle doesn't hold |
-| `candidate_id` | string or null | The forecast's `candidate_id`, on forecast-named mayoral rows only (the draws' named candidates); null on every other row, all of them in the forecast's residual pool |
+| `candidate_id` | string or null | The forecast's `candidate_id`, on the final forecast's leader and challenger only (its `pairwise_margin`: today Chow and Bradford); null on every other row |
 | `votes` | int or null | Counted votes; null before results |
 | `share` | number or null | 100 × votes / the race's summed candidate votes, 2 dp; null before results or with no votes |
 
