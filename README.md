@@ -58,4 +58,22 @@ CI (`.github/workflows/ci.yml`) runs the lint, format and test checks on pushes 
 pull requests, with a Redis service container. In CI a missing `REDIS_URL` fails the Redis tests
 instead of skipping them.
 
+## Replays
+
+`election_night.replay` re-runs the past nights (2014 on its 44 wards, 2018, 2022 and the 2023
+by-election for mayor) as the City's two files would have published them (#28):
+
+- `historical.load_night(year, prereg)` reads the vendored workbooks in `data/historical/results/`
+  into per-unit vote vectors, checked against every block's totals. A Reporting Unit is a
+  (City ward, code) pair; the pre-registered codes (97–99) are Ward Aggregates, and 96 is an
+  election-day unit.
+- `orders.arrival_order(night, prereg, kind, index)` and `orders.orders(night, prereg)` give the
+  seeded arrival orders, with every count, seed and code read from `gates/preregistration.json`.
+- `snapshots.snapshots(night, order, steps=...)` yields the Count Snapshot pair after each step
+  (one Reporting Unit per step, separate `seq`s); the last step holds the certified totals.
+  `snapshots.night_bundle(night)` is the night's historical Night Bundle. Ballot Names are the
+  workbook's (`Chow Olivia`), and `totalVoters` is `"0"` until electors are loaded.
+- `captures.real_captures(prereg, root, nights)` gives the pre-registered real captures as named
+  checkpoints, in the same names.
+
 This is an independent Git repository within the Toronto election workspace.
