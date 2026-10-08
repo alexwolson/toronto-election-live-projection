@@ -1,0 +1,174 @@
+"""The Replay scorer (`gates/preregistration.json` § checkpoints, baseline, scores, pass_criteria).
+
+A case is one race at one checkpoint of one arrival order: the projection's draws of every
+candidate's final share, the Live Tally's shares, and the certified final shares, all in points.
+The eventual winner and runner-up come from the final count. The Tally Baseline is the tally read
+as a point mass, its leader winning for certain.
+
+Cases are averaged within a race, races within a night, and nights equally. G1 and G2 pool every
+case of a night into one rate, and the per-night rates are averaged with nights weighted equally.
+"""
+
+from dataclasses import dataclass
+
+import numpy as np
+
+
+@dataclass(frozen=True, eq=False)
+class Case:
+    night: int
+    race: str  # the payload's race id
+    checkpoint: str  # "50%", or a real capture's name
+    order: str | None  # "early-0"; None for a real capture
+    draws: np.ndarray  # (draws, candidates): final shares
+    tally: np.ndarray  # (candidates,): counted shares
+    final: np.ndarray  # (candidates,): certified shares
+    retired: bool = False  # all units in: the projection has retired and the count stands
+
+
+@dataclass(frozen=True)
+class CaseScore:
+    night: int
+    race: str
+    retired: bool
+    margin_crps: float
+    baseline_margin_error: float
+    brier: float
+    baseline_brier: float
+    share_crps: float  # diagnostic only
+    g1_calls: int  # candidates given at least the confidence
+    g1_hits: int  # of those, the ones who won
+    g2_margin: bool  # the margin's central range holds the final margin
+    g2_shares: int  # candidates whose central range holds their final share
+    candidates: int
+
+
+def crps(draws: np.ndarray, observed: float) -> float:
+    """Exact CRPS of an equally weighted empirical forecast (the Backend's `empirical_crps`)."""
+    values = np.sort(np.asarray(draws, dtype=float))
+    n = values.size
+    if n == 0 or not np.all(np.isfinite(values)):
+        raise ValueError("draws must be non-empty and finite")
+    absolute_error = float(np.mean(np.abs(values - observed)))
+    dispersion = float(np.sum((2 * np.arange(n) - n + 1) * values))
+    return max(0.0, absolute_error - dispersion / (n * n))
+
+
+def _first_max(rows: np.ndarray) -> np.ndarray:
+    """Each row's top candidate; ties go to the earlier one."""
+    return np.argmax(rows, axis=-1)
+
+
+def _brier(probabilities: np.ndarray, winner: int) -> float:
+    outcome = np.zeros_like(probabilities)
+    outcome[winner] = 1.0
+    return float(np.sum((probabilities - outcome) ** 2))
+
+
+def _within(draws: np.ndarray, value, interval_mass: float):
+    tail = (1 - interval_mass) / 2
+    low, high = np.quantile(draws, [tail, 1 - tail], axis=0)
+    return (low <= value) & (value <= high)
+
+
+def score_case(case: Case, confidence: float, interval_mass: float) -> CaseScore:
+    draws, tally, final = case.draws, case.tally, case.final
+    k = final.size
+    if draws.ndim != 2 or draws.shape[1] != k or tally.size != k:
+        raise ValueError(f"{case.race}: draws, tally and final name different candidates")
+    winner, runner_up = (int(i) for i in np.argsort(-final, kind="stable")[:2])
+    final_margin = float(final[winner] - final[runner_up])
+    margins = draws[:, winner] - draws[:, runner_up]
+    tally_margin = float(tally[winner] - tally[runner_up])
+
+    probabilities = np.bincount(_first_max(draws), minlength=k) / draws.shape[0]
+    baseline = np.zeros(k)
+    baseline[_first_max(tally)] = 1.0
+    calls = probabilities >= confidence
+
+    return CaseScore(
+        night=case.night,
+        race=case.race,
+        retired=case.retired,
+        margin_crps=crps(margins, final_margin),
+        baseline_margin_error=abs(tally_margin - final_margin),
+        brier=_brier(probabilities, winner),
+        baseline_brier=_brier(baseline, winner),
+        share_crps=float(np.mean([crps(draws[:, c], final[c]) for c in range(k)])),
+        g1_calls=int(calls.sum()),
+        g1_hits=int(calls[winner]),
+        g2_margin=bool(_within(margins, final_margin, interval_mass)),
+        g2_shares=int(_within(draws, final, interval_mass).sum()),
+        candidates=k,
+    )
+
+
+MEANS = ("margin_crps", "baseline_margin_error", "brier", "baseline_brier", "share_crps")
+
+
+def night_scores(scores: list[CaseScore]) -> dict[int, dict]:
+    """Per night: the race-weighted means, and G1 and G2 pooled over the night's cases."""
+    nights = {}
+    for night in sorted({s.night for s in scores}):
+        cases = [s for s in scores if s.night == night]
+        races = {}
+        for s in cases:
+            races.setdefault(s.race, []).append(s)
+        summary = {
+            name: float(np.mean([np.mean([getattr(s, name) for s in r]) for r in races.values()]))
+            for name in MEANS
+        }
+        calls = sum(s.g1_calls for s in cases)
+        summary["g1"] = sum(s.g1_hits for s in cases) / calls if calls else None
+        summary["g2_margin"] = sum(s.g2_margin for s in cases) / len(cases)
+        summary["g2_shares"] = sum(s.g2_shares for s in cases) / sum(s.candidates for s in cases)
+        summary |= {"races": len(races), "cases": len(cases), "g1_calls": calls}
+        summary["retired_cases"] = sum(s.retired for s in cases)
+        nights[night] = summary
+    return nights
+
+
+def totals(nights: dict[int, dict]) -> dict:
+    """Nights weighted equally; a night with no G1 call is left out of G1."""
+    total = {name: float(np.mean([n[name] for n in nights.values()])) for name in MEANS}
+    g1 = [n["g1"] for n in nights.values() if n["g1"] is not None]
+    total["g1"] = float(np.mean(g1)) if g1 else None
+    for name in ("g2_margin", "g2_shares"):
+        total[name] = float(np.mean([n[name] for n in nights.values()]))
+    return total
+
+
+def criteria(nights: dict[int, dict], prereg: dict, level: str) -> list[dict]:
+    """Criteria 1-5 with their values and pre-registered thresholds. `level` is the prereg's
+    level name (mayor, council, trustee). A G1 with no call anywhere is null and doesn't fail."""
+    listed = {c["id"]: c for c in prereg["pass_criteria"]["criteria"]}
+    total = totals(nights)
+    beat = sum(n["margin_crps"] < n["baseline_margin_error"] for n in nights.values())
+    c2, c4, c5 = listed[2], listed[4], listed[5]
+    g2 = {"margin": total["g2_margin"], "shares": total["g2_shares"]}
+    results = [
+        (1, total["margin_crps"] < total["baseline_margin_error"], total["margin_crps"],
+         total["baseline_margin_error"]),
+        (2, beat >= c2["min_nights"][level], beat, c2["min_nights"][level]),
+        (3, total["brier"] <= total["baseline_brier"], total["brier"], total["baseline_brier"]),
+        (4, total["g1"] is None or total["g1"] >= c4["min_hit_rate"], total["g1"],
+         c4["min_hit_rate"]),
+        (5, all(v >= c5["min_coverage"] for v in g2.values()), g2, c5["min_coverage"]),
+    ]  # fmt: skip
+    return [
+        {"id": i, "name": listed[i]["name"], "pass": bool(ok), "value": value, "threshold": bar}
+        for i, ok, value, bar in results
+    ]
+
+
+def checkpoint_steps(received: np.ndarray, units: int, percents) -> list[tuple[int, int]]:
+    """Each percent's checkpoint: the first step whose Reporting Progress is at or above it.
+    `received[step]` is the race's Reporting Units in after that step. Two percents may share a
+    step; a percent the race never reaches has no checkpoint."""
+    scaled = np.asarray(received) * 100
+    grid = []
+    for p in percents:
+        step = int(np.searchsorted(scaled, p * units, side="left"))
+        if step < scaled.size:
+            grid.append((p, step))
+    return grid

@@ -9,6 +9,8 @@ import json
 import random
 from datetime import datetime
 
+import numpy as np
+
 from election_night.feed import (
     MAYOR_OFFICE_ID,
     AllOffice,
@@ -20,6 +22,11 @@ from election_night.feed import (
 )
 
 SCHEMA_VERSION = 1
+STUB_DRAWS = 1000
+
+# A race's draws per variant: the candidates' keys in payload order, and a (draws, candidates)
+# array of final shares in points. The Replay harness scores exactly these.
+Draws = dict[str, tuple[tuple[str, ...], np.ndarray]]
 
 # The projection variants each projected level carries. Until the gated projections land, every
 # variant carries deterministic stub bands, marked as stubs.
@@ -125,6 +132,13 @@ def _stub_bands(race: dict, rng: random.Random) -> dict:
     return bands
 
 
+def _stub_draws(bands: dict, keys: tuple[str, ...], rng: np.random.Generator) -> np.ndarray:
+    """Stub draws: each candidate's share uniform within their stub band."""
+    low = np.array([bands[k]["low"] for k in keys])
+    high = np.array([bands[k]["high"] for k in keys])
+    return rng.uniform(low, high, size=(STUB_DRAWS, len(keys)))
+
+
 def _mayor_race(race: dict, spec: dict, w: WardByWard) -> None:
     try:
         tally = w.tally()
@@ -163,15 +177,20 @@ def _seed(a_seq: int, w_seq: int, model_version: str) -> int:
     return int.from_bytes(digest[:8], "big")
 
 
-def build_payload(all_office: bytes, ward_by_ward: bytes, bundle: dict) -> bytes:
-    """Build the payload bytes, or raise UnreadableFile if the pair is rejected."""
+def project(all_office: bytes, ward_by_ward: bytes, bundle: dict) -> tuple[dict, dict[str, Draws]]:
+    """The payload, and the draws behind each projected race's bands, by race id and variant.
+
+    Raises UnreadableFile if the pair is rejected.
+    """
     a = read_all_office(all_office)
     w = read_ward_by_ward(ward_by_ward)
     opening = _opening_ms(bundle)
     before = a.seq < opening or w.seq < opening
 
-    rng = random.Random(_seed(a.seq, w.seq, bundle["model_version"]))
-    races = []
+    seed = _seed(a.seq, w.seq, bundle["model_version"])
+    rng = random.Random(seed)
+    draw_rng = np.random.default_rng(seed)
+    races, draws = [], {}
     for spec in bundle["races"]:
         race = _race(spec)
         if not before:
@@ -180,9 +199,11 @@ def build_payload(all_office: bytes, ward_by_ward: bytes, bundle: dict) -> bytes
             else:
                 _all_office_race(race, spec, a)
             if race["state"] == "counting" and spec["level"] in VARIANTS:
-                race["projection"] = {
-                    "stub": True,
-                    "bands": {v: _stub_bands(race, rng) for v in VARIANTS[spec["level"]]},
+                bands = {v: _stub_bands(race, rng) for v in VARIANTS[spec["level"]]}
+                race["projection"] = {"stub": True, "bands": bands}
+                keys = tuple(c["key"] for c in race["candidates"])
+                draws[race["id"]] = {
+                    v: (keys, _stub_draws(b, keys, draw_rng)) for v, b in bands.items()
                 }
         races.append(race)
 
@@ -203,4 +224,10 @@ def build_payload(all_office: bytes, ward_by_ward: bytes, bundle: dict) -> bytes
         },
         "races": races,
     }
+    return payload, draws
+
+
+def build_payload(all_office: bytes, ward_by_ward: bytes, bundle: dict) -> bytes:
+    """Build the payload bytes, or raise UnreadableFile if the pair is rejected."""
+    payload, _ = project(all_office, ward_by_ward, bundle)
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")

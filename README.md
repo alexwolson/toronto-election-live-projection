@@ -76,4 +76,26 @@ by-election for mayor) as the City's two files would have published them (#28):
 - `captures.real_captures(prereg, root, nights)` gives the pre-registered real captures as named
   checkpoints, in the same names.
 
+The scorer (#29) runs those snapshots through the payload function and scores the draws it used:
+
+- `replay.run` checks each race at the first Count Snapshot at or after every pre-registered point
+  of its own Reporting Progress (5% to 95%), plus the real captures, and scores the level's
+  variant against the Tally Baseline. Acclaimed races are not scored; a race whose projection has
+  retired is scored as its count.
+- `replay.scoring` holds the scores (signed-margin CRPS, multiclass Brier, G1, G2 and the
+  diagnostic share CRPS) and criteria 1–5, with every threshold read from the pre-registration.
+- `replay.gate_result` writes each Gate Result once (`<level>-run-NNN.json`, never overwritten).
+  The model version is a sha256 of the model's code (`payload.py`, `feed.py`, `projection/`) and
+  its frozen parameters (`gates/params/`); the final forecast is an input outside it.
+
+```bash
+uv run election-night replay --level council --smoke   # one night, one order per timing pattern,
+                                                       # 600 s hard timeout, to .cache/gates-smoke/
+uv run election-night replay --level council --timeout 3600
+                                                       # every night and order, to gates/results/
+```
+
+Levels are `council`, `trustee`, `mayor-count-only` and `mayor-forecast-weighted`. The smoke run
+prints its timing and an extrapolation to the full run.
+
 This is an independent Git repository within the Toronto election workspace.
