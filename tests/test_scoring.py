@@ -236,3 +236,14 @@ def test_the_grid_is_the_pre_registered_one():
 
     assert [p for p, _ in grid] == list(range(5, 100, 5))
     assert [s for _, s in grid] == list(range(5, 100, 5))
+
+
+def test_g2_share_coverage_is_averaged_per_case_before_pooling():
+    # A two-way race fully covered and a four-way race with one of four covered: per case, (1 +
+    # 0.25) / 2, not 3 of 6 candidates. Decided by Alex on #29 (2026-10-08).
+    two = _case([[60.0, 40.0]] * 3, [60.0, 40.0], [60.0, 40.0], race="a")
+    four_draws = [[40.0, 30.0, 20.0, 10.0]] * 3
+    four = _case(four_draws, [40, 30, 20, 10], [40.0, 25.0, 25.0, 10.0 - 0.0001], race="b")
+    nights = night_scores([_score(two), _score(four)])
+
+    assert nights[2022]["g2_shares"] == pytest.approx((1.0 + 0.25) / 2)

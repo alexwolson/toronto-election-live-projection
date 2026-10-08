@@ -7,6 +7,7 @@ as a point mass, its leader winning for certain.
 
 Cases are averaged within a race, races within a night, and nights equally. G1 and G2 pool every
 case of a night into one rate, and the per-night rates are averaged with nights weighted equally.
+For each candidate's share, G2 first takes each case's share of candidates covered.
 """
 
 from dataclasses import dataclass
@@ -121,7 +122,8 @@ def night_scores(scores: list[CaseScore]) -> dict[int, dict]:
         calls = sum(s.g1_calls for s in cases)
         summary["g1"] = sum(s.g1_hits for s in cases) / calls if calls else None
         summary["g2_margin"] = sum(s.g2_margin for s in cases) / len(cases)
-        summary["g2_shares"] = sum(s.g2_shares for s in cases) / sum(s.candidates for s in cases)
+        # Each case's share of candidates covered, so a crowded race weighs as one case (#29).
+        summary["g2_shares"] = float(np.mean([s.g2_shares / s.candidates for s in cases]))
         summary |= {"races": len(races), "cases": len(cases), "g1_calls": calls}
         summary["retired_cases"] = sum(s.retired for s in cases)
         nights[night] = summary
