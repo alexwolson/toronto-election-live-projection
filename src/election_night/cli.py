@@ -9,8 +9,12 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+import boto3
 import redis
+from botocore.config import Config
 
+from election_night.alerts import Alerts
+from election_night.archive import Archive, ArchiveWriter
 from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write_bundle
 from election_night.feed import check_status
 from election_night.gates import load_preregistration, s3_record
@@ -70,10 +74,28 @@ def _env(name: str) -> str:
 
 
 def cmd_pipeline(args) -> None:
-    # Only the feed base URL and the store credentials come from the environment.
+    # URLs, buckets and credentials come from the environment (docs/store.md). The archive's
+    # endpoint and keys are boto3's own: AWS_ENDPOINT_URL_S3, AWS_ACCESS_KEY_ID and so on.
     base_url, redis_url = _env("FEED_BASE_URL"), _env("REDIS_URL")
+    alerts = Alerts(
+        pipeline=_env("PING_URL_PIPELINE"),
+        reader_path=_env("PING_URL_READER_PATH"),
+        count_decrease=_env("PING_URL_COUNT_DECREASE"),
+        reader_path_url=_env("READER_PATH_URL"),
+    )
+    s3 = boto3.client(
+        "s3", config=Config(connect_timeout=10, read_timeout=20, retries={"max_attempts": 3})
+    )
+    archive = ArchiveWriter(Archive(s3, _env("ARCHIVE_BUCKET")))
     client = redis.Redis.from_url(redis_url, socket_timeout=10, socket_connect_timeout=10)
-    pipeline = Pipeline(args.name, base_url, load_bundle(args.bundle), Store(client))
+    pipeline = Pipeline(
+        args.name,
+        base_url,
+        load_bundle(args.bundle),
+        Store(client),
+        archive=archive,
+        alerts=alerts,
+    )
     run(pipeline, args.stagger, Watchdog())
 
 

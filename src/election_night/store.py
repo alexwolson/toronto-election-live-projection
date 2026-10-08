@@ -1,7 +1,8 @@
 """The store: one Redis database that holds the newest payload and each pipeline's heartbeat.
 
 Key layout (docs/store.md): `payload` holds the payload bytes, `payload:seq` its "<a>,<w>" seq
-pair, and `heartbeat:<pipeline>` the epoch milliseconds of that pipeline's last valid read.
+pair, `heartbeat:<pipeline>` the epoch milliseconds of that pipeline's last valid read, and
+`count_decreases` one JSON entry per count decrease a pipeline saw.
 """
 
 import json
@@ -10,6 +11,7 @@ import redis
 
 PAYLOAD_KEY = "payload"
 SEQ_KEY = "payload:seq"
+DECREASES_KEY = "count_decreases"
 PIPELINES = ("fly", "do")
 
 # S7: a pair is newer only if neither seq is older and at least one is newer. Equal and mixed
@@ -47,3 +49,8 @@ class Store:
 
     def heartbeat(self, pipeline: str, ms: int) -> None:
         self.client.set(heartbeat_key(pipeline), ms)
+
+    def record_decreases(self, entries: list[dict]) -> None:
+        """Append count decreases, one JSON entry each, for `night status`."""
+        if entries:
+            self.client.rpush(DECREASES_KEY, *(json.dumps(e) for e in entries))
