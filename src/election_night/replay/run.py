@@ -12,21 +12,38 @@ the grid's own range.
 The timing-pattern orders and the captures decide criteria 1-5, and for mayor criterion 6, the
 Bailão check, on the 2023 capture. The stress orders, and the results
 without 2014 and without 2023, are reported only.
+
+The mayor's forecast-weighted variant (#41) runs on the same orders and the same draws as
+count-only: each refresh's one payload call gives the count-only draws and the variant's weights.
+The night's held-out 1-day forecast (S4) is its Night Bundle's forecast. At each refresh the
+variant scores its weighted draws when the payload put them in effect; below the ESS floor it
+scores count-only's draws if count-only met criteria 1-6 on the same run, else the tally. The
+wrong-forecast stress test reweights the same count-only draws by the forecast shifted against
+the eventual winner by S3's shift, with the same fallback. The variant passes only if it meets
+criteria 1-6, beats count-only on total margin CRPS and on 3 of 4 nights, and meets G1 and
+criterion 6 under the stress test.
+
+Each case is scored as soon as its order is replayed, and only its scores are kept, apart from
+the real captures' cases, which the Bailão check reads.
 """
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from itertools import pairwise
 
 import numpy as np
 
 from election_night import payload
 from election_night.feed import COUNCILLOR_OFFICE_ID, MAYOR_OFFICE_ID
 from election_night.gates import HOLDOUT_FORECASTS, ROOT, sha256
+from election_night.names import name_words
+from election_night.projection.forecast_weighted import ESS_MIN, resolve_forecast, weigh
 from election_night.replay.captures import Capture
 from election_night.replay.historical import Night, Race
 from election_night.replay.scoring import (
     BAILAO_NIGHT,
     Case,
+    CaseScore,
     bailao_check,
     checkpoint_steps,
     criteria,
@@ -73,7 +90,34 @@ def _scored(night: Night, bundle: dict, level: Level) -> list[tuple[dict, Race]]
     ]
 
 
-def _case(night, race: Race, row: dict, draws, level, checkpoint, order) -> Case:
+# The versions of each refresh the variant's Replays score.
+VARIANT_CASES = ("count_only", "forecast_weighted", "stress_test", "tally")
+
+
+def _stress_weights(bundle: dict, race: Race, keys, shares, prereg: dict) -> np.ndarray | None:
+    """The count-only draws' weights under the forecast shifted against the eventual winner by
+    S3's shift, or None below the ESS floor."""
+    density = bundle.get("forecast_density")
+    if density is None:
+        raise ValueError(f"{race.name}: the variant's Replays need the night's forecast")
+    winner = race.candidates[int(np.argmax(race.certified))]
+    shift = prereg["stress_test_shift"]["shift_points"]
+    if winner == density.leader:
+        shifted = density.shifted(-shift)
+    elif winner == density.challenger:
+        shifted = density.shifted(shift)
+    else:
+        raise ValueError(f"{winner} won, but the forecast's pair is not theirs")
+    found = weigh(shifted, keys, shares)
+    if found is None:
+        raise ValueError("the forecast's pair is not among the payload's candidates")
+    weights, ess = found
+    return weights if ess >= ESS_MIN else None
+
+
+def _cases(night, race: Race, row: dict, draws, level, checkpoint, order, bundle, prereg):
+    """The race's case at this refresh; for the forecast-weighted variant, one per version in
+    `VARIANT_CASES`, leaving out a weighted version below the ESS floor."""
     if row["state"] not in ("counting", "all_units_in"):
         raise ValueError(f"{night.year} {row['id']} at {checkpoint}: state {row['state']}")
     keys = tuple(c["key"] for c in row["candidates"])
@@ -87,14 +131,28 @@ def _case(night, race: Race, row: dict, draws, level, checkpoint, order) -> Case
     # A name the certified count leaves out (2022 Ward 23's Cynthia Lai, at 0) finishes at 0.
     final = np.array([certified.get(k, 0) for k in keys], dtype=float)
     final = 100 * final / final.sum()
-    if row["id"] in draws:
-        draw_keys, shares = draws[row["id"]][level.variant]
-        if draw_keys != keys:
-            raise ValueError(f"{row['id']}: draws and payload name different candidates")
-    else:
-        shares = tally[None, :]  # the projection has retired: the count stands
     retired = row["id"] not in draws
-    return Case(night.year, row["id"], checkpoint, order, shares, tally, final, retired, keys)
+    # A retired projection scores the count, which then stands, in every version.
+    case = Case(
+        night.year, row["id"], checkpoint, order, tally[None, :], tally, final, retired, keys
+    )
+    if retired and level.variant == "count_only":
+        return [case]
+    if retired:
+        return [replace(case, variant=v) for v in VARIANT_CASES]
+    draw_keys, shares, weights = draws[row["id"]]["count_only"]
+    if draw_keys != keys:
+        raise ValueError(f"{row['id']}: draws and payload name different candidates")
+    if level.variant == "count_only":
+        return [replace(case, draws=shares, weights=weights)]
+    cases = [replace(case, draws=shares), replace(case, variant="tally")]
+    if row["projection"]["variant"]["in_effect"] == "forecast_weighted":
+        _, weighted, weights = draws[row["id"]]["forecast_weighted"]
+        cases.append(replace(case, draws=weighted, weights=weights, variant="forecast_weighted"))
+    stress = _stress_weights(bundle, race, keys, shares, prereg)
+    if stress is not None:
+        cases.append(replace(case, draws=shares, weights=stress, variant="stress_test"))
+    return cases
 
 
 def order_cases(
@@ -123,7 +181,8 @@ def order_cases(
         body, draws = project(snap.all_office, snap.ward_by_ward, bundle, only=scored)
         rows = {r["id"]: r for r in body["races"]}
         for race_id, race, checkpoint in at_step[snap.step]:
-            cases.append(_case(night, race, rows[race_id], draws, level, checkpoint, label))
+            row = rows[race_id]
+            cases += _cases(night, race, row, draws, level, checkpoint, label, bundle, prereg)
     return cases
 
 
@@ -154,8 +213,31 @@ def capture_cases(
         ):
             row = rows[spec["id"]]
             label = f"capture {capture.time_edt}"
-            cases.append(_case(night, race, row, draws, level, label, None))
+            cases += _cases(night, race, row, draws, level, label, None, bundle, prereg)
     return cases
+
+
+def with_holdout_forecast(bundle: dict, year: int) -> dict:
+    """The replayed night's bundle with its held-out 1-day forecast (S4) as the night's pinned
+    forecast, resolved as at pipeline start. The forecast's named candidates take their
+    `candidate_id`s on the mayoral rows whose Ballot Names have the same words. Raises unless
+    the forecast resolves: a Replay of the variant never runs without it."""
+    manifest = HOLDOUT_FORECASTS / f"toronto_{year}.json"
+    meta = json.loads(manifest.read_text(encoding="utf-8"))
+    ids = {name_words(c["name"]): c["candidate_id"] for c in meta["candidates"]}
+    bundle = json.loads(json.dumps(bundle))
+    mayor = next(r for r in bundle["races"] if r["office_id"] == MAYOR_OFFICE_ID)
+    for row in mayor["candidates"]:
+        row["candidate_id"] = ids.get(name_words(row["key"]))
+    bundle["forecast"] = {
+        "release_tag": f"holdout-1d/{meta['campaign']}",
+        "npz": (manifest.parent / meta["npz"]).relative_to(ROOT).as_posix(),
+        "npz_sha256": meta["npz_sha256"],
+    }
+    resolved = resolve_forecast(bundle, ROOT)
+    if "forecast_density" not in resolved:
+        raise ValueError(f"{year}: the held-out forecast is {resolved['forecast_off']}")
+    return resolved
 
 
 def _forecast_name(candidate_id: str, year: int) -> str:
@@ -165,11 +247,61 @@ def _forecast_name(candidate_id: str, year: int) -> str:
     return next(c["name"] for c in forecast["candidates"] if c["candidate_id"] == candidate_id)
 
 
-def _summary(cases: list[Case], prereg: dict) -> dict:
+# A scored case: (night, race, checkpoint, order), its version, and its scores.
+Scored = tuple[tuple, str, CaseScore]
+
+
+def _scorer(prereg: dict):
     confidence = next(c for c in prereg["pass_criteria"]["criteria"] if c["id"] == 4)
     mass = next(c for c in prereg["pass_criteria"]["criteria"] if c["id"] == 5)
-    scores = [score_case(c, confidence["confidence"], mass["interval_mass"]) for c in cases]
-    return night_scores(scores)
+    return lambda case: score_case(case, confidence["confidence"], mass["interval_mass"])
+
+
+def _key(case: Case) -> tuple:
+    return (case.night, case.race, case.checkpoint, case.order)
+
+
+def _pick(items: list[tuple], variant: str, fallback: str) -> list:
+    """From (key, version, item) triples, each key's `variant` item, or its `fallback` item
+    where the variant was not in effect."""
+    by_key: dict[tuple, dict] = {}
+    for key, v, item in items:
+        by_key.setdefault(key, {})[v] = item
+    return [vs[variant] if variant in vs else vs[fallback] for vs in by_key.values()]
+
+
+def _pick_cases(cases: list[Case], variant: str, fallback: str) -> list[Case]:
+    return _pick([(_key(c), c.variant, c) for c in cases], variant, fallback)
+
+
+def _switching(scored: list[Scored], variant: str) -> dict:
+    """How often the mayor card would switch between the variant and its fallback: along each
+    order's scored checkpoints, whether the variant was in effect; a switch between two
+    checkpoints counts once, so this is a floor on the refreshes' switches. Retired
+    projections and the real captures are left out."""
+    by_key: dict[tuple, set[str]] = {}
+    retired = set()
+    for key, v, score in scored:
+        by_key.setdefault(key, set()).add(v)
+        if score.retired:
+            retired.add(key)
+    runs: dict[tuple, list[bool]] = {}
+    for key, versions in by_key.items():
+        night, race, _, order = key
+        if order is not None and key not in retired:
+            runs.setdefault((night, race, order), []).append(variant in versions)
+    checkpoints = sum(len(r) for r in runs.values())
+    fallback = sum(r.count(False) for r in runs.values())
+    switches = [sum(a != b for a, b in pairwise(r)) for r in runs.values()]
+    return {
+        "checkpoints": checkpoints,
+        "fallback_checkpoints": fallback,
+        "fallback_share": fallback / checkpoints if checkpoints else None,
+        "orders": len(runs),
+        "switches": sum(switches),
+        "orders_with_a_switch": sum(s > 0 for s in switches),
+        "mean_switches_per_order": sum(switches) / len(runs) if runs else None,
+    }
 
 
 def _report(nights: dict[int, dict], cases: int) -> dict:
@@ -178,6 +310,86 @@ def _report(nights: dict[int, dict], cases: int) -> dict:
         "nights": {str(y): n for y, n in nights.items()},
         "cases": cases,
     }
+
+
+def _subsets(by_night: dict[int, dict]) -> dict:
+    """The results without 2014 and without 2023, reported only."""
+    reported = {}
+    for year in (2014, 2023):
+        rest = {y: n for y, n in by_night.items() if y != year}
+        if year in by_night and rest:
+            reported[f"without_{year}"] = _report(rest, sum(n["cases"] for n in rest.values()))
+    return reported
+
+
+def _beats_count_only(variant: dict[int, dict], count_only: dict[int, dict], prereg) -> dict:
+    rule = prereg["forecast_weighted_variant"]["beats_count_only"]
+    beaten = sum(variant[y]["margin_crps"] < count_only[y]["margin_crps"] for y in variant)
+    total = {
+        "forecast_weighted": totals(variant)["margin_crps"],
+        "count_only": totals(count_only)["margin_crps"],
+    }
+    return {
+        "id": "beats_count_only",
+        "name": "beats count-only on total margin CRPS and in enough nights",
+        "pass": total["forecast_weighted"] < total["count_only"] and beaten >= rule["min_nights"],
+        "value": {"total": total, "nights_beaten": beaten},
+        "threshold": {"min_nights": rule["min_nights"], "of_nights": rule["of_nights"]},
+    }
+
+
+def _variant_result(deciding, stress, kept, prereg, bailao) -> dict:
+    """The forecast-weighted variant's criteria and reports: count-only first, which fixes the
+    fallback, then the variant, its ladder against count-only, and the stress test."""
+    variant_rules = prereg["forecast_weighted_variant"]
+    if variant_rules["ess_fallback"]["threshold"] != ESS_MIN:
+        raise ValueError("the payload's ESS floor is not the pre-registered one")
+    count_only = _pick(deciding, "count_only", "count_only")
+    co_nights = night_scores(count_only)
+    co_checks = criteria(co_nights, prereg, "mayor") + [
+        bailao(_pick_cases(kept, "count_only", "count_only"))
+    ]
+    co_passed = all(c["pass"] for c in co_checks)
+    fallback = "count_only" if co_passed else "tally"
+
+    weighted = _pick(deciding, "forecast_weighted", fallback)
+    by_night = night_scores(weighted)
+    checks = criteria(by_night, prereg, "mayor")
+    checks.append(bailao(_pick_cases(kept, "forecast_weighted", fallback)))
+    checks.append(_beats_count_only(by_night, co_nights, prereg))
+
+    stress_test = _pick(deciding, "stress_test", fallback)
+    st_nights = night_scores(stress_test)
+    st_checks = criteria(st_nights, prereg, "mayor")
+    st_checks.append(bailao(_pick_cases(kept, "stress_test", fallback)))
+    must = variant_rules["wrong_forecast_stress_test"]["must_meet"]
+    if must != [4, 6]:
+        raise ValueError(f"the stress test must meet {must}, not G1 and criterion 6")
+    for check, name in zip((st_checks[3], st_checks[5]), ("stress_g1", "stress_bailao")):
+        checks.append({**check, "id": name, "name": f"wrong-forecast stress test: {check['name']}"})
+
+    reported = _subsets(by_night)
+    reported["count_only"] = {
+        "pass": co_passed,
+        "criteria": co_checks,
+        "cases": len(count_only),
+        "scores": _report(co_nights, len(count_only)),
+    }
+    reported["stress_test"] = {
+        "shift_points": prereg["stress_test_shift"]["shift_points"],
+        "criteria": st_checks,
+        "scores": _report(st_nights, len(stress_test)),
+    }
+    reported["fallback"] = fallback
+    reported["switching"] = {
+        "forecast_weighted": _switching(deciding, "forecast_weighted"),
+        "stress_test": _switching(deciding, "stress_test"),
+    }
+    if stress:
+        orders = _pick(stress, "forecast_weighted", fallback)
+        reported["stress_orders"] = _report(night_scores(orders), len(orders))
+        reported["stress_orders"]["switching"] = _switching(stress, "forecast_weighted")
+    return {"checks": checks, "by_night": by_night, "cases": len(weighted), "reported": reported}
 
 
 def replay_level(
@@ -194,32 +406,55 @@ def replay_level(
     """The level's Gate Result, without its run number."""
     level = LEVELS[level_name]
     patterns = set(prereg["arrival_orders"]["ward_aggregates"]["timing_patterns"])
-    deciding, stress = [], []
+    score = _scorer(prereg)
+    deciding: list[Scored] = []
+    stress: list[Scored] = []
+    kept: list[Case] = []  # the real captures' cases, for the Bailão check
+
+    def take(cases: list[Case], into: list[Scored]) -> None:
+        for case in cases:
+            into.append((_key(case), case.variant, score(case)))
+            if case.order is None:
+                kept.append(case)
+
     for year, night in nights.items():
         for kind, index, order in orders[year]:
             cases = order_cases(
                 night, order, f"{kind}-{index}", level, prereg, model_version, project, make_bundle
             )
-            (deciding if kind in patterns else stress).extend(cases)
+            take(cases, deciding if kind in patterns else stress)
     for capture in captures:
         if capture.night in nights:
-            deciding += capture_cases(
-                nights[capture.night], capture, level, prereg, model_version, project, make_bundle
+            night = nights[capture.night]
+            cases = capture_cases(
+                night, capture, level, prereg, model_version, project, make_bundle
             )
+            take(cases, deciding)
 
-    by_night = _summary(deciding, prereg)
-    checks = criteria(by_night, prereg, level.name)
-    bailao = next(c for c in prereg["pass_criteria"]["criteria"] if c["id"] == 6)
-    if level.name in bailao["levels"]:
-        name = _forecast_name(bailao["candidate_id"], BAILAO_NIGHT)
-        checks.append(bailao_check(deciding, prereg, name))
-    reported = {}
-    for year in (2014, 2023):
-        rest = {y: n for y, n in by_night.items() if y != year}
-        if year in by_night and rest:
-            reported[f"without_{year}"] = _report(rest, sum(n["cases"] for n in rest.values()))
-    if stress:
-        reported["stress_orders"] = _report(_summary(stress, prereg), len(stress))
+    six = next(c for c in prereg["pass_criteria"]["criteria"] if c["id"] == 6)
+    name = (
+        _forecast_name(six["candidate_id"], BAILAO_NIGHT) if level.name in six["levels"] else None
+    )
+
+    def bailao(cases: list[Case]) -> dict:
+        return bailao_check(cases, prereg, name)
+
+    if level.variant == "forecast_weighted":
+        found = _variant_result(deciding, stress, kept, prereg, bailao)
+        checks, by_night, cases = found["checks"], found["by_night"], found["cases"]
+        reported = found["reported"]
+    else:
+        scores = [s for _, _, s in deciding]
+        by_night = night_scores(scores)
+        checks = criteria(by_night, prereg, level.name)
+        if name is not None:
+            checks.append(bailao(kept))
+        cases = len(scores)
+        reported = _subsets(by_night)
+        if stress:
+            reported["stress_orders"] = _report(
+                night_scores([s for _, _, s in stress]), len(stress)
+            )
     kinds = [kind for year in orders for kind, _, _ in orders[year]]
     per_night = max(1, len(nights))
     return {
@@ -228,9 +463,9 @@ def replay_level(
         "smoke": smoke,
         "pass": all(c["pass"] for c in checks),
         "criteria": checks,
-        "scores": _report(by_night, len(deciding)),
+        "scores": _report(by_night, cases),
         "nights": sorted(nights),
-        "cases": len(deciding),
+        "cases": cases,
         "orders_per_night": {
             "timing_patterns": sum(k in patterns for k in kinds) // per_night,
             "stress": sum(k not in patterns for k in kinds) // per_night,
@@ -249,7 +484,8 @@ def replay_level(
 
 def run_replay(level_name: str, prereg: dict, years: list[int], smoke: bool) -> tuple[dict, dict]:
     """Load the nights, draw the orders and replay the level. A smoke run takes the first order
-    of each timing pattern and no stress orders. Returns the Gate Result and timing figures."""
+    of each timing pattern and of each stress kind, so its report-only results are filled.
+    Returns the Gate Result and timing figures."""
     import time
 
     from election_night.projection.history import replay_bundle
@@ -263,10 +499,13 @@ def run_replay(level_name: str, prereg: dict, years: list[int], smoke: bool) -> 
     history = {year: load_night(year, prereg) for year in YEARS}
     nights = {year: history[year] for year in years}
     bundles = {year: replay_bundle(history[year], history, prereg) for year in years}
+    if LEVELS[level_name].variant == "forecast_weighted":
+        bundles = {year: with_holdout_forecast(b, year) for year, b in bundles.items()}
     patterns = list(prereg["arrival_orders"]["ward_aggregates"]["timing_patterns"])
     if smoke:
+        kinds = patterns + list(prereg["arrival_orders"]["stress_orders"]["kinds"])
         drawn = {
-            y: [(kind, 0, arrival_order(n, prereg, kind, 0)) for kind in patterns]
+            y: [(kind, 0, arrival_order(n, prereg, kind, 0)) for kind in kinds]
             for y, n in nights.items()
         }
     else:
@@ -290,6 +529,15 @@ def run_replay(level_name: str, prereg: dict, years: list[int], smoke: bool) -> 
         make_bundle=lambda night: bundles[night.year],
     )
     done = time.monotonic()
+    if LEVELS[level_name].variant == "forecast_weighted":
+        # The forecast is an input, outside the model version (gate_result.forecast_in_hash).
+        result["forecast_inputs"] = {
+            str(year): {
+                "release_tag": b["forecast"]["release_tag"],
+                "npz_sha256": b["forecast"]["npz_sha256"],
+            }
+            for year, b in bundles.items()
+        }
     arrival = prereg["arrival_orders"]
     full_orders = arrival["orders_per_night"] + sum(
         k["orders_per_night"] for k in arrival["stress_orders"]["kinds"].values()

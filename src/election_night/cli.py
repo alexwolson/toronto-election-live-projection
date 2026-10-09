@@ -27,6 +27,7 @@ from election_night.mockfeed.server import serve
 from election_night.name_inputs import fetch_name_inputs, load_name_inputs, refresh_forecast
 from election_night.payload import build_payload
 from election_night.pipeline import FILES, Pipeline, Watchdog, now_ms, run
+from election_night.projection.forecast_weighted import resolve_forecast
 from election_night.replay.gate_result import write_gate_result
 from election_night.replay.run import LEVELS, PREREGISTRATION, run_replay
 from election_night.status import read_status, render_status
@@ -64,9 +65,19 @@ def fetch(url: str, cache: Path) -> bytes:
     return body
 
 
+def _night_bundle(path: Path) -> dict:
+    """The Night Bundle with its pinned forecast resolved once, as at pipeline start: the draws
+    sit beside the bundle. A missing, corrupt or unmatched forecast turns the mayor's variant
+    off for the night, and is reported here, never failing the start."""
+    bundle = resolve_forecast(load_bundle(path), path.parent)
+    if "forecast_off" in bundle:
+        print(f"mayor's forecast-weighted variant off: {bundle['forecast_off']}", file=sys.stderr)
+    return bundle
+
+
 def cmd_payload(args) -> None:
     bodies = [fetch(f"{args.base_url}/{name}", args.cache_dir / name) for name in FILES]
-    body = build_payload(*bodies, load_bundle(args.bundle))
+    body = build_payload(*bodies, _night_bundle(args.bundle))
     if args.pretty:
         body = json.dumps(json.loads(body), ensure_ascii=False, indent=2).encode("utf-8")
     sys.stdout.buffer.write(body + b"\n")
@@ -97,7 +108,7 @@ def cmd_pipeline(args) -> None:
     pipeline = Pipeline(
         args.name,
         base_url,
-        load_bundle(args.bundle),
+        _night_bundle(args.bundle),
         Store(client),
         archive=archive,
         alerts=alerts,
