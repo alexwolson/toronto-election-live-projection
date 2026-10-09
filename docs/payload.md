@@ -96,7 +96,8 @@ published: the `council-counting-2022` golden carries MonAvenir 4 at 539 of 0 un
   stands. A bundle without these inputs keeps the stub bands; the 2026 bundle gains them in #46.
 - **Mayor projection** (#36): the same family, read from the ward-by-ward file alone, with one unit
   per City ward (`expected.wards`, one entry per ward) summed to the citywide result, under the
-  `mayor` parameters (`kappa`, `size_cv`, `tau`, `omega_city`, `omega_ward`). The turnout level is
+  `mayor` parameters (`kappa`, `size_cv`, `tau`, `omega_city`, `omega_ward`, `omega_city_nu`;
+  2023 weighted at 50%, docs/adr/0001). The turnout level is
   citywide, shared by every ward. Each draw takes one early-vote shift per candidate, applied in
   every ward with ward-level noise; a ward with no election-day unit counted is centred on the
   citywide counted shares. Inputs whose wards or per-ward units don't match the file's wards and

@@ -1,5 +1,6 @@
 """The mayor's count-extension projection: City ward units summed to the citywide result (#36)."""
 
+import dataclasses
 import json
 
 import numpy as np
@@ -12,6 +13,7 @@ from election_night.projection.count_extension import (
     MayorParams,
     RaceInputs,
     WardInputs,
+    _shifted,
     draw_mayor_final_shares,
     mayor_final_votes,
 )
@@ -153,3 +155,71 @@ def test_a_ward_whose_inputs_dont_match_its_units_fails_the_mayor_closed(replay_
 
     assert next(r for r in body["races"] if r["id"] == "mayor")["projection"] is None
     assert "mayor" not in draws
+
+
+def early_shift(nu: float, seed: int = 5) -> np.ndarray:
+    """Draws of the first candidate's early-vote share, with every unit's election-day vote
+    in and only the two wards' advance votes out (as in the shared-shift test)."""
+    inputs = RaceInputs(
+        (
+            ward("1", 50_000.0, aggregates=advance(5_000.0)),
+            ward("2", 50_000.0, aggregates=advance(5_000.0)),
+        )
+    )
+    votes = np.array([[2_500, 2_500], [2_500, 2_500]], dtype=float)
+    params = MayorParams(
+        kappa=1e4, size_cv=0.01, tau=1e4, omega_city=50.0, omega_ward=1e5, omega_city_nu=nu
+    )
+    _, wards = run(inputs, votes, [10, 10], params=params, per_ward=True, seed=seed, draws=20_000)
+    out = wards[0] - votes[0]
+    return out[:, 0] / out.sum(axis=1)
+
+
+def test_a_shift_spread_fitted_on_few_nights_has_heavier_tails():
+    # The spread is estimated from a handful of nights, so each draw takes its own spread from
+    # the estimate's uncertainty: the typical shift barely moves, the rare one is much larger.
+    known, few = early_shift(np.inf), early_shift(3.0)
+    spread = {name: np.abs(s - 0.5) for name, s in (("known", known), ("few", few))}
+
+    assert np.median(spread["few"]) == pytest.approx(np.median(spread["known"]), rel=0.25)
+    assert np.percentile(spread["few"], 99) > 1.5 * np.percentile(spread["known"], 99)
+
+
+def test_an_infinitely_known_spread_draws_exactly_as_before():
+    # The default is a spread taken as known: the stream of draws is the unchanged model's.
+    inputs = RaceInputs((ward("1", 20_000.0, aggregates=advance(800.0)), ward("2", 30_000.0)))
+    votes = [[300, 200], [100, 50]]
+    default, _ = run(inputs, votes, [3, 1])
+    infinite, _ = run(
+        inputs, votes, [3, 1], params=dataclasses.replace(PARAMS, omega_city_nu=np.inf)
+    )
+    assert np.array_equal(default, infinite)
+
+
+def test_2023_takes_half_the_weight_of_the_mayoral_fit_when_it_is_a_training_night(nights):
+    # Alex, 2026-10-09: 2026 is expected to resemble 2023, so 2023 takes 50% and the other
+    # nights split 50% in their usual proportions. An assumption, not fitted (docs/adr/0001).
+    equal = {y: fit_mayor([nights[y]]) for y in (2018, 2023)}
+    both = fit_mayor([nights[2018], nights[2023]])
+
+    def v(omega):
+        return 1 / (omega + 1)
+
+    assert v(both.omega_city) == pytest.approx(
+        0.5 * v(equal[2018].omega_city) + 0.5 * v(equal[2023].omega_city)
+    )
+    assert both.omega_city_nu == pytest.approx(2.0)
+    without = fit_mayor([nights[2014], nights[2018], nights[2022]])
+    assert 2.0 < without.omega_city_nu <= 3.0  # unchanged weights: by each night's size
+
+
+def test_a_shift_with_no_mass_where_the_centre_has_any_keeps_the_centre():
+    # A very wide shift can put all its mass on a candidate whose centre share underflowed to
+    # 0 (seen on 2014's 65 candidates): the shifted split falls back to the centre, never NaN.
+    centre = np.array([[0.6, 0.4, 0.0], [0.5, 0.3, 0.2]])
+    shift = np.array([[0.0, 0.0, 3.0], [1.0, 2.0, 0.0]])
+    shifted = _shifted(centre, shift)
+
+    assert np.isfinite(shifted).all()
+    assert np.allclose(shifted[0], centre[0])
+    assert np.allclose(shifted[1], np.array([0.5, 0.6, 0.0]) / 1.1)

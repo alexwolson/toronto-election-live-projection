@@ -16,7 +16,9 @@ every race of the level on the nights it is given; the caller leaves the held-ou
 The mayor (`fit_mayor`) takes its units in City wards: `kappa` and `size_cv` as above with each
 ward as a race; `tau`, a ward's election-day shares around the city's; `omega_city`, the citywide
 aggregates' shares around citywide election day; and `omega_ward`, a ward's aggregates' shares
-around its election day shifted by the citywide ratio of aggregate to election-day shares.
+around its election day shifted by the citywide ratio of aggregate to election-day shares. Its
+nights are weighted by MAYOR_NIGHT_SHARES, and `omega_city_nu` is the effective number of
+nights behind `omega_city`.
 """
 
 import numpy as np
@@ -82,12 +84,45 @@ def fit_level(nights: list[Night], offices: tuple[int, ...]) -> Params:
     )
 
 
+# A night's share of every mayoral parameter's fit when it is a training night. 2026 is expected to
+# resemble 2023 (Alex, 2026-10-09): an assumption, not fitted (docs/adr/0001). The other nights
+# split the rest in their pooled proportions. Without 2023, every night keeps its pooled share.
+MAYOR_NIGHT_SHARES = {2023: 0.5}
+
+
+def _shares(sizes: dict[int, float]) -> dict[int, float]:
+    """Each night's share of a pooled estimate: its size, or its fixed share where one is set."""
+    fixed = {y: MAYOR_NIGHT_SHARES[y] for y in sizes if y in MAYOR_NIGHT_SHARES}
+    rest = sum(v for y, v in sizes.items() if y not in fixed)
+    if rest <= 0:  # only fixed nights: they share the whole fit
+        return {y: fixed[y] / sum(fixed.values()) for y in sizes}
+    left = 1 - sum(fixed.values())
+    return {y: fixed.get(y, left * v / rest) for y, v in sizes.items()}
+
+
+def _pooled(per_night: dict[int, tuple[float, float]]) -> tuple[float, float]:
+    """The pooled moment v = excess / spread, each night weighted by its share; and the
+    effective number of nights behind it (Kish)."""
+    nights = {y: pair for y, pair in per_night.items() if pair[1] > 0}
+    if not nights:
+        raise ValueError("no mayoral races to fit")
+    shares = _shares({y: spread for y, (_, spread) in nights.items()})
+    v = sum(shares[y] * excess / spread for y, (excess, spread) in nights.items())
+    return v, 1 / sum(w * w for w in shares.values())
+
+
 def fit_mayor(nights: list[Night]) -> MayorParams:
-    unit_excess = unit_spread = 0.0
-    tau_excess = tau_spread = city_excess = city_spread = ward_excess = ward_spread = 0.0
-    cvs = []
+    moments: dict[str, dict[int, tuple[float, float]]] = {
+        name: {} for name in ("kappa", "tau", "omega_city", "omega_ward")
+    }
+    cvs: dict[int, list[float]] = {}
+
+    def add(name: str, year: int, pair: tuple[float, float]) -> None:
+        excess, spread = moments[name].get(year, (0.0, 0.0))
+        moments[name][year] = (excess + pair[0], spread + pair[1])
+
     for night in nights:
-        race = night.mayor
+        race, year = night.mayor, night.year
         aggregate = {u.key: u.ward_aggregate for u in night.units}
         is_agg = np.array([aggregate[u] for u in race.units])
         votes = race.votes.astype(float)
@@ -95,9 +130,7 @@ def fit_mayor(nights: list[Night]) -> MayorParams:
         if city_ed.sum() <= 0 or city_agg.sum() <= 0:
             continue
         p_city, q_city = city_ed / city_ed.sum(), city_agg / city_agg.sum()
-        excess, spread = _excess(q_city, p_city, city_agg.sum())
-        city_excess += excess
-        city_spread += spread
+        add("omega_city", year, _excess(q_city, p_city, city_agg.sum()))
         # The citywide shift: each candidate's aggregate share over their election-day share.
         ratio = np.where(p_city > 0, q_city / np.where(p_city > 0, p_city, 1.0), 1.0)
         wards = np.array([w for w, _ in race.units])
@@ -106,26 +139,25 @@ def fit_mayor(nights: list[Night]) -> MayorParams:
             if ed.sum() <= 0:
                 continue
             excess, spread, cv = _units(ed)
-            unit_excess += excess
-            unit_spread += spread
+            add("kappa", year, (excess, spread))
             if cv is not None:
-                cvs.append(cv)
+                cvs.setdefault(year, []).append(cv)
             p = ed.sum(axis=0) / ed.sum()
-            excess, spread = _excess(p, p_city, ed.sum())
-            tau_excess += excess
-            tau_spread += spread
+            add("tau", year, _excess(p, p_city, ed.sum()))
             agg = votes[(wards == ward) & is_agg].sum(axis=0)
             if agg.sum() > 0:
                 target = p * ratio / (p * ratio).sum()
-                excess, spread = _excess(agg / agg.sum(), target, agg.sum())
-                ward_excess += excess
-                ward_spread += spread
-    if not cvs or min(unit_spread, tau_spread, city_spread, ward_spread) <= 0:
+                add("omega_ward", year, _excess(agg / agg.sum(), target, agg.sum()))
+    if not cvs:
         raise ValueError("no mayoral races to fit")
+    pooled = {name: _pooled(per_night) for name, per_night in moments.items()}
+    cv_shares = _shares({y: float(len(c)) for y, c in cvs.items()})
+    size_cv = np.sqrt(sum(cv_shares[y] * np.mean(np.square(c)) for y, c in cvs.items()))
     return MayorParams(
-        kappa=_concentration(unit_excess, unit_spread),
-        size_cv=float(np.sqrt(np.mean(np.square(cvs)))),
-        tau=_concentration(tau_excess, tau_spread),
-        omega_city=_concentration(city_excess, city_spread),
-        omega_ward=_concentration(ward_excess, ward_spread),
+        kappa=_concentration(pooled["kappa"][0], 1.0),
+        size_cv=float(size_cv),
+        tau=_concentration(pooled["tau"][0], 1.0),
+        omega_city=_concentration(pooled["omega_city"][0], 1.0),
+        omega_ward=_concentration(pooled["omega_ward"][0], 1.0),
+        omega_city_nu=pooled["omega_city"][1],
     )

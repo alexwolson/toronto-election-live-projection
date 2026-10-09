@@ -60,6 +60,9 @@ class MayorParams:
     tau: float  # Dirichlet concentration of a ward's election-day shares around the city's
     omega_city: float  # of the citywide Ward Aggregates' shares around citywide election day
     omega_ward: float  # of a ward's aggregates' shares around its election day, after the shift
+    # The effective number of nights omega_city was fitted on. Each draw takes its own shift
+    # spread from that estimate's uncertainty (scaled-inverse-chi-squared); infinite: known.
+    omega_city_nu: float = math.inf
 
 
 @dataclass(frozen=True)
@@ -289,6 +292,25 @@ def draw_final_shares(
     return 100 * final / final.sum(axis=1, keepdims=True)
 
 
+def _shifted(centre: np.ndarray, shift: np.ndarray) -> np.ndarray:
+    """Each row's centre times its shift, renormalised. A row whose shift has no mass where its
+    centre has any keeps its centre."""
+    early = centre * shift
+    total = early.sum(axis=1, keepdims=True)
+    return np.where(total > 0, early / np.where(total > 0, total, 1.0), centre)
+
+
+def _shift_concentration(params: MayorParams, rng: np.random.Generator, draws: int):
+    """Each draw's concentration of the citywide early-vote shift. Its spread v = 1/(omega + 1)
+    is estimated from a few nights, so each draw takes v from the scaled-inverse-chi-squared
+    distribution with the fit's effective nights as degrees of freedom, centred on the fit."""
+    if math.isinf(params.omega_city_nu):
+        return np.full(draws, params.omega_city)
+    nu = params.omega_city_nu
+    v = nu / (params.omega_city + 1) / rng.chisquare(nu, size=draws)
+    return 1 / np.minimum(v, 1 - MIN_CONCENTRATION) - 1
+
+
 def mayor_final_votes(
     inputs: RaceInputs,
     params: MayorParams,
@@ -332,7 +354,7 @@ def mayor_final_votes(
     candidates = votes.shape[1]
     city_counted = votes.sum(axis=0)
     city_shares = (city_counted + PSEUDO_VOTES) / (city_counted.sum() + PSEUDO_VOTES * candidates)
-    shift = _dirichlet(rng, np.full(draws, params.omega_city), city_shares) / city_shares
+    shift = _dirichlet(rng, _shift_concentration(params, rng, draws), city_shares) / city_shares
     effective = 1 + params.size_cv**2
 
     city = np.zeros((draws, candidates))
@@ -366,9 +388,7 @@ def mayor_final_votes(
             centre = _dirichlet(rng, concentration, np.where(own[:, None], counted, city_shares))
             ed_concentration = (params.kappa + 1) * np.maximum(out, 1) / effective - 1
             ed_split = _dirichlet(rng, ed_concentration, centre)
-            early = centre * shift
-            early /= early.sum(axis=1, keepdims=True)
-            agg_split = _dirichlet(rng, np.full(draws, params.omega_ward), early)
+            agg_split = _dirichlet(rng, np.full(draws, params.omega_ward), _shifted(centre, shift))
             final = v[None, :] + ed_votes[:, None] * ed_split + agg_votes[:, None] * agg_split
         city += final
         if wards is not None:
