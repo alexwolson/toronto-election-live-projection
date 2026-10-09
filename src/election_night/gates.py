@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+HOLDOUT_FORECASTS = ROOT / "data" / "forecasts" / "holdout-1d"
 
 # Every section #17 § Pre-registered gates asks for.
 SECTIONS = (

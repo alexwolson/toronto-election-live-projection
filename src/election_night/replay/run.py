@@ -9,21 +9,25 @@ The real captures enter as named checkpoints, pooled with the orders' checkpoint
 of the level the captured file holds with Reporting Progress from 5% up to but not including 100%,
 the grid's own range.
 
-The timing-pattern orders and the captures decide criteria 1-5. The stress orders, and the results
+The timing-pattern orders and the captures decide criteria 1-5, and for mayor criterion 6, the
+Bailão check, on the 2023 capture. The stress orders, and the results
 without 2014 and without 2023, are reported only.
 """
 
+import json
 from dataclasses import dataclass
 
 import numpy as np
 
 from election_night import payload
 from election_night.feed import COUNCILLOR_OFFICE_ID, MAYOR_OFFICE_ID
-from election_night.gates import ROOT, sha256
+from election_night.gates import HOLDOUT_FORECASTS, ROOT, sha256
 from election_night.replay.captures import Capture
 from election_night.replay.historical import Night, Race
 from election_night.replay.scoring import (
+    BAILAO_NIGHT,
     Case,
+    bailao_check,
     checkpoint_steps,
     criteria,
     night_scores,
@@ -90,7 +94,7 @@ def _case(night, race: Race, row: dict, draws, level, checkpoint, order) -> Case
     else:
         shares = tally[None, :]  # the projection has retired: the count stands
     retired = row["id"] not in draws
-    return Case(night.year, row["id"], checkpoint, order, shares, tally, final, retired)
+    return Case(night.year, row["id"], checkpoint, order, shares, tally, final, retired, keys)
 
 
 def order_cases(
@@ -154,6 +158,13 @@ def capture_cases(
     return cases
 
 
+def _forecast_name(candidate_id: str, year: int) -> str:
+    """A candidate's name as the night's held-out forecast writes it."""
+    path = HOLDOUT_FORECASTS / f"toronto_{year}.json"
+    forecast = json.loads(path.read_text(encoding="utf-8"))
+    return next(c["name"] for c in forecast["candidates"] if c["candidate_id"] == candidate_id)
+
+
 def _summary(cases: list[Case], prereg: dict) -> dict:
     confidence = next(c for c in prereg["pass_criteria"]["criteria"] if c["id"] == 4)
     mass = next(c for c in prereg["pass_criteria"]["criteria"] if c["id"] == 5)
@@ -198,6 +209,10 @@ def replay_level(
 
     by_night = _summary(deciding, prereg)
     checks = criteria(by_night, prereg, level.name)
+    bailao = next(c for c in prereg["pass_criteria"]["criteria"] if c["id"] == 6)
+    if level.name in bailao["levels"]:
+        name = _forecast_name(bailao["candidate_id"], BAILAO_NIGHT)
+        checks.append(bailao_check(deciding, prereg, name))
     reported = {}
     for year in (2014, 2023):
         rest = {y: n for y, n in by_night.items() if y != year}

@@ -16,10 +16,10 @@ written only if it has no votes: 2022 Ward 23 lists Cynthia Lai, who died during
 
 import hashlib
 import json
-import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
+from election_night.names import name_words
 from election_night.replay.historical import Night, Race
 from election_night.replay.snapshots import WARD_BY_WARD_LAG_MS, zeroed_pair
 
@@ -33,15 +33,11 @@ class Capture:
     ward_by_ward: bytes
 
 
-def _words(name: str) -> tuple[str, ...]:
-    return tuple(sorted(unicodedata.normalize("NFC", name).casefold().split()))
-
-
 def _rename(race: Race, candidates: list[dict], where: str) -> None:
-    ours = {_words(c): c for c in race.candidates}
+    ours = {name_words(c): c for c in race.candidates}
     if len(ours) != len(race.candidates):
         raise ValueError(f"{where}: two workbook names share their words")
-    mapped = [ours.get(_words(c["name"])) for c in candidates]
+    mapped = [ours.get(name_words(c["name"])) for c in candidates]
     unmatched = [c for c, m in zip(candidates, mapped) if m is None]
     if any(c["votesReceived"] != "0" for c in unmatched) or sorted(
         m for m in mapped if m is not None

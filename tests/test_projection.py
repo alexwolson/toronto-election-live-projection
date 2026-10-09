@@ -113,7 +113,7 @@ def poisoned(night):
     return dataclasses.replace(night, races=races)
 
 
-@pytest.mark.parametrize("year", [2014, 2018, 2022])
+@pytest.mark.parametrize("year", [2014, 2018, 2022, 2023])
 def test_a_fold_never_sees_its_held_out_nights_votes(nights, year):
     clean = fold_projection(nights[year], nights, PREREG)
     dirty = fold_projection(
@@ -131,14 +131,11 @@ def test_each_fold_fits_its_own_parameters(nights):
             assert all(v > 0 for v in fold[level].values())
 
 
-def test_every_council_and_trustee_race_gets_inputs_that_cover_its_units(nights):
+def test_every_race_gets_inputs_that_cover_its_units(nights):
     night = nights[2022]
     fold = fold_projection(night, nights, PREREG)
     races = {(r.office_id, r.num): r for r in night.races}
     for spec in night_bundle(night)["races"]:
-        if spec["level"] == "mayor":
-            assert spec["id"] not in fold["races"]
-            continue
         expected = fold["races"][spec["id"]]
         units = sum(w["election_day_units"] + len(w["aggregates"]) for w in expected["wards"])
         assert units == len(races[(spec["office_id"], spec["num"])].units) == spec["polls"]
@@ -168,8 +165,6 @@ def test_counting_council_and_trustee_races_carry_the_models_bands(replay_2022):
         assert list(race["projection"]["bands"]) == ["count_only"]
         assert list(race["projection"]["bands"]["count_only"]) == keys
         assert draws[race["id"]]["count_only"][1].shape == (10_000, len(keys))
-    mayor = next(r for r in body["races"] if r["id"] == "mayor")
-    assert mayor["projection"]["stub"] is True  # #36
 
 
 def test_the_payload_with_projections_is_deterministic(replay_2022):

@@ -1,8 +1,9 @@
 """A replayed night's projection inputs, built only from what was known before it (#33).
 
 `fold_projection(target, nights, prereg)` gives the Night Bundle additions for one replayed
-night: each level's parameters, fitted on the other nights (ADR 0029), and each council and
-trustee race's expected-total inputs. From the target night it reads only its structure (wards,
+night: each level's parameters, fitted on the other nights (ADR 0029), and each race's
+expected-total inputs. The mayor's are one entry per City ward, with an office ratio of 1
+(#36). From the target night it reads only its structure (wards,
 units, which codes are Ward Aggregates), its pre-night electors and its released advance figure;
 never its votes.
 
@@ -28,7 +29,7 @@ import xlrd
 
 from election_night.feed import race_id
 from election_night.gates import ROOT
-from election_night.projection.fit import fit_level
+from election_night.projection.fit import fit_level, fit_mayor
 from election_night.replay.historical import Night
 
 VOTER_STATISTICS = ROOT / "data" / "historical" / "voter_statistics"
@@ -180,6 +181,7 @@ def fold_projection(target: Night, nights: dict[int, Night], prereg: dict) -> di
         for level, offices in LEVEL_OFFICES.items()
         if any(r.office_id in offices for n in others for r in n.races)
     }
+    params["mayor"] = vars(fit_mayor(others))
 
     def turnout_ratio(ward: int) -> float:
         if not ward_level:
@@ -237,7 +239,7 @@ def fold_projection(target: Night, nights: dict[int, Night], prereg: dict) -> di
     aggregate = {u.key: u.ward_aggregate for u in target.units}
     races = {}
     for race in target.races:
-        if race.office_id == MAYOR or not any(race.office_id in o for o in LEVEL_OFFICES.values()):
+        if race.office_id != MAYOR and not any(race.office_id in o for o in LEVEL_OFFICES.values()):
             continue
         wards = []
         for ward in sorted({w for w, _ in race.units}):

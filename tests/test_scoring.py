@@ -4,6 +4,7 @@ Shares are in points. Candidates are listed in the same order in a case's draws,
 count; the eventual winner and runner-up come from the final count.
 """
 
+import dataclasses
 from pathlib import Path
 
 import numpy as np
@@ -12,6 +13,7 @@ import pytest
 from election_night.gates import load_preregistration
 from election_night.replay.scoring import (
     Case,
+    bailao_check,
     checkpoint_steps,
     criteria,
     crps,
@@ -247,3 +249,33 @@ def test_g2_share_coverage_is_averaged_per_case_before_pooling():
     nights = night_scores([_score(two), _score(four)])
 
     assert nights[2022]["g2_shares"] == pytest.approx((1.0 + 0.25) / 2)
+
+
+# Criterion 6, the Bailão check (#36)
+
+CAPTURE = "capture 2023-06-26T20:26"
+KEYS = ("Chow Olivia", "Bailão Ana", "Saunders Mark")
+
+
+def _capture_case(bailao_wins: int, checkpoint=CAPTURE, night=2023) -> Case:
+    # Of 10 draws, Bailão leads in `bailao_wins`, Chow in the rest.
+    draws = [[30.0, 40.0, 30.0]] * bailao_wins + [[40.0, 30.0, 30.0]] * (10 - bailao_wins)
+    final = [37.2, 32.5, 30.3]
+    case = _case(draws, [35.2, 36.1, 28.7], final, night=night, race="mayor", order=None)
+    return dataclasses.replace(case, checkpoint=checkpoint, keys=KEYS)
+
+
+@pytest.mark.parametrize(("wins", "passes"), [(6, True), (7, False)])
+def test_bailao_check_holds_bailaos_win_probability_at_the_capture_under_065(wins, passes):
+    others = [_capture_case(10, checkpoint="50%")]  # an ordinary checkpoint never counts
+    result = bailao_check(others + [_capture_case(wins)], PREREG, "Ana Bailão")
+
+    assert result["id"] == 6 and result["threshold"] == 0.65
+    assert result["value"] == pytest.approx(wins / 10)
+    assert result["pass"] is passes
+
+
+def test_bailao_check_fails_closed_without_the_capture():
+    result = bailao_check([_capture_case(0, night=2022)], PREREG, "Ana Bailão")
+
+    assert result["pass"] is False and result["value"] is None

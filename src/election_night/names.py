@@ -7,6 +7,7 @@ vendored and loaded by `election_night.name_inputs`.
 """
 
 import json
+import unicodedata
 from collections import Counter
 from dataclasses import dataclass
 from typing import NamedTuple
@@ -22,6 +23,11 @@ SCHOOL_BOARDS = {
     "conseil_scolaire_viamonde": 5,
     "conseil_scolaire_catholique_monavenir": 6,
 }
+
+
+def name_words(name: str) -> tuple[str, ...]:
+    """A name's words, sorted and case-folded: `Bailão Ana` and `Ana Bailão` match."""
+    return tuple(sorted(unicodedata.normalize("NFC", name).casefold().split()))
 
 
 class NameMismatch(ValueError):
