@@ -79,10 +79,11 @@ forecast weights never fell below the ESS floor, so the card would never have sw
 
 ## For the implementing tickets
 
-- **Election-day registrations.** If the feed's `totalVoters` is the pre-night electors list, a
-  ward's votes can exceed it once election-day registrations are counted, and the floor at 0 then
-  understates what is possible there. #45 checks `totalVoters` against the historical files before
-  relying on it.
+- **What `totalVoters` means.** #45 confirms from the historical files that the ward-by-ward
+  file's `totalVoters` is each City ward's registered electors and is filled for every mayoral
+  ward. Election-day registrations could in principle push a ward's votes past it, but only near
+  100% turnout; Toronto's has run 29.7%-54.7% (2003-2023), so the floor at 0 is a guard, not a
+  case expected to arise.
 - **Payload and page.** The mayor payload already carries both bands and the variant marker (#41,
   schema 2). The Possible Range, the approval record and the gating that honours it are new: #45
   takes them.
