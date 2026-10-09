@@ -140,3 +140,20 @@ def test_the_committed_approval_names_the_scored_version():
     assert records["mayor-forecast-weighted"]["approved"] is True
     assert records["mayor-count-only"]["approved"] is False
     assert records["council"]["pass"] and records["trustee"]["pass"]
+
+
+def test_each_approval_of_a_level_counts_for_the_version_it_names(tmp_path):
+    from election_night.replay.gate_result import gate_records
+
+    results, approvals = tmp_path / "results", tmp_path / "approvals"
+    write(
+        results / "mayor-forecast-weighted-run-002.json",
+        {"pass": False, "model_version": "v2", "run": 2},
+    )
+    for version in ("v1", "v2", "v0"):  # v2's approval is neither the first nor the last read
+        write(
+            approvals / f"mayor-forecast-weighted-{version}.json",
+            {"level": "mayor-forecast-weighted", "model_version": version},
+        )
+
+    assert gate_records(results, approvals)["mayor-forecast-weighted"]["approved"] is True

@@ -81,9 +81,17 @@ forecast weights never fell below the ESS floor, so the card would never have sw
 - **Not a pass, and not a gate change.** No criterion, threshold or night is altered after the
   run. Anything that cites these Gate Results must say that both mayoral versions failed and that
   the mayor is live by Alex's approval.
-- **Not a model change.** The approval holds for model version `13021e79805d` only, the version
-  scored. A later change to the model needs its own Replays and its own approval. It binds the way
-  a Gate Result does: checked against the running version at pipeline start (#45).
+- **Not a model change.** Each approval holds for the one model version it scored. A later change
+  to the model code needs its own Replays and its own approval. It binds the way a Gate Result
+  does: checked against the running version at pipeline start (#45). One file per approved
+  version sits in `gates/approvals/`.
+
+## Approvals
+
+| Model version | Gate Result | Basis |
+|---|---|---|
+| `13021e79805d` | run 1 | The evidence above (Alex, 2026-10-09). |
+| `0b812b0bf91c` | run 2 | #45 changed the payload code, so the version moved. Alex approved again on condition that run 2 matched run 1 within simulation noise. The band was fixed before run 2's variant result landed, from how much council, trustee and count-only moved between the runs (at most 0.0009 pooled, 0.004 on the Bailão check). It allowed pooled scores within 0.005 of run 1 or better, the Bailão checks within 0.015 or better, night counts not lower, and no criterion that passed in run 1 failing. Run 2 was within it on every value: CRPS 2.031 (2.031), G2 margin 0.845 (0.846), Bailão 0.751 (0.746), stress G1 0.981 (0.979), stress Bailão 0.814 (0.810), still beating count-only on 3 of 4 nights. Council and trustee passed run 2. |
 - **No hidden claim.** The page states that the model did worse than expected on 2023, as above.
   Its wording is drafted with the rest of the on-night wording and approved by Alex (#54).
 

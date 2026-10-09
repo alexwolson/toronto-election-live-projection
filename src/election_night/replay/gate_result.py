@@ -60,24 +60,24 @@ def write_gate_result(result: dict, out_dir: Path, level: str) -> Path:
 
 def gate_records(results_dir: Path, approvals_dir: Path) -> dict[str, dict]:
     """Each level's latest Gate Result as the Night Bundle carries it (#45): pass, model version
-    and run, and whether Alex approved that run's model version (ADR 0002). An approval of any
-    other version approves nothing."""
+    and run, and whether Alex approved that run's model version (ADR 0002). Each approval names
+    one level and one version; an approval of any other version approves nothing."""
     latest: dict[str, dict] = {}
     for path in sorted(Path(results_dir).glob("*-run-*.json")):
         level = path.name.rsplit("-run-", 1)[0]
         result = json.loads(path.read_text(encoding="utf-8"))
         if level not in latest or result["run"] > latest[level]["run"]:
             latest[level] = result
-    approved = {}
+    approved: set[tuple[str, str]] = set()  # (level, model version), one per approval file
     for path in sorted(Path(approvals_dir).glob("*.json")):
         approval = json.loads(path.read_text(encoding="utf-8"))
-        approved[approval["level"]] = approval["model_version"]
+        approved.add((approval["level"], approval["model_version"]))
     return {
         level: {
             "pass": bool(r["pass"]),
             "model_version": r["model_version"],
             "run": r["run"],
-            "approved": approved.get(level) == r["model_version"],
+            "approved": (level, r["model_version"]) in approved,
         }
         for level, r in sorted(latest.items())
     }
