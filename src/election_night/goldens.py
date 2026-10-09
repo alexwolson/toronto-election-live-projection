@@ -87,6 +87,24 @@ def _replay_midpoint(year: int) -> tuple[bytes, bytes, dict]:
     return snap.all_office, snap.ward_by_ward, replay_bundle(night, history, prereg)
 
 
+def _gated_2022(records: dict) -> tuple[bytes, bytes, dict]:
+    """The 2022 Replay midpoint on a gated night (#45): the night's held-out forecast, the
+    voter statistics' electors for the Possible Range, and the given gate records, each for the
+    bundle's model version."""
+    from election_night.projection.history import ward_electors
+    from election_night.replay.run import with_holdout_forecast
+
+    all_office, ward_by_ward, bundle = _replay_midpoint(2022)
+    bundle = with_holdout_forecast(bundle, 2022)
+    bundle["electors"] = {str(ward): n for ward, n in ward_electors(2022).items()}
+    version = bundle["model_version"]
+    bundle["gates"] = {}
+    for level, (passed, same, approved) in records.items():
+        record = {"pass": passed, "model_version": version if same else "another", "run": 1}
+        bundle["gates"][level] = {**record, "approved": approved}
+    return all_office, ward_by_ward, bundle
+
+
 def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
     """Golden payload bytes by name, built from the feed fixtures directory.
 
@@ -144,6 +162,27 @@ def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
         # A Replay of 2022 halfway through: every level counting, the mayor in all 25 wards, and
         # council and trustee with the count-extension projection fitted without 2022 (#33).
         "replay-counting-2022": _replay_midpoint(2022),
+        # The same on a gated night (#45, ADR 0002): council and trustee live, and the mayor live
+        # on Alex's approval of its failed forecast-weighted Gate Result, with every Possible
+        # Range.
+        "gated-live-2022": _gated_2022(
+            {
+                "council": (True, True, False),
+                "trustee": (True, True, False),
+                "mayor-count-only": (False, True, False),
+                "mayor-forecast-weighted": (False, True, True),
+            }
+        ),
+        # And with nothing live: council's gate failed, trustee's names another model version,
+        # and both mayoral versions failed. Every race shows the tally and its Possible Range.
+        "gated-off-2022": _gated_2022(
+            {
+                "council": (False, True, False),
+                "trustee": (True, False, False),
+                "mayor-count-only": (False, True, False),
+                "mayor-forecast-weighted": (False, True, False),
+            }
+        ),
         # 2018's final pair: every race with all units in.
         "all-units-in-2018": (
             ao_2018,

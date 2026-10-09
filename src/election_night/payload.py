@@ -37,7 +37,7 @@ from election_night.projection.forecast_weighted import (
     weighted_bands,
 )
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 STUB_DRAWS = 1000
 
 # A race's draws per variant: the candidates' keys in payload order, a (draws, candidates) array
@@ -101,6 +101,7 @@ def _race(spec: dict) -> dict:
         "progress": None,
         "candidates": [_candidate(c, c["key"]) for c in spec["candidates"]],
         "projection": None,
+        "possible": None,
         "withdrawal": None,
         "fault": None,
     }
@@ -256,6 +257,123 @@ def _forecast_weighted(
     race["projection"]["variant"] = variant
 
 
+def _gate_status(record: dict | None, version: str) -> str:
+    """Whether a Gate Result (or Alex's approval, ADR 0002) puts a projection live for the
+    running model version, or why not."""
+    if record is None:
+        return "gate_missing"
+    if record["model_version"] != version:
+        return "version_mismatch"
+    return "live" if record["pass"] or record.get("approved") else "gate_failed"
+
+
+def _levels(bundle: dict) -> tuple[dict, str]:
+    """Each level's projection status, and the mayor's count-only status. A level with no fitted parameters keeps its stub bands;
+    a bundle without Gate Results (the Replays, the historical goldens) leaves its projections
+    ungated."""
+    fitted = bundle.get("projection", {}).get("params", {})
+    records = bundle.get("gates")
+    version = bundle["model_version"]
+
+    def status(level: str, gate: str) -> str:
+        if level not in fitted:
+            return "stub"
+        if records is None:
+            return "ungated"
+        return _gate_status(records.get(gate), version)
+
+    variant = status("mayor", "mayor-forecast-weighted")
+    count_only = status("mayor", "mayor-count-only")
+    # The mayor is live if either version is; otherwise the likeliest operator fault first.
+    mayor = variant
+    for candidate in ("live", "version_mismatch", "gate_missing", "gate_failed"):
+        if variant not in ("stub", "ungated") and candidate in (variant, count_only):
+            mayor = candidate
+            break
+    approved = bool(
+        records
+        and variant == "live"
+        and not records["mayor-forecast-weighted"]["pass"]
+        and records["mayor-forecast-weighted"].get("approved")
+    )
+    return {
+        "mayor": {"projection": mayor, "variant": variant, "approved": approved},
+        "council": {"projection": status("council", "council")},
+        "trustee": {"projection": status("trustee", "trustee")},
+        "french_trustee": {"projection": "none"},
+    }, count_only
+
+
+def _gated(race: dict, levels: dict, mayor_count_only: str) -> None:
+    """Name the band the page shows, and on a gated night publish only that one: for the mayor,
+    the forecast-weighted range while it is in effect, else count-only's if count-only is live,
+    else none (ADR 0002). A level that isn't live shows the tally. Ungated (the Replays), every
+    band stays."""
+    projection = race["projection"]
+    if not projection or projection["stub"] or race["level"] not in ("mayor", "council", "trustee"):
+        return
+    if race["level"] != "mayor":
+        status = levels[race["level"]]["projection"]
+        if status in ("live", "ungated"):
+            projection["shown"] = "count_only"
+        else:
+            race["projection"] = None
+        return
+    open_ = ("live", "ungated")
+    variant_live = levels["mayor"]["variant"] in open_
+    count_only_live = mayor_count_only in open_
+    if not (variant_live or count_only_live):
+        race["projection"] = None
+        return
+    allowed = {"forecast_weighted": variant_live, "count_only": count_only_live}
+    projection["bands"] = {k: v for k, v in projection["bands"].items() if allowed[k]}
+    in_effect = projection.get("variant", {}).get("in_effect")
+    if variant_live and in_effect == "forecast_weighted":
+        projection["shown"] = "forecast_weighted"
+    elif count_only_live:
+        projection["shown"] = "count_only"
+    else:
+        projection["shown"] = None
+    if "live" in (levels["mayor"]["variant"], mayor_count_only):
+        # On a gated night the payload is public: a band set aside is not published.
+        shown = projection["shown"]
+        projection["bands"] = {k: v for k, v in projection["bands"].items() if k == shown}
+
+
+def _possible(race: dict, spec: dict, electors: dict[str, int] | None) -> dict | None:
+    """The Possible Range (ADR 0002): each candidate's final share from none of the outstanding
+    votes going to them up to all of them, with the outstanding votes bounded by every remaining
+    elector, floored at 0. For the mayor, the electors of each City ward not fully reported less
+    its votes counted; for council, the ward's electors; for a trustee area, those of the City
+    wards it covers; less the race's votes counted. Arithmetic on the count, not a model, so no
+    gate applies. None while the race isn't counting or its electors aren't known."""
+    if not electors or race["state"] != "counting":
+        return None
+    votes = {c["key"]: c["votes"] for c in race["candidates"]}
+    counted = sum(votes.values())
+    if race["level"] == "mayor":
+        remaining = 0
+        for ward in race["wards"]:
+            if ward["progress"]["received"] < ward["progress"]["total"]:
+                if ward["num"] not in electors:
+                    return None
+                remaining += max(0, electors[ward["num"]] - ward["votes_counted"])
+    elif race["level"] in ("council", "trustee"):
+        wards = [race["num"]] if race["level"] == "council" else spec.get("city_wards")
+        if not wards or any(ward not in electors for ward in wards):
+            return None
+        remaining = max(0, sum(electors[ward] for ward in wards) - counted)
+    else:
+        return None
+    total = counted + remaining
+    if total <= 0:
+        return None
+    return {
+        key: {"low": round(100 * v / total, 2), "high": round(100 * (v + remaining) / total, 2)}
+        for key, v in votes.items()
+    }
+
+
 def _seed(a_seq: int, w_seq: int, model_version: str) -> int:
     digest = hashlib.sha256(f"{a_seq}:{w_seq}:{model_version}".encode()).digest()
     return int.from_bytes(digest[:8], "big")
@@ -303,7 +421,11 @@ def project(
                 draws[race["id"]] = {
                     v: (keys, _stub_draws(b, keys, draw_rng), None) for v, b in bands.items()
                 }
+            race["possible"] = _possible(race, spec, bundle.get("electors"))
         races.append(race)
+    levels, mayor_count_only = _levels(bundle)
+    for race in races:
+        _gated(race, levels, mayor_count_only)
 
     desc = a.election_desc
     payload = {
@@ -314,12 +436,7 @@ def project(
         "election_desc": desc,
         "rehearsal": any("REHEARSAL" in (d or "") for d in (desc, w.election_desc)),
         "state": "before_results" if before else "results",
-        "levels": {
-            "mayor": {"projection": "stub", "variant": "stub"},
-            "council": {"projection": "stub"},
-            "trustee": {"projection": "stub"},
-            "french_trustee": {"projection": "none"},
-        },
+        "levels": levels,
         "races": races,
     }
     return payload, draws

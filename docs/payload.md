@@ -1,4 +1,4 @@
-# The payload, schema version 2
+# The payload, schema version 3
 
 The payload is the one citywide JSON file each pipeline publishes per Count Snapshot pair
 (#17 § Payload). It is a pure function of the City's two files and the Night Bundle
@@ -13,7 +13,7 @@ Fields marked *v0 null* are in the layout now and filled by later tickets (#46 f
 
 | Field | Type | Meaning |
 |---|---|---|
-| `schema_version` | int | `2` (2 added a modelled mayor's `projection.variant`, #41) |
+| `schema_version` | int | `3` (2 added a modelled mayor's `projection.variant`, #41; 3 added the gated `levels`, `projection.shown` and each race's `possible`, #45) |
 | `model_version` | string | The Night Bundle's model version. `"stub-v0"` while projections are stubs. |
 | `forecast_release_tag` | string or null | The pinned Backend release of the final forecast. *v0 null* |
 | `seq` | object | `{"all_office": int, "ward_by_ward": int}`: each file's `seq` (epoch ms). "City count as of" is the older one. |
@@ -24,12 +24,23 @@ Fields marked *v0 null* are in the layout now and filled by later tickets (#46 f
 | `races` | array | Every race in the bundle, in ballot order: mayor, councillor 1–25, TDSB, TCDSB, Viamonde, MonAvenir |
 
 `levels` has keys `mayor`, `council`, `trustee` (TDSB and TCDSB) and `french_trustee`. Each is
-`{"projection": status}`, and mayor also has `"variant"` for the forecast-weighted variant.
-Statuses: `"stub"` (deterministic stub bands, not a projection) and `"none"` (the level never has
-one). Later tickets add the gated statuses (#45). Until then council and trustee keep `"stub"`
-here even when their races carry the model's bands; the race's own `projection.stub` says which.
-Mayor likewise keeps `"variant": "stub"` until #45; a modelled mayor race's own
-`projection.variant` says which band is in effect at that refresh (below).
+`{"projection": status}`. Mayor is `{"projection", "variant", "approved"}`: `projection` is the
+mayor's overall status, `variant` the forecast-weighted variant's own, and `approved` true while
+the variant is live on Alex's approval rather than a pass (ADR 0002).
+
+| Status | When | The level's races |
+|---|---|---|
+| `live` | its Gate Result passed, or Alex approved it, for the running model version | carry the shown band |
+| `gate_failed` | its Gate Result failed for the running version, with no approval | the tally only |
+| `version_mismatch` | its Gate Result (or approval) names another model version | the tally only |
+| `gate_missing` | the Night Bundle holds no Gate Result for it | the tally only |
+| `stub` | the bundle has no fitted parameters for it | deterministic stub bands, not a projection |
+| `ungated` | the bundle carries no Gate Results at all: the Replays and the historical goldens | every band, ungated |
+| `none` | never projected (the French-language boards) | the tally only |
+
+The bundle's `gates` (`election_night.replay.gate_result.gate_records`) holds each level's latest
+Gate Result as `{"pass", "model_version", "run", "approved"}`. The mayor is `live` if either
+version is; the forecast-weighted variant comes first, then count-only (the ladder).
 
 ## Race
 
@@ -42,7 +53,8 @@ Mayor likewise keeps `"variant": "stub"` until #45; a modelled mayor race's own
 | `state` | string | Below |
 | `progress` | object or null | Reporting Progress, `{"received": int, "total": int}` (the feed's `pollsReceived` and `polls`). Null before results or with no figures. |
 | `candidates` | array | Below. Before results: the bundle's candidates in ballot order, without votes. Otherwise the feed's candidates by votes, descending, ties in ballot order. |
-| `projection` | object or null | `{"stub": bool, "bands": {variant: {key: {"low", "mid", "high"}}}}`, shares in percent. Present only while the race is `counting` at a projected level. Stub mayor bands have `count_only` and `forecast_weighted`. A modelled mayor has `count_only`, plus `forecast_weighted` whenever the forecast weighted its draws, and `"variant"` (below). Council and trustee have `count_only`. |
+| `projection` | object or null | `{"stub": bool, "bands": {variant: {key: {"low", "mid", "high"}}}, "shown": variant or null}`, shares in percent: the Estimated Range. Present only while the race is `counting` and its level is projected (`live`, `stub` or `ungated`); null when the level shows the tally. `shown` is the band the page draws, and on a gated night `bands` holds only that one: council and trustee `count_only`; the mayor `forecast_weighted` while it is in effect, else `count_only` only if count-only is itself live, else none (`shown` null, `bands` empty: ADR 0002). Ungated (the Replays) every band stays. Stub mayor bands have `count_only` and `forecast_weighted`. A modelled mayor also has `"variant"` (below). |
+| `possible` | object or null | The Possible Range (ADR 0002): `{key: {"low", "high"}}`, each candidate's final share in percent from none to all of the outstanding votes, bounded by every remaining elector. Mayor: the electors of each City ward not fully reported, less its `votes_counted`; council: its ward's electors; trustee: the electors of the City wards it covers (the bundle's `city_wards`); less the race's votes counted, floored at 0. From the bundle's `electors`, each City ward's `totalVoters` in the City's test file. Present while the race is `counting` at mayor, council or trustee, whatever its gate: it is arithmetic on the count, not a projection. Null otherwise, or without the electors. |
 | `withdrawal` | object or null | A Withdrawal: `{"reason": string}`, the machine reason a check withheld the race's projection while its Live Tally stands. Always null in v0; the per-race checks (#43) fill it. Readers never see the reason. |
 | `fault` | object or null | `{"reason": string}`, why a race has no figures: `row_unreadable` or `race_missing`. Readers never see the reason. |
 | `wards` | array | Mayor only: each City ward's mayoral vote from the ward-by-ward file, below. Empty when the mayor race has no figures. |

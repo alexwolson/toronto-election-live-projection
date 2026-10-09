@@ -17,7 +17,12 @@ from botocore.config import Config
 
 from election_night.alerts import Alerts
 from election_night.archive import Archive, ArchiveWriter
-from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write_bundle
+from election_night.bundle import (
+    OPENING_2026,
+    build_night_bundle,
+    load_bundle,
+    write_bundle,
+)
 from election_night.feed import check_status
 from election_night.freeze_gate import FRONTEND_REPO, check_archives
 from election_night.gates import HOLDOUT_FORECASTS, load_preregistration, s3_record
@@ -42,6 +47,8 @@ BUNDLE = ROOT / "data" / "night-bundle" / "night-bundle.json"
 BACKEND_REPO = "alexwolson/toronto-election-poll-tracker-backend"
 OUTCOMES_PATH = "data/raw/elections/mayoral_outcomes.csv"
 NAME_INPUTS = ROOT / "data" / "night-bundle" / "inputs"
+# Each 2026 trustee area's City wards, from the City's school-board ward reference chart.
+TRUSTEE_WARDS = ROOT / "data" / "mock-feed" / "trustee_wards_2026.csv"
 
 
 def fetch(url: str, cache: Path) -> bytes:
@@ -123,12 +130,12 @@ def cmd_status(args) -> None:
 
 
 def cmd_bundle(args) -> None:
-    city = args.fixtures / "city-2026"
-    bundle = build_bundle(
-        (city / FILES[0]).read_bytes(),
-        (city / FILES[1]).read_bytes(),
+    bundle = build_night_bundle(
+        args.fixtures / "city-2026",
+        load_name_inputs(args.names),
         args.opening_time,
-        names=load_name_inputs(args.names),
+        TRUSTEE_WARDS,
+        ROOT / "gates",
     )
     write_bundle(bundle, args.out)
     print(args.out)

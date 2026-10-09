@@ -1,0 +1,9 @@
+{
+ "level": "mayor-forecast-weighted",
+ "model_version": "13021e79805d1aa11122bbb9881b2eff5970cb5069f147fa646a391e3f14211b",
+ "gate_result": "gates/results/mayor-forecast-weighted-run-001.json",
+ "decision": "Live on the evidence although its Gate Result failed: shown as an Estimated Range beside a Possible Range, never a win probability, with a statement that the model did worse than expected on 2023",
+ "adr": "docs/adr/0002-mayor-approved-on-the-evidence.md",
+ "approved_by": "Alex Olson",
+ "date": "2026-10-09"
+}
