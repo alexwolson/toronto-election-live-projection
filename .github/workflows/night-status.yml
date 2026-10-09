@@ -1,0 +1,37 @@
+name: night status
+
+# Read-only: prints both heartbeats, the stored seq pair, current Withdrawals and count decreases
+# to the job summary (#50). Run it from the GitHub mobile app.
+on:
+  workflow_dispatch:
+    inputs:
+      store:
+        description: Which store to read
+        type: choice
+        options: [night, rehearsal]
+        default: night
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+          python-version: "3.14"
+      - run: uv sync --locked
+      - name: Night status (${{ inputs.store }})
+        env:
+          # Chooses the secret's name, not its value: an empty secret fails the run rather than
+          # falling through to the other store.
+          REDIS_URL: ${{ secrets[inputs.store == 'night' && 'NIGHT_REDIS_URL' || 'REHEARSAL_REDIS_URL'] }}
+        run: |
+          {
+            echo "_Store: ${{ inputs.store }}_"
+            echo
+            uv run election-night status
+          } >> "$GITHUB_STEP_SUMMARY"

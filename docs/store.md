@@ -81,3 +81,16 @@ healthchecks.io checks, delivered through Pushover (#17 § On the night):
 
 The probe, the pings and the log line run on a thread after each tick, so a slow route or
 healthchecks.io never pushes a tick past its slot.
+
+## Night status
+
+`uv run election-night status` prints a Markdown summary of the store at `REDIS_URL`: both
+heartbeats (stale over 5 minutes), the stored `seq` pair and the City count time, current
+Withdrawals with their machine reasons, and every entry in `count_decreases`, newest first
+(`src/election_night/status.py`). It reads with one `MGET` and one `LRANGE`, and never writes.
+Switch states join it with the switches (#49).
+
+On the night it runs as the `night status` workflow (`.github/workflows/night-status.yml`), from
+the GitHub mobile app: Actions → night status → Run workflow, choosing `night` or `rehearsal`. It
+reads `NIGHT_REDIS_URL` or `REHEARSAL_REDIS_URL` from the Actions secrets and writes to the job
+summary.
