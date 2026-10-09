@@ -394,30 +394,33 @@ def _variant_result(deciding, stress, kept, prereg, bailao) -> dict:
     return {"checks": checks, "by_night": by_night, "cases": len(weighted), "reported": reported}
 
 
-# One worker's replay state, set once per process (`_start_worker`).
-_WORKER: dict = {}
+def _order_scores(state: dict, task: tuple[int, str, int, np.ndarray]) -> list[Scored]:
+    """Replay one arrival order and score its cases: the unit of work, serial or pooled."""
+    year, kind, index, order = task
+    score = _scorer(state["prereg"])
+    cases = order_cases(
+        state["nights"][year],
+        order,
+        f"{kind}-{index}",
+        LEVELS[state["level_name"]],
+        state["prereg"],
+        state["model_version"],
+        state["project"],
+        state["make_bundle"],
+    )
+    return [(_key(case), case.variant, score(case)) for case in cases]
+
+
+# A pool worker's replay state, set once per worker process (`_start_worker`).
+_WORKER_STATE: dict = {}
 
 
 def _start_worker(state: dict) -> None:
-    _WORKER.update(state)
+    _WORKER_STATE.update(state)
 
 
-def _order_scores(task: tuple[int, str, int, np.ndarray]) -> list[Scored]:
-    """Replay one arrival order and score its cases: a pool worker's unit of work."""
-    year, kind, index, order = task
-    w = _WORKER
-    score = _scorer(w["prereg"])
-    cases = order_cases(
-        w["nights"][year],
-        order,
-        f"{kind}-{index}",
-        LEVELS[w["level_name"]],
-        w["prereg"],
-        w["model_version"],
-        w["project"],
-        w["make_bundle"],
-    )
-    return [(_key(case), case.variant, score(case)) for case in cases]
+def _pooled_order_scores(task: tuple[int, str, int, np.ndarray]) -> list[Scored]:
+    return _order_scores(_WORKER_STATE, task)
 
 
 def _bundle_from(bundles: dict[int, dict], night: Night) -> dict:
@@ -465,19 +468,22 @@ def replay_level(
     }
     if workers > 1:
         pool = ProcessPoolExecutor(workers, initializer=_start_worker, initargs=(state,))
-        results = pool.map(_order_scores, tasks)
+        results = pool.map(_pooled_order_scores, tasks)
     else:
         pool = None
-        _start_worker(state)
-        results = map(_order_scores, tasks)
+        results = map(partial(_order_scores, state), tasks)
     try:
-        for done, (task, scored) in enumerate(zip(tasks, results), start=1):
-            (deciding if task[1] in patterns else stress).extend(scored)
+        for done, ((_, kind, _, _), scored) in enumerate(zip(tasks, results), start=1):
+            (deciding if kind in patterns else stress).extend(scored)
             if on_order is not None:
                 on_order(done, len(tasks))
-    finally:
+    except BaseException:
+        # A timeout or a worker's error ends the run now, not after the orders in flight.
         if pool is not None:
-            pool.shutdown(cancel_futures=True)
+            pool.terminate_workers()
+        raise
+    if pool is not None:
+        pool.shutdown()
     for capture in captures:
         if capture.night in nights:
             night = nights[capture.night]
