@@ -28,7 +28,9 @@ the real captures' cases, which the Bailão check reads.
 """
 
 import json
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, replace
+from functools import partial
 from itertools import pairwise
 
 import numpy as np
@@ -392,6 +394,36 @@ def _variant_result(deciding, stress, kept, prereg, bailao) -> dict:
     return {"checks": checks, "by_night": by_night, "cases": len(weighted), "reported": reported}
 
 
+# One worker's replay state, set once per process (`_start_worker`).
+_WORKER: dict = {}
+
+
+def _start_worker(state: dict) -> None:
+    _WORKER.update(state)
+
+
+def _order_scores(task: tuple[int, str, int, np.ndarray]) -> list[Scored]:
+    """Replay one arrival order and score its cases: a pool worker's unit of work."""
+    year, kind, index, order = task
+    w = _WORKER
+    score = _scorer(w["prereg"])
+    cases = order_cases(
+        w["nights"][year],
+        order,
+        f"{kind}-{index}",
+        LEVELS[w["level_name"]],
+        w["prereg"],
+        w["model_version"],
+        w["project"],
+        w["make_bundle"],
+    )
+    return [(_key(case), case.variant, score(case)) for case in cases]
+
+
+def _bundle_from(bundles: dict[int, dict], night: Night) -> dict:
+    return bundles[night.year]
+
+
 def replay_level(
     level_name: str,
     prereg: dict,
@@ -402,8 +434,13 @@ def replay_level(
     smoke: bool = False,
     project=payload.project,
     make_bundle=night_bundle,
+    workers: int = 1,
+    on_order=None,
 ) -> dict:
-    """The level's Gate Result, without its run number."""
+    """The level's Gate Result, without its run number. With `workers` above 1 the orders fan
+    out over a process pool (`project` and `make_bundle` must then pickle); their scores come
+    back in the orders' own sequence, so the result is the serial one. `on_order(done, total)`
+    is called as each order's scores arrive."""
     level = LEVELS[level_name]
     patterns = set(prereg["arrival_orders"]["ward_aggregates"]["timing_patterns"])
     score = _scorer(prereg)
@@ -417,12 +454,30 @@ def replay_level(
             if case.order is None:
                 kept.append(case)
 
-    for year, night in nights.items():
-        for kind, index, order in orders[year]:
-            cases = order_cases(
-                night, order, f"{kind}-{index}", level, prereg, model_version, project, make_bundle
-            )
-            take(cases, deciding if kind in patterns else stress)
+    tasks = [(year, kind, index, order) for year in nights for kind, index, order in orders[year]]
+    state = {
+        "level_name": level_name,
+        "prereg": prereg,
+        "nights": nights,
+        "model_version": model_version,
+        "project": project,
+        "make_bundle": make_bundle,
+    }
+    if workers > 1:
+        pool = ProcessPoolExecutor(workers, initializer=_start_worker, initargs=(state,))
+        results = pool.map(_order_scores, tasks)
+    else:
+        pool = None
+        _start_worker(state)
+        results = map(_order_scores, tasks)
+    try:
+        for done, (task, scored) in enumerate(zip(tasks, results), start=1):
+            (deciding if task[1] in patterns else stress).extend(scored)
+            if on_order is not None:
+                on_order(done, len(tasks))
+    finally:
+        if pool is not None:
+            pool.shutdown(cancel_futures=True)
     for capture in captures:
         if capture.night in nights:
             night = nights[capture.night]
@@ -482,7 +537,14 @@ def replay_level(
     }
 
 
-def run_replay(level_name: str, prereg: dict, years: list[int], smoke: bool) -> tuple[dict, dict]:
+def run_replay(
+    level_name: str,
+    prereg: dict,
+    years: list[int],
+    smoke: bool,
+    workers: int = 1,
+    on_order=None,
+) -> tuple[dict, dict]:
     """Load the nights, draw the orders and replay the level. A smoke run takes the first order
     of each timing pattern and of each stress kind, so its report-only results are filled.
     Returns the Gate Result and timing figures."""
@@ -526,7 +588,9 @@ def run_replay(level_name: str, prereg: dict, years: list[int], smoke: bool) -> 
         captures,
         version,
         smoke=smoke,
-        make_bundle=lambda night: bundles[night.year],
+        make_bundle=partial(_bundle_from, bundles),
+        workers=workers,
+        on_order=on_order,
     )
     done = time.monotonic()
     if LEVELS[level_name].variant == "forecast_weighted":

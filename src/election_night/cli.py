@@ -5,6 +5,7 @@ import json
 import os
 import signal
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime
@@ -191,11 +192,28 @@ def cmd_replay(args) -> None:
     elif args.smoke:
         years = years[-1:]  # the latest night, which holds the real captures
     out = args.out or ROOT / (".cache/gates-smoke" if args.smoke else "gates/results")
+    # One thread per worker process: the pool's children inherit these before importing numpy.
+    for name in (
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+        "MKL_NUM_THREADS",
+    ):
+        os.environ.setdefault(name, "1")
+    started = time.monotonic()
+
+    def heartbeat(done: int, total: int) -> None:
+        elapsed = round(time.monotonic() - started, 1)
+        line = {"level": args.level, "orders_done": done, "orders": total, "elapsed_s": elapsed}
+        print(json.dumps(line), file=sys.stderr, flush=True)
+
     timeout = args.timeout if args.timeout is not None else 600
     signal.signal(signal.SIGALRM, _timed_out)
     signal.alarm(timeout)
     try:
-        result, timing = run_replay(args.level, prereg, years, args.smoke)
+        result, timing = run_replay(
+            args.level, prereg, years, args.smoke, workers=args.workers, on_order=heartbeat
+        )
     except TimeoutError:
         sys.exit(f"replay timed out after {timeout} s; no Gate Result written")
     finally:
@@ -294,6 +312,9 @@ def main(argv: list[str] | None = None) -> None:
         help="hard timeout in seconds (smoke default 600; required for a full run)",
     )
     replay.add_argument("--out", type=Path, help="where to write the Gate Result")
+    replay.add_argument(
+        "--workers", type=int, default=1, help="processes to replay orders on (default 1)"
+    )
     replay.set_defaults(run=cmd_replay)
 
     mock = commands.add_parser(
