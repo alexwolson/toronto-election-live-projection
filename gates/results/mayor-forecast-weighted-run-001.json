@@ -1,0 +1,650 @@
+{
+ "cases": 4561,
+ "criteria": [
+  {
+   "id": 1,
+   "name": "margin CRPS beats the Tally Baseline in total",
+   "pass": true,
+   "threshold": 2.783168181444153,
+   "value": 2.030468984043342
+  },
+  {
+   "id": 2,
+   "name": "margin CRPS beats the Tally Baseline in a majority of nights",
+   "pass": true,
+   "threshold": 3,
+   "value": 4
+  },
+  {
+   "id": 3,
+   "name": "winner Brier not worse",
+   "pass": true,
+   "threshold": 0.15600965604194536,
+   "value": 0.11072547201385179
+  },
+  {
+   "id": 4,
+   "name": "G1, confident calls",
+   "pass": true,
+   "threshold": 0.95,
+   "value": 1.0
+  },
+  {
+   "id": 5,
+   "name": "G2, ranges",
+   "pass": false,
+   "threshold": 0.85,
+   "value": {
+    "margin": 0.8457278164736997,
+    "shares": 0.9924330781162268
+   }
+  },
+  {
+   "id": 6,
+   "name": "the Bailão check",
+   "pass": false,
+   "threshold": 0.65,
+   "value": 0.7463424993626268
+  },
+  {
+   "id": "beats_count_only",
+   "name": "beats count-only on total margin CRPS and in enough nights",
+   "pass": true,
+   "threshold": {
+    "min_nights": 3,
+    "of_nights": 4
+   },
+   "value": {
+    "nights_beaten": 3,
+    "total": {
+     "count_only": 2.1534957841845435,
+     "forecast_weighted": 2.030468984043342
+    }
+   }
+  },
+  {
+   "id": "stress_g1",
+   "name": "wrong-forecast stress test: G1, confident calls",
+   "pass": true,
+   "threshold": 0.95,
+   "value": 0.9793080054274084
+  },
+  {
+   "id": "stress_bailao",
+   "name": "wrong-forecast stress test: the Bailão check",
+   "pass": false,
+   "threshold": 0.65,
+   "value": 0.8100020938753354
+  }
+ ],
+ "forecast_inputs": {
+  "2014": {
+   "npz_sha256": "f23f35ca84293f28c22622066c82812303e0e523938f20946ef645ebf4e3b98f",
+   "release_tag": "holdout-1d/toronto_2014"
+  },
+  "2018": {
+   "npz_sha256": "a034e77c4ad467c4f5e59dfc38c9fbc6d584efd59456aab1d405c2b45387c42e",
+   "release_tag": "holdout-1d/toronto_2018"
+  },
+  "2022": {
+   "npz_sha256": "8c34bc5ac5d0a6adf84930fb19ce9ec8a09acd45abb053c2f51c438c1ff1d4f4",
+   "release_tag": "holdout-1d/toronto_2022"
+  },
+  "2023": {
+   "npz_sha256": "6cfa35f25384723d9bd41450467fd1e2ede60daa52770ff2b866937dc7cdb917",
+   "release_tag": "holdout-1d/toronto_2023"
+  }
+ },
+ "forecast_release_tag": null,
+ "level": "mayor-forecast-weighted",
+ "model_version": "13021e79805d1aa11122bbb9881b2eff5970cb5069f147fa646a391e3f14211b",
+ "nights": [
+  2014,
+  2018,
+  2022,
+  2023
+ ],
+ "orders_per_night": {
+  "stress": 60,
+  "timing_patterns": 60
+ },
+ "pass": false,
+ "preregistration_sha256": "2d213d533b3c05280bdf9f516ef99a90746b09a2b4cd8f6a41b56cd457862365",
+ "real_captures": [
+  "2023 2023-06-26T20:26 ward-by-ward"
+ ],
+ "reported": {
+  "count_only": {
+   "cases": 4561,
+   "criteria": [
+    {
+     "id": 1,
+     "name": "margin CRPS beats the Tally Baseline in total",
+     "pass": true,
+     "threshold": 2.783168181444153,
+     "value": 2.1534957841845435
+    },
+    {
+     "id": 2,
+     "name": "margin CRPS beats the Tally Baseline in a majority of nights",
+     "pass": true,
+     "threshold": 3,
+     "value": 4
+    },
+    {
+     "id": 3,
+     "name": "winner Brier not worse",
+     "pass": true,
+     "threshold": 0.15600965604194536,
+     "value": 0.13370716416615924
+    },
+    {
+     "id": 4,
+     "name": "G1, confident calls",
+     "pass": true,
+     "threshold": 0.95,
+     "value": 0.9766666666666667
+    },
+    {
+     "id": 5,
+     "name": "G2, ranges",
+     "pass": false,
+     "threshold": 0.85,
+     "value": {
+      "margin": 0.8229252194904438,
+      "shares": 0.9920545741377801
+     }
+    },
+    {
+     "id": 6,
+     "name": "the Bailão check",
+     "pass": false,
+     "threshold": 0.65,
+     "value": 0.8115
+    }
+   ],
+   "pass": false,
+   "scores": {
+    "cases": 4561,
+    "nights": {
+     "2014": {
+      "baseline_brier": 0.028070175438596492,
+      "baseline_margin_error": 2.9820200576623646,
+      "brier": 0.055665735982456145,
+      "cases": 1140,
+      "g1": 1.0,
+      "g1_calls": 675,
+      "g2_margin": 0.8315789473684211,
+      "g2_shares": 0.9965856950067477,
+      "margin_crps": 2.182962331729258,
+      "races": 1,
+      "retired_cases": 0,
+      "share_crps": 0.044227393056225014
+     },
+     "2018": {
+      "baseline_brier": 0.0,
+      "baseline_margin_error": 0.9842864924177871,
+      "brier": 0.0,
+      "cases": 1140,
+      "g1": 1.0,
+      "g1_calls": 1140,
+      "g2_margin": 1.0,
+      "g2_shares": 0.9998245614035087,
+      "margin_crps": 0.74496050796179,
+      "races": 1,
+      "retired_cases": 0,
+      "share_crps": 0.04212286488941269
+     },
+     "2022": {
+      "baseline_brier": 0.0,
+      "baseline_margin_error": 1.582573159646817,
+      "brier": 2.7836842105263115e-07,
+      "cases": 1140,
+      "g1": 1.0,
+      "g1_calls": 1140,
+      "g2_margin": 0.9991228070175439,
+      "g2_shares": 0.9901528013582342,
+      "margin_crps": 1.0520838994850925,
+      "races": 1,
+      "retired_cases": 0,
+      "share_crps": 0.09815548065945841
+     },
+     "2023": {
+      "baseline_brier": 0.595968448729185,
+      "baseline_margin_error": 5.5837930160496425,
+      "brier": 0.4791626423137598,
+      "cases": 1141,
+      "g1": 0.9066666666666666,
+      "g1_calls": 750,
+      "g2_margin": 0.4609991235758107,
+      "g2_shares": 0.9816552387826296,
+      "margin_crps": 4.633976397562034,
+      "races": 1,
+      "retired_cases": 0,
+      "share_crps": 0.06555613807994211
+     }
+    },
+    "total": {
+     "baseline_brier": 0.15600965604194536,
+     "baseline_margin_error": 2.783168181444153,
+     "brier": 0.13370716416615924,
+     "g1": 0.9766666666666667,
+     "g2_margin": 0.8229252194904438,
+     "g2_shares": 0.9920545741377801,
+     "margin_crps": 2.1534957841845435,
+     "share_crps": 0.06251546917125955
+    }
+   }
+  },
+  "fallback": "tally",
+  "stress_orders": {
+   "cases": 4560,
+   "nights": {
+    "2014": {
+     "baseline_brier": 0.08771929824561403,
+     "baseline_margin_error": 3.462373715443152,
+     "brier": 0.05350595026184758,
+     "cases": 1140,
+     "g1": 0.9975579975579976,
+     "g1_calls": 819,
+     "g2_margin": 0.8368421052631579,
+     "g2_shares": 0.8991632928475034,
+     "margin_crps": 1.8343146059052886,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.05559263647221156
+    },
+    "2018": {
+     "baseline_brier": 0.0,
+     "baseline_margin_error": 3.3597208327445673,
+     "brier": 9.063107867003753e-07,
+     "cases": 1140,
+     "g1": 1.0,
+     "g1_calls": 1140,
+     "g2_margin": 0.9280701754385965,
+     "g2_shares": 0.946967418546366,
+     "margin_crps": 1.6085715018285445,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.09944756376654446
+    },
+    "2022": {
+     "baseline_brier": 0.0,
+     "baseline_margin_error": 3.9136215843117834,
+     "brier": 2.2004697674284096e-07,
+     "cases": 1140,
+     "g1": 1.0,
+     "g1_calls": 1140,
+     "g2_margin": 0.956140350877193,
+     "g2_shares": 0.9633276740237692,
+     "margin_crps": 1.960839802381521,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.1508976138144268
+    },
+    "2023": {
+     "baseline_brier": 0.2929824561403509,
+     "baseline_margin_error": 6.109440099888871,
+     "brier": 0.182073446655975,
+     "cases": 1140,
+     "g1": 0.9927360774818402,
+     "g1_calls": 826,
+     "g2_margin": 0.39035087719298245,
+     "g2_shares": 0.9149810801513587,
+     "margin_crps": 4.182038935466249,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.06975109886425498
+    }
+   },
+   "switching": {
+    "checkpoints": 4560,
+    "fallback_checkpoints": 0,
+    "fallback_share": 0.0,
+    "mean_switches_per_order": 0.0,
+    "orders": 240,
+    "orders_with_a_switch": 0,
+    "switches": 0
+   },
+   "total": {
+    "baseline_brier": 0.09517543859649123,
+    "baseline_margin_error": 4.211289058097093,
+    "brier": 0.05889513081889651,
+    "g1": 0.9975735187599595,
+    "g2_margin": 0.7778508771929825,
+    "g2_shares": 0.9311098663922492,
+    "margin_crps": 2.396441211395401,
+    "share_crps": 0.09392222822935944
+   }
+  },
+  "stress_test": {
+   "criteria": [
+    {
+     "id": 1,
+     "name": "margin CRPS beats the Tally Baseline in total",
+     "pass": true,
+     "threshold": 2.783168181444153,
+     "value": 2.186428618846231
+    },
+    {
+     "id": 2,
+     "name": "margin CRPS beats the Tally Baseline in a majority of nights",
+     "pass": true,
+     "threshold": 3,
+     "value": 4
+    },
+    {
+     "id": 3,
+     "name": "winner Brier not worse",
+     "pass": true,
+     "threshold": 0.15600965604194536,
+     "value": 0.13361714470240477
+    },
+    {
+     "id": 4,
+     "name": "G1, confident calls",
+     "pass": true,
+     "threshold": 0.95,
+     "value": 0.9793080054274084
+    },
+    {
+     "id": 5,
+     "name": "G2, ranges",
+     "pass": false,
+     "threshold": 0.85,
+     "value": {
+      "margin": 0.7992406245675538,
+      "shares": 0.9918336875055979
+     }
+    },
+    {
+     "id": 6,
+     "name": "the Bailão check",
+     "pass": false,
+     "threshold": 0.65,
+     "value": 0.8100020938753354
+    }
+   ],
+   "scores": {
+    "cases": 4561,
+    "nights": {
+     "2014": {
+      "baseline_brier": 0.028070175438596492,
+      "baseline_margin_error": 2.9820200576623646,
+      "brier": 0.05884502446967788,
+      "cases": 1140,
+      "g1": 1.0,
+      "g1_calls": 656,
+      "g2_margin": 0.7342105263157894,
+      "g2_shares": 0.9952361673414304,
+      "margin_crps": 2.2329333246693968,
+      "races": 1,
+      "retired_cases": 0,
+      "share_crps": 0.04482598728917151
+     },
+     "2018": {
+      "baseline_brier": 0.0,
+      "baseline_margin_error": 0.9842864924177871,
+      "brier": 5.668088863529411e-30,
+      "cases": 1140,
+      "g1": 1.0,
+      "g1_calls": 1140,
+      "g2_margin": 1.0,
+      "g2_shares": 0.9998746867167922,
+      "margin_crps": 0.8345856282401285,
+      "races": 1,
+      "retired_cases": 0,
+      "share_crps": 0.04455933650102619
+     },
+     "2022": {
+      "baseline_brier": 0.0,
+      "baseline_margin_error": 1.582573159646817,
+      "brier": 5.8633999348238337e-08,
+      "cases": 1140,
+      "g1": 1.0,
+      "g1_calls": 1140,
+      "g2_margin": 1.0,
+      "g2_shares": 0.9905772495755518,
+      "margin_crps": 1.1506819270671111,
+      "races": 1,
+      "retired_cases": 0,
+      "share_crps": 0.1013721081812989
+     },
+     "2023": {
+      "baseline_brier": 0.595968448729185,
+      "baseline_margin_error": 5.5837930160496425,
+      "brier": 0.4756234957059418,
+      "cases": 1141,
+      "g1": 0.9172320217096337,
+      "g1_calls": 737,
+      "g2_margin": 0.46275197195442597,
+      "g2_shares": 0.9816466463886168,
+      "margin_crps": 4.527513595408287,
+      "races": 1,
+      "retired_cases": 0,
+      "share_crps": 0.06448746751556289
+     }
+    },
+    "total": {
+     "baseline_brier": 0.15600965604194536,
+     "baseline_margin_error": 2.783168181444153,
+     "brier": 0.13361714470240477,
+     "g1": 0.9793080054274084,
+     "g2_margin": 0.7992406245675538,
+     "g2_shares": 0.9918336875055979,
+     "margin_crps": 2.186428618846231,
+     "share_crps": 0.06381122487176487
+    }
+   },
+   "shift_points": 12.685048
+  },
+  "switching": {
+   "forecast_weighted": {
+    "checkpoints": 4560,
+    "fallback_checkpoints": 0,
+    "fallback_share": 0.0,
+    "mean_switches_per_order": 0.0,
+    "orders": 240,
+    "orders_with_a_switch": 0,
+    "switches": 0
+   },
+   "stress_test": {
+    "checkpoints": 4560,
+    "fallback_checkpoints": 0,
+    "fallback_share": 0.0,
+    "mean_switches_per_order": 0.0,
+    "orders": 240,
+    "orders_with_a_switch": 0,
+    "switches": 0
+   }
+  },
+  "without_2014": {
+   "cases": 3421,
+   "nights": {
+    "2018": {
+     "baseline_brier": 0.0,
+     "baseline_margin_error": 0.9842864924177871,
+     "brier": 5.284557147109458e-30,
+     "cases": 1140,
+     "g1": 1.0,
+     "g1_calls": 1140,
+     "g2_margin": 1.0,
+     "g2_shares": 0.9999248120300751,
+     "margin_crps": 0.7477045055592144,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.04213440351090372
+    },
+    "2022": {
+     "baseline_brier": 0.0,
+     "baseline_margin_error": 1.582573159646817,
+     "brier": 4.577434694478449e-09,
+     "cases": 1140,
+     "g1": 1.0,
+     "g1_calls": 1140,
+     "g2_margin": 0.9991228070175439,
+     "g2_shares": 0.9901245048104129,
+     "margin_crps": 1.0169208644730134,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.09720766979694953
+    },
+    "2023": {
+     "baseline_brier": 0.595968448729185,
+     "baseline_margin_error": 5.5837930160496425,
+     "brier": 0.4067051564125545,
+     "cases": 1141,
+     "g1": 1.0,
+     "g1_calls": 708,
+     "g2_margin": 0.48115687992988604,
+     "g2_shares": 0.9826519564881168,
+     "margin_crps": 4.337432835750782,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.06291134212255692
+    }
+   },
+   "total": {
+    "baseline_brier": 0.198656149576395,
+    "baseline_margin_error": 2.716884222704749,
+    "brier": 0.13556838699666307,
+    "g1": 1.0,
+    "g2_margin": 0.8267598956491433,
+    "g2_shares": 0.9909004244428683,
+    "margin_crps": 2.03401940192767,
+    "share_crps": 0.06741780514347005
+   }
+  },
+  "without_2023": {
+   "cases": 3420,
+   "nights": {
+    "2014": {
+     "baseline_brier": 0.028070175438596492,
+     "baseline_margin_error": 2.9820200576623646,
+     "brier": 0.03619672706541793,
+     "cases": 1140,
+     "g1": 1.0,
+     "g1_calls": 727,
+     "g2_margin": 0.9026315789473685,
+     "g2_shares": 0.9970310391363024,
+     "margin_crps": 2.0198177303903577,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.04176682999800409
+    },
+    "2018": {
+     "baseline_brier": 0.0,
+     "baseline_margin_error": 0.9842864924177871,
+     "brier": 5.284557147109458e-30,
+     "cases": 1140,
+     "g1": 1.0,
+     "g1_calls": 1140,
+     "g2_margin": 1.0,
+     "g2_shares": 0.9999248120300751,
+     "margin_crps": 0.7477045055592144,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.04213440351090372
+    },
+    "2022": {
+     "baseline_brier": 0.0,
+     "baseline_margin_error": 1.582573159646817,
+     "brier": 4.577434694478449e-09,
+     "cases": 1140,
+     "g1": 1.0,
+     "g1_calls": 1140,
+     "g2_margin": 0.9991228070175439,
+     "g2_shares": 0.9901245048104129,
+     "margin_crps": 1.0169208644730134,
+     "races": 1,
+     "retired_cases": 0,
+     "share_crps": 0.09720766979694953
+    }
+   },
+   "total": {
+    "baseline_brier": 0.00935672514619883,
+    "baseline_margin_error": 1.8496265699089893,
+    "brier": 0.01206557721428421,
+    "g1": 1.0,
+    "g2_margin": 0.9672514619883041,
+    "g2_shares": 0.9956934519922634,
+    "margin_crps": 1.2614810334741953,
+    "share_crps": 0.06036963443528578
+   }
+  }
+ },
+ "run": 1,
+ "scores": {
+  "cases": 4561,
+  "nights": {
+   "2014": {
+    "baseline_brier": 0.028070175438596492,
+    "baseline_margin_error": 2.9820200576623646,
+    "brier": 0.03619672706541793,
+    "cases": 1140,
+    "g1": 1.0,
+    "g1_calls": 727,
+    "g2_margin": 0.9026315789473685,
+    "g2_shares": 0.9970310391363024,
+    "margin_crps": 2.0198177303903577,
+    "races": 1,
+    "retired_cases": 0,
+    "share_crps": 0.04176682999800409
+   },
+   "2018": {
+    "baseline_brier": 0.0,
+    "baseline_margin_error": 0.9842864924177871,
+    "brier": 5.284557147109458e-30,
+    "cases": 1140,
+    "g1": 1.0,
+    "g1_calls": 1140,
+    "g2_margin": 1.0,
+    "g2_shares": 0.9999248120300751,
+    "margin_crps": 0.7477045055592144,
+    "races": 1,
+    "retired_cases": 0,
+    "share_crps": 0.04213440351090372
+   },
+   "2022": {
+    "baseline_brier": 0.0,
+    "baseline_margin_error": 1.582573159646817,
+    "brier": 4.577434694478449e-09,
+    "cases": 1140,
+    "g1": 1.0,
+    "g1_calls": 1140,
+    "g2_margin": 0.9991228070175439,
+    "g2_shares": 0.9901245048104129,
+    "margin_crps": 1.0169208644730134,
+    "races": 1,
+    "retired_cases": 0,
+    "share_crps": 0.09720766979694953
+   },
+   "2023": {
+    "baseline_brier": 0.595968448729185,
+    "baseline_margin_error": 5.5837930160496425,
+    "brier": 0.4067051564125545,
+    "cases": 1141,
+    "g1": 1.0,
+    "g1_calls": 708,
+    "g2_margin": 0.48115687992988604,
+    "g2_shares": 0.9826519564881168,
+    "margin_crps": 4.337432835750782,
+    "races": 1,
+    "retired_cases": 0,
+    "share_crps": 0.06291134212255692
+   }
+  },
+  "total": {
+   "baseline_brier": 0.15600965604194536,
+   "baseline_margin_error": 2.783168181444153,
+   "brier": 0.11072547201385179,
+   "g1": 1.0,
+   "g2_margin": 0.8457278164736997,
+   "g2_shares": 0.9924330781162268,
+   "margin_crps": 2.030468984043342,
+   "share_crps": 0.06100506135710356
+  }
+ },
+ "smoke": false,
+ "variant": "forecast_weighted"
+}
