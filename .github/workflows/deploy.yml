@@ -48,7 +48,7 @@ defaults:
 
 jobs:
   check-inputs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - run: |
           [[ "$TAG" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::tag must be the image's full commit sha"; exit 1; }
@@ -57,7 +57,7 @@ jobs:
 
   fly:
     needs: check-inputs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       APP: toronto-election-${{ inputs.environment }}-fly
       IMAGE: registry.fly.io/toronto-election-night-image:${{ inputs.tag }}@${{ inputs.digest }}
@@ -96,7 +96,7 @@ jobs:
 
   digitalocean:
     needs: check-inputs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       APP: toronto-election-${{ inputs.environment }}-do
     steps:
