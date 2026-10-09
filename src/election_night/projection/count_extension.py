@@ -412,9 +412,17 @@ def draw_mayor_final_shares(
     return 100 * city / city.sum(axis=1, keepdims=True)
 
 
-def bands(draws: np.ndarray, keys: tuple[str, ...]) -> dict[str, dict[str, float]]:
-    """Each candidate's central 90% final-share range and middle tick, in points to 2 dp."""
-    low, mid, high = np.percentile(draws, BAND, axis=0)
+def bands(
+    draws: np.ndarray, keys: tuple[str, ...], weights: np.ndarray | None = None
+) -> dict[str, dict[str, float]]:
+    """Each candidate's central 90% final-share range and middle tick, in points to 2 dp. With
+    `weights`, the inverse of the weighted empirical CDF."""
+    if weights is None:
+        low, mid, high = np.percentile(draws, BAND, axis=0)
+    else:
+        low, mid, high = np.quantile(
+            draws, np.array(BAND) / 100, axis=0, weights=weights, method="inverted_cdf"
+        )
     return {
         key: {"low": round(float(lo), 2), "mid": round(float(mi), 2), "high": round(float(hi), 2)}
         for key, lo, mi, hi in zip(keys, low, mid, high)

@@ -279,3 +279,40 @@ def test_bailao_check_fails_closed_without_the_capture():
     result = bailao_check([_capture_case(0, night=2022)], PREREG, "Ana Bailão")
 
     assert result["pass"] is False and result["value"] is None
+
+
+# Weighted draws: the forecast-weighted variant scores the count-only draws reweighted (#41).
+
+
+def test_weighted_crps_equals_the_crps_of_the_draws_repeated_by_their_weights():
+    draws, weights = np.array([0.0, 1.0, 2.0, 5.0]), np.array([1.0, 2.0, 1.0, 3.0])
+    repeated = np.repeat(draws, weights.astype(int))
+
+    for observed in (-1.0, 1.5, 4.0):
+        assert crps(draws, observed, weights / weights.sum()) == pytest.approx(
+            crps(repeated, observed)
+        )
+
+
+def test_draws_of_weight_zero_score_as_if_absent():
+    # The first two draws reverse the order; weighted away, the rest all have the winner ahead.
+    draws = [[30.0, 60.0, 10.0], [35.0, 55.0, 10.0], [55.0, 35.0, 10.0], [58.0, 32.0, 10.0]]
+    tally, final = [48.0, 42.0, 10.0], [56.0, 34.0, 10.0]
+    kept = _score(_case(draws[2:], tally, final))
+    weighted = _score(
+        dataclasses.replace(_case(draws, tally, final), weights=np.array([0, 0, 0.5, 0.5]))
+    )
+
+    assert weighted.margin_crps == pytest.approx(kept.margin_crps)
+    assert weighted.brier == pytest.approx(0.0) and kept.brier == pytest.approx(0.0)
+    assert (weighted.g1_calls, weighted.g1_hits) == (1, 1)
+    assert weighted.share_crps == pytest.approx(kept.share_crps)
+
+
+def test_the_bailao_check_reads_the_weighted_share_of_draws_she_leads():
+    case = _capture_case(5)  # Bailão leads in the first five of ten draws
+    weights = np.array([0.1] * 5 + [0.02] * 5)  # 0.5 of the weight on her five
+    weights = weights / weights.sum()
+    result = bailao_check([dataclasses.replace(case, weights=weights)], PREREG, "Ana Bailão")
+
+    assert result["value"] == pytest.approx(0.5 / 0.6)

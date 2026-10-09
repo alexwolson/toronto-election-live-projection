@@ -28,13 +28,22 @@ from election_night.projection.count_extension import (
     draw_final_shares,
     draw_mayor_final_shares,
 )
+from election_night.projection.forecast_weighted import (
+    ESS_MIN,
+    FORECAST_MISSING,
+    FORECAST_UNMATCHED,
+    LOW_ESS,
+    weigh,
+    weighted_bands,
+)
 
 SCHEMA_VERSION = 1
 STUB_DRAWS = 1000
 
-# A race's draws per variant: the candidates' keys in payload order, and a (draws, candidates)
-# array of final shares in points. The Replay harness scores exactly these.
-Draws = dict[str, tuple[tuple[str, ...], np.ndarray]]
+# A race's draws per variant: the candidates' keys in payload order, a (draws, candidates) array
+# of final shares in points, and each draw's weight (None: equal). The forecast-weighted variant
+# is the count-only array itself, reweighted. The Replay harness scores exactly these.
+Draws = dict[str, tuple[tuple[str, ...], np.ndarray, np.ndarray | None]]
 
 # The projection variants each projected level carries. Until the gated projections land, every
 # variant carries deterministic stub bands, marked as stubs.
@@ -197,11 +206,11 @@ def _projected(race: dict, keys: tuple[str, ...], shares: np.ndarray | None, dra
     if shares is None:
         return
     race["projection"] = {"stub": False, "bands": {"count_only": bands(shares, keys)}}
-    draws[race["id"]] = {"count_only": (keys, shares)}
+    draws[race["id"]] = {"count_only": (keys, shares, None)}
 
 
 def _mayor_model(
-    race: dict, spec: dict, params: dict, rng: np.random.Generator, draws: dict
+    race: dict, spec: dict, params: dict, rng: np.random.Generator, draws: dict, bundle: dict
 ) -> None:
     """The mayor's projection from the ward-by-ward file alone: one unit per City ward, summed
     to the citywide result. Inputs that don't match the file's wards and their units fail
@@ -218,6 +227,33 @@ def _mayor_model(
     received = np.array([wards[w.ward]["progress"]["received"] for w in inputs.wards])
     shares = draw_mayor_final_shares(inputs, MayorParams(**params), votes, received, rng)
     _projected(race, keys, shares, draws)
+    if shares is not None:
+        _forecast_weighted(race, keys, shares, bundle, draws)
+
+
+def _forecast_weighted(
+    race: dict, keys: tuple[str, ...], shares: np.ndarray, bundle: dict, draws: dict
+) -> None:
+    """The forecast-weighted band from the count-only draws, and which band is in effect.
+    Below the ESS floor the refresh falls back to count-only; with no resolved forecast, or its
+    pair not among the feed's names, the variant is off."""
+    density = bundle.get("forecast_density")
+    variant = {"in_effect": "count_only", "ess": None, "off_reason": None}
+    found = weigh(density, keys, shares) if density is not None else None
+    if density is None:
+        variant["off_reason"] = bundle.get("forecast_off", FORECAST_MISSING)
+    elif found is None:
+        variant["off_reason"] = FORECAST_UNMATCHED
+    else:
+        weights, ess = found
+        race["projection"]["bands"]["forecast_weighted"] = weighted_bands(shares, weights, keys)
+        draws[race["id"]]["forecast_weighted"] = (keys, shares, weights)
+        variant["ess"] = round(ess, 1)
+        if ess < ESS_MIN:
+            variant["off_reason"] = LOW_ESS
+        else:
+            variant["in_effect"] = "forecast_weighted"
+    race["projection"]["variant"] = variant
 
 
 def _seed(a_seq: int, w_seq: int, model_version: str) -> int:
@@ -256,14 +292,16 @@ def project(
             modelled = race["state"] == "counting" and params and "expected" in spec
             if modelled and (only is None or spec["id"] in only):
                 race_rng = np.random.default_rng(np.random.SeedSequence([seed, index]))
-                model = _mayor_model if spec["office_id"] == MAYOR_OFFICE_ID else _model
-                model(race, spec, params, race_rng, draws)
+                if spec["office_id"] == MAYOR_OFFICE_ID:
+                    _mayor_model(race, spec, params, race_rng, draws, bundle)
+                else:
+                    _model(race, spec, params, race_rng, draws)
             elif not modelled and race["state"] == "counting" and spec["level"] in VARIANTS:
                 bands = {v: _stub_bands(race, rng) for v in VARIANTS[spec["level"]]}
                 race["projection"] = {"stub": True, "bands": bands}
                 keys = tuple(c["key"] for c in race["candidates"])
                 draws[race["id"]] = {
-                    v: (keys, _stub_draws(b, keys, draw_rng)) for v, b in bands.items()
+                    v: (keys, _stub_draws(b, keys, draw_rng), None) for v, b in bands.items()
                 }
         races.append(race)
 

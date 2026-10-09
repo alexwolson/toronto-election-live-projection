@@ -8,6 +8,11 @@ as a point mass, its leader winning for certain.
 Cases are averaged within a race, races within a night, and nights equally. G1 and G2 pool every
 case of a night into one rate, and the per-night rates are averaged with nights weighted equally.
 For each candidate's share, G2 first takes each case's share of candidates covered.
+
+A case's draws may carry weights (the forecast-weighted variant: the count-only draws
+reweighted, #41). Every score then reads the weighted empirical distribution: CRPS exactly, win
+probabilities as weighted shares of draws led, and central ranges from the inverse of the
+weighted CDF.
 """
 
 from dataclasses import dataclass
@@ -28,6 +33,10 @@ class Case:
     final: np.ndarray  # (candidates,): certified shares
     retired: bool = False  # all units in: the projection has retired and the count stands
     keys: tuple[str, ...] = ()  # the candidates' Ballot Names, in the draws' order
+    weights: np.ndarray | None = None  # (draws,): each draw's weight, summing to 1; None: equal
+    # Which version of the race the draws are: count_only; for the forecast-weighted variant's
+    # Replays also forecast_weighted, stress_test (the shifted forecast) and tally (#41).
+    variant: str = "count_only"
 
 
 @dataclass(frozen=True)
@@ -47,15 +56,25 @@ class CaseScore:
     candidates: int
 
 
-def crps(draws: np.ndarray, observed: float) -> float:
-    """Exact CRPS of an equally weighted empirical forecast (the Backend's `empirical_crps`)."""
-    values = np.sort(np.asarray(draws, dtype=float))
+def crps(draws: np.ndarray, observed: float, weights: np.ndarray | None = None) -> float:
+    """Exact CRPS of an empirical forecast (the Backend's `empirical_crps`), equally weighted
+    or with `weights` summing to 1: E|X - y| - E|X - X'| / 2."""
+    values = np.asarray(draws, dtype=float)
     n = values.size
     if n == 0 or not np.all(np.isfinite(values)):
         raise ValueError("draws must be non-empty and finite")
-    absolute_error = float(np.mean(np.abs(values - observed)))
-    dispersion = float(np.sum((2 * np.arange(n) - n + 1) * values))
-    return max(0.0, absolute_error - dispersion / (n * n))
+    if weights is None:
+        values = np.sort(values)
+        absolute_error = float(np.mean(np.abs(values - observed)))
+        dispersion = float(np.sum((2 * np.arange(n) - n + 1) * values))
+        return max(0.0, absolute_error - dispersion / (n * n))
+    order = np.argsort(values, kind="stable")
+    values, w = values[order], np.asarray(weights, dtype=float)[order]
+    absolute_error = float(np.sum(w * np.abs(values - observed)))
+    below = np.cumsum(w) - w  # the weight of the draws sorted before each
+    above = 1.0 - below - w
+    dispersion = float(np.sum(w * values * (below - above)))
+    return max(0.0, absolute_error - dispersion)
 
 
 def _first_max(rows: np.ndarray) -> np.ndarray:
@@ -69,14 +88,28 @@ def _brier(probabilities: np.ndarray, winner: int) -> float:
     return float(np.sum((probabilities - outcome) ** 2))
 
 
-def _within(draws: np.ndarray, value, interval_mass: float):
+def _within(draws: np.ndarray, value, interval_mass: float, weights=None):
     tail = (1 - interval_mass) / 2
-    low, high = np.quantile(draws, [tail, 1 - tail], axis=0)
+    if weights is None:
+        low, high = np.quantile(draws, [tail, 1 - tail], axis=0)
+    else:
+        low, high = (
+            np.quantile(draws, q, axis=0, weights=weights, method="inverted_cdf")
+            for q in (tail, 1 - tail)
+        )
     return (low <= value) & (value <= high)
 
 
+def win_probabilities(draws: np.ndarray, weights: np.ndarray | None = None) -> np.ndarray:
+    """Each candidate's share of draws led (ties to the earlier), weighted if given."""
+    k = draws.shape[1]
+    if weights is None:
+        return np.bincount(_first_max(draws), minlength=k) / draws.shape[0]
+    return np.bincount(_first_max(draws), weights=weights, minlength=k) / weights.sum()
+
+
 def score_case(case: Case, confidence: float, interval_mass: float) -> CaseScore:
-    draws, tally, final = case.draws, case.tally, case.final
+    draws, tally, final, w = case.draws, case.tally, case.final, case.weights
     k = final.size
     if draws.ndim != 2 or draws.shape[1] != k or tally.size != k:
         raise ValueError(f"{case.race}: draws, tally and final name different candidates")
@@ -85,7 +118,7 @@ def score_case(case: Case, confidence: float, interval_mass: float) -> CaseScore
     margins = draws[:, winner] - draws[:, runner_up]
     tally_margin = float(tally[winner] - tally[runner_up])
 
-    probabilities = np.bincount(_first_max(draws), minlength=k) / draws.shape[0]
+    probabilities = win_probabilities(draws, w)
     baseline = np.zeros(k)
     baseline[_first_max(tally)] = 1.0
     calls = probabilities >= confidence
@@ -94,15 +127,15 @@ def score_case(case: Case, confidence: float, interval_mass: float) -> CaseScore
         night=case.night,
         race=case.race,
         retired=case.retired,
-        margin_crps=crps(margins, final_margin),
+        margin_crps=crps(margins, final_margin, w),
         baseline_margin_error=abs(tally_margin - final_margin),
         brier=_brier(probabilities, winner),
         baseline_brier=_brier(baseline, winner),
-        share_crps=float(np.mean([crps(draws[:, c], final[c]) for c in range(k)])),
+        share_crps=float(np.mean([crps(draws[:, c], final[c], w) for c in range(k)])),
         g1_calls=int(calls.sum()),
         g1_hits=int(calls[winner]),
-        g2_margin=bool(_within(margins, final_margin, interval_mass)),
-        g2_shares=int(_within(draws, final, interval_mass).sum()),
+        g2_margin=bool(_within(margins, final_margin, interval_mass, w)),
+        g2_shares=int(_within(draws, final, interval_mass, w).sum()),
         candidates=k,
     )
 
@@ -183,7 +216,7 @@ def bailao_check(cases: list[Case], prereg: dict, candidate: str) -> dict:
             (index,) = [
                 i for i, k in enumerate(case.keys) if name_words(k) == name_words(candidate)
             ]
-            value = float(np.mean(_first_max(case.draws) == index))
+            value = float(win_probabilities(case.draws, case.weights)[index])
     bar = listed["max_win_probability"]
     return {
         "id": 6,

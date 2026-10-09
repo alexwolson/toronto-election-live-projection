@@ -283,7 +283,7 @@ def test_the_payload_function_returns_the_draws_its_bands_came_from():
     keys = tuple(c["key"] for c in mayor["candidates"])
     assert set(draws) == {r["id"] for r in payload["races"] if r["projection"]}
     assert set(draws["mayor"]) == set(mayor["projection"]["bands"])
-    for variant, (draw_keys, shares) in draws["mayor"].items():
+    for variant, (draw_keys, shares, _) in draws["mayor"].items():
         bands = mayor["projection"]["bands"][variant]
         assert draw_keys == keys
         assert shares.ndim == 2 and shares.shape[1] == len(keys) and shares.shape[0] > 1

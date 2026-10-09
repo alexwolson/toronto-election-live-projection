@@ -7,7 +7,7 @@ compact, with keys in the order below. The Frontend validator pins `schema_versi
 this layout bumps it.
 
 Fields marked *v0 null* are in the layout now and filled by later tickets (#46 forecast,
-#33/#36/#41 projections).
+#45 gated statuses).
 
 ## Top level
 
@@ -28,8 +28,8 @@ Fields marked *v0 null* are in the layout now and filled by later tickets (#46 f
 Statuses: `"stub"` (deterministic stub bands, not a projection) and `"none"` (the level never has
 one). Later tickets add the gated statuses (#45). Until then council and trustee keep `"stub"`
 here even when their races carry the model's bands; the race's own `projection.stub` says which.
-Mayor likewise keeps `"variant": "stub"` until #41, while a modelled mayor race carries only
-`count_only` bands.
+Mayor likewise keeps `"variant": "stub"` until #45; a modelled mayor race's own
+`projection.variant` says which band is in effect at that refresh (below).
 
 ## Race
 
@@ -42,7 +42,7 @@ Mayor likewise keeps `"variant": "stub"` until #41, while a modelled mayor race 
 | `state` | string | Below |
 | `progress` | object or null | Reporting Progress, `{"received": int, "total": int}` (the feed's `pollsReceived` and `polls`). Null before results or with no figures. |
 | `candidates` | array | Below. Before results: the bundle's candidates in ballot order, without votes. Otherwise the feed's candidates by votes, descending, ties in ballot order. |
-| `projection` | object or null | `{"stub": bool, "bands": {variant: {key: {"low", "mid", "high"}}}}`, shares in percent. Present only while the race is `counting` at a projected level. Stub mayor bands have `count_only` and `forecast_weighted`; a modelled mayor has `count_only` until #41 adds `forecast_weighted`. Council and trustee have `count_only`. |
+| `projection` | object or null | `{"stub": bool, "bands": {variant: {key: {"low", "mid", "high"}}}}`, shares in percent. Present only while the race is `counting` at a projected level. Stub mayor bands have `count_only` and `forecast_weighted`. A modelled mayor has `count_only`, plus `forecast_weighted` whenever the forecast weighted its draws, and `"variant"` (below). Council and trustee have `count_only`. |
 | `withdrawal` | object or null | A Withdrawal: `{"reason": string}`, the machine reason a check withheld the race's projection while its Live Tally stands. Always null in v0; the per-race checks (#43) fill it. Readers never see the reason. |
 | `fault` | object or null | `{"reason": string}`, why a race has no figures: `row_unreadable` or `race_missing`. Readers never see the reason. |
 | `wards` | array | Mayor only: each City ward's mayoral vote from the ward-by-ward file, below. Empty when the mayor race has no figures. |
@@ -57,6 +57,14 @@ Race states:
 | `all_units_in` | `pollsReceived` equals `polls` | "All voting areas in" |
 | `acclaimed` | the bundle lists one candidate | "acclaimed: the only candidate, so there is no vote." |
 | `no_figures` | the race's row is unreadable or missing | "No figures from the City for this race right now" |
+
+A modelled mayor's `projection.variant` is `{"in_effect", "ess", "off_reason"}`:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `in_effect` | string | `"forecast_weighted"` or `"count_only"`: the band in effect at this refresh, before any gate or switch (#45 applies those) |
+| `ess` | number or null | The Kish effective sample size of the forecast weights, of 10,000 draws, to 1 dp; null when the forecast weighted nothing |
+| `off_reason` | string or null | Null while the variant is in effect. `low_ess`: the ESS is below 1,000, so this refresh uses count-only (no hysteresis). `forecast_missing`, `forecast_corrupt`, `forecast_unmatched`: the variant is off all night, decided once at pipeline start; `forecast_unmatched` also when the forecast's pair is missing from this refresh's names |
 
 ## Candidate
 
@@ -102,6 +110,17 @@ published: the `council-counting-2022` golden carries MonAvenir 4 at 539 of 0 un
   every ward with ward-level noise; a ward with no election-day unit counted is centred on the
   citywide counted shares. Inputs whose wards or per-ward units don't match the file's wards and
   their `polls` leave the mayor with no projection.
+- **Mayor's forecast-weighted variant** (#41): the count-only draws, each weighted by the final
+  Mayoral Forecast's density at its own final margin between the forecast's pair (S2: a Gaussian
+  KDE over the forecast's leader-minus-challenger margin draws, Silverman's rule-of-thumb
+  bandwidth 0.9 min(sd, IQR/1.34) n^(-1/5), exact in log space;
+  `src/election_night/projection/forecast_weighted.py`). Its band is the weighted 5th, 50th and
+  95th percentile (the inverse of the weighted CDF) of the same draws, so the count-only band is
+  unchanged by it. The pinned draws are read once at pipeline start from the bundle's
+  `forecast` pointer (`{"release_tag", "npz", "npz_sha256"}`, the npz beside the bundle): a
+  missing file, a sha256 or shape mismatch, a non-finite draw, shares not summing to 1, or a pair
+  not on exactly one mayoral row each turns the variant off for the night without failing the
+  start.
 - A pair is rejected (`UnreadableFile`) only when a file is not JSON or misses a structural key:
   `seq`, `office`, the ward or candidate arrays. A response status other than 200 or 304 is
   rejected by `check_status` before the body is read.
