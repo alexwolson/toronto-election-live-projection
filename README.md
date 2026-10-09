@@ -73,6 +73,30 @@ CI (`.github/workflows/ci.yml`) runs the lint, format and test checks on pushes 
 pull requests, with a Redis service container. In CI a missing `REDIS_URL` fails the Redis tests
 instead of skipping them.
 
+### Freeze gate (#40)
+
+At the Deploy Freeze, the payloads archived from the Dress are checked against the exact
+production Frontend build (#17 § Schema skew). First copy the Dress's payloads from both archive
+buckets (docs/store.md § The archive), each with its own provider's endpoint and keys. The Dress
+shares the `rehearsal/` prefix with earlier Rehearsals and payload keys carry no time, so delete
+the local copies last modified before the Dress began, or the gate checks those too:
+
+```bash
+aws s3 sync s3://toronto-election-night-archive/rehearsal/payloads/ dress/fly/payloads/ \
+  --endpoint-url https://fly.storage.tigris.dev
+aws s3 sync s3://toronto-election-night-archive/rehearsal/payloads/ dress/do/payloads/ \
+  --endpoint-url https://nyc3.digitaloceanspaces.com
+uv run election-night freeze-gate --archive dress/fly --archive dress/do \
+  --frontend-commit <production build's full SHA> \
+  --backend-release-tag <the tag given to npm run deploy:production>
+```
+
+The gate fetches a clean checkout of that Frontend commit, runs its `validateLivePayload` with
+Node (22.18 or later, which runs the TypeScript directly) over every payload, and checks that
+each payload's `forecast_release_tag` equals the tag. It prints one `FAIL` line per failure and
+exits nonzero on any failure, on an unreadable payload, on an archive with no payloads, or if the
+commit can't be fetched or its validator can't run.
+
 ## Replays
 
 `election_night.replay` re-runs the past nights (2014 on its 44 wards, 2018, 2022 and the 2023
