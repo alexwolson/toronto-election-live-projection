@@ -17,6 +17,11 @@ env:
   # The Fly app that only holds the image; registry.fly.io paths belong to an app.
   FLY_IMAGE_APP: toronto-election-night-image
 
+# `bash -eo pipefail`, so a failed CLI call in a pipe fails the step instead of reading as empty.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   image:
     runs-on: ubuntu-latest
@@ -49,9 +54,9 @@ jobs:
         run: |
           flyctl apps list --json | jq -e --arg app "$FLY_IMAGE_APP" 'any(.[]; .Name == $app)' \
             || flyctl apps create "$FLY_IMAGE_APP" --org personal
-          crane auth login registry.fly.io -u x -p "$FLY_API_TOKEN"
-          crane auth login registry.digitalocean.com \
-            -u "$DIGITALOCEAN_ACCESS_TOKEN" -p "$DIGITALOCEAN_ACCESS_TOKEN"
+          echo "$FLY_API_TOKEN" | crane auth login registry.fly.io -u x --password-stdin
+          echo "$DIGITALOCEAN_ACCESS_TOKEN" | crane auth login registry.digitalocean.com \
+            -u "$DIGITALOCEAN_ACCESS_TOKEN" --password-stdin
           crane copy "$GHCR_REPO@$DIGEST" "$FLY_REPO:$GITHUB_SHA"
           crane copy "$GHCR_REPO@$DIGEST" "$DOCR_REPO:$GITHUB_SHA"
       - name: Check the same digest in all three registries

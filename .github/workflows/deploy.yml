@@ -32,6 +32,7 @@ concurrency:
   group: deploy-${{ inputs.environment }}
 
 env:
+  TAG: ${{ inputs.tag }}
   DIGEST: ${{ inputs.digest }}
   FEED_BASE_URL: ${{ inputs.feed_base_url }}
   READER_PATH_URL: ${{ inputs.reader_path_url }}
@@ -40,11 +41,17 @@ env:
   REDIS_URL: ${{ secrets[inputs.environment == 'night' && 'NIGHT_REDIS_URL' || 'REHEARSAL_REDIS_URL'] }}
   HC_PING_KEY: ${{ secrets[inputs.environment == 'night' && 'HC_NIGHT_PING_KEY' || 'HC_REHEARSAL_PING_KEY'] }}
 
+# `bash -eo pipefail`, so a failed CLI call in a pipe fails the step instead of reading as empty.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   check-inputs:
     runs-on: ubuntu-latest
     steps:
       - run: |
+          [[ "$TAG" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::tag must be the image's full commit sha"; exit 1; }
           [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "::error::digest must be sha256:<64 hex>"; exit 1; }
           [ -n "$REDIS_URL" ] && [ -n "$HC_PING_KEY" ] || { echo "::error::store secrets missing"; exit 1; }
 
@@ -99,12 +106,11 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Create or update the app by digest
         env:
-          IMAGE_DIGEST: ${{ inputs.digest }}
           SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
           SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
         run: |
           # shellcheck disable=SC2016 # envsubst takes the variable names, unexpanded
-          envsubst '${IMAGE_DIGEST} ${FEED_BASE_URL} ${READER_PATH_URL} ${REDIS_URL}
+          envsubst '${DIGEST} ${FEED_BASE_URL} ${READER_PATH_URL} ${REDIS_URL}
             ${SPACES_ACCESS_KEY_ID} ${SPACES_SECRET_ACCESS_KEY} ${HC_PING_KEY}' \
             < "deploy/do.${{ inputs.environment }}.yaml" > "$RUNNER_TEMP/spec.yaml"
           doctl apps spec validate "$RUNNER_TEMP/spec.yaml" > /dev/null

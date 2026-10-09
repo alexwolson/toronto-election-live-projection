@@ -51,7 +51,7 @@ The `Dockerfile` bakes this repo's code and the Night Bundle into one image, so 
 everything and a restart fetches nothing from GitHub. Three manual (`workflow_dispatch`) workflows:
 
 - **`image`** builds `linux/amd64`, pushes it to GHCR, copies it by digest to
-  `registry.fly.io/toronto-election-night-image` and DOCR `toronto-election-night/pipeline`, and
+  `registry.fly.io/toronto-election-night-image` and DOCR `<DOCR_REGISTRY>/pipeline` (the Actions variable, `toronto-election-night`), and
   fails unless all three report the built digest. The job summary prints the tag and digest.
 - **`deploy`** takes the environment (`rehearsal` or `night`), that tag and digest, the feed base URL
   and the reader-path URL. It deploys the Fly Machine (`deploy/fly.<env>.toml`, `yyz`) and the App
