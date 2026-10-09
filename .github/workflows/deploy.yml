@@ -1,0 +1,128 @@
+name: deploy
+
+# Deploys one environment's two pipelines by digest (#32): a Fly Machine in yyz and a DigitalOcean
+# App Platform worker in nyc, staggered 30 s apart. The environments differ only in the feed base
+# URL and the store credentials (plus the archive prefix and reader path). Each job fails unless
+# the running image's digest equals the input: flyctl once doubled digest references.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which apps and store
+        type: choice
+        options: [rehearsal, night]
+        default: rehearsal
+      tag:
+        description: The image tag (its commit), from the image run's summary
+        required: true
+      digest:
+        description: The image digest (sha256:...), from the image run's summary
+        required: true
+      feed_base_url:
+        description: The feed the pipelines read
+        default: https://mediaresults.toronto.ca/results
+      reader_path_url:
+        description: The public /live/results.json the reader-path check probes
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ inputs.environment }}
+
+env:
+  TAG: ${{ inputs.tag }}
+  DIGEST: ${{ inputs.digest }}
+  FEED_BASE_URL: ${{ inputs.feed_base_url }}
+  READER_PATH_URL: ${{ inputs.reader_path_url }}
+  # Chooses the secret's name, not its value: an empty secret fails the run rather than falling
+  # through to the other store.
+  REDIS_URL: ${{ secrets[inputs.environment == 'night' && 'NIGHT_REDIS_URL' || 'REHEARSAL_REDIS_URL'] }}
+  HC_PING_KEY: ${{ secrets[inputs.environment == 'night' && 'HC_NIGHT_PING_KEY' || 'HC_REHEARSAL_PING_KEY'] }}
+
+# `bash -eo pipefail`, so a failed CLI call in a pipe fails the step instead of reading as empty.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check-inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          [[ "$TAG" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::tag must be the image's full commit sha"; exit 1; }
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "::error::digest must be sha256:<64 hex>"; exit 1; }
+          [ -n "$REDIS_URL" ] && [ -n "$HC_PING_KEY" ] || { echo "::error::store secrets missing"; exit 1; }
+
+  fly:
+    needs: check-inputs
+    runs-on: ubuntu-latest
+    env:
+      APP: toronto-election-${{ inputs.environment }}-fly
+      IMAGE: registry.fly.io/toronto-election-night-image:${{ inputs.tag }}@${{ inputs.digest }}
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: superfly/flyctl-actions/setup-flyctl@1.5
+      - name: Create the app if missing and stage its secrets
+        env:
+          TIGRIS_ACCESS_KEY_ID: ${{ secrets.TIGRIS_ACCESS_KEY_ID }}
+          TIGRIS_SECRET_ACCESS_KEY: ${{ secrets.TIGRIS_SECRET_ACCESS_KEY }}
+        run: |
+          flyctl apps list --json | jq -e --arg app "$APP" 'any(.[]; .Name == $app)' \
+            || flyctl apps create "$APP" --org personal
+          flyctl secrets set --stage -a "$APP" \
+            REDIS_URL="$REDIS_URL" \
+            AWS_ACCESS_KEY_ID="$TIGRIS_ACCESS_KEY_ID" \
+            AWS_SECRET_ACCESS_KEY="$TIGRIS_SECRET_ACCESS_KEY" \
+            PING_URL_PIPELINE="https://hc-ping.com/$HC_PING_KEY/pipeline-fly" \
+            PING_URL_READER_PATH="https://hc-ping.com/$HC_PING_KEY/reader-path" \
+            PING_URL_COUNT_DECREASE="https://hc-ping.com/$HC_PING_KEY/count-decrease"
+      - name: Deploy by digest
+        run: |
+          flyctl deploy --config "deploy/fly.${{ inputs.environment }}.toml" --image "$IMAGE" \
+            --env FEED_BASE_URL="$FEED_BASE_URL" --env READER_PATH_URL="$READER_PATH_URL" \
+            --ha=false --strategy immediate --yes
+      - name: Check the deployed digest
+        run: |
+          flyctl machine list -a "$APP" --json > machines.json
+          jq -r '.[] | "\(.id) \(.region) \(.state) \(.config.image) \(.image_ref.digest)"' machines.json
+          jq -e --arg d "$DIGEST" 'length == 1 and all(.[];
+              .image_ref.digest == $d and .region == "yyz"
+              and (.config.image | [scan("@sha256:")] | length) <= 1)' machines.json \
+            || { echo "::error::Fly is not running exactly one yyz Machine on $DIGEST"; exit 1; }
+          echo "Fly \`$APP\`: \`$(jq -r '.[0].image_ref.digest' machines.json)\`" >> "$GITHUB_STEP_SUMMARY"
+
+  digitalocean:
+    needs: check-inputs
+    runs-on: ubuntu-latest
+    env:
+      APP: toronto-election-${{ inputs.environment }}-do
+    steps:
+      - uses: actions/checkout@v7
+      - uses: digitalocean/action-doctl@v2.5.2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Create or update the app by digest
+        env:
+          SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+          SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+        run: |
+          # shellcheck disable=SC2016 # envsubst takes the variable names, unexpanded
+          envsubst '${DIGEST} ${FEED_BASE_URL} ${READER_PATH_URL} ${REDIS_URL}
+            ${SPACES_ACCESS_KEY_ID} ${SPACES_SECRET_ACCESS_KEY} ${HC_PING_KEY}' \
+            < "deploy/do.${{ inputs.environment }}.yaml" > "$RUNNER_TEMP/spec.yaml"
+          doctl apps spec validate "$RUNNER_TEMP/spec.yaml" > /dev/null
+          doctl apps create --spec "$RUNNER_TEMP/spec.yaml" --upsert --wait > /dev/null
+          rm "$RUNNER_TEMP/spec.yaml"
+      - name: Check the deployed digest
+        run: |
+          doctl apps list -o json | jq --arg app "$APP" '[.[]? | select(.spec.name == $app)]' > apps.json
+          jq -r '.[] | "\(.id) \(.active_deployment.phase) \(.active_deployment.spec.workers[0].image.digest)"' apps.json
+          jq -e --arg d "$DIGEST" 'length == 1 and all(.[];
+              .active_deployment.phase == "ACTIVE"
+              and .active_deployment.spec.region == "nyc"
+              and .active_deployment.spec.workers[0].image.digest == $d)' apps.json \
+            || { echo "::error::DigitalOcean's active deployment is not on $DIGEST"; exit 1; }
+          echo "DigitalOcean \`$APP\`: \`$(jq -r '.[0].active_deployment.spec.workers[0].image.digest' apps.json)\`" >> "$GITHUB_STEP_SUMMARY"

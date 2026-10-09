@@ -53,6 +53,15 @@ def test_keys_are_write_once():
     assert s3.objects[("night", "files/a/1-x.json")] == (b"first", {"received-ms": "1"})
 
 
+def test_a_prefix_separates_environments_sharing_a_bucket():
+    s3 = FakeS3()
+    rehearsal = Archive(s3, "archive", prefix="rehearsal/")
+    night = Archive(s3, "archive", prefix="night/")
+    assert rehearsal.put("files/a/1-x.json", b"mock")
+    assert night.put("files/a/1-x.json", b"real")
+    assert s3.puts == ["rehearsal/files/a/1-x.json", "night/files/a/1-x.json"]
+
+
 class HangingArchive:
     def __init__(self):
         self.release = threading.Event()

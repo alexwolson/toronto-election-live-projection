@@ -47,14 +47,17 @@ class Archive:
 
     Write-once is a HEAD before the PUT rather than `If-None-Match: *`, which Spaces doesn't
     document (research 04). Each bucket has one writer, the pipeline's single archive thread.
+    Rehearsal and Night share each bucket, so every key starts with the environment's `prefix`.
     """
 
-    def __init__(self, client, bucket: str):
+    def __init__(self, client, bucket: str, prefix: str = ""):
         self.client = client
         self.bucket = bucket
+        self.prefix = prefix
 
     def put(self, key: str, body: bytes, metadata: dict[str, str] | None = None) -> bool:
         """Write the object unless the key exists; True if written."""
+        key = self.prefix + key
         try:
             self.client.head_object(Bucket=self.bucket, Key=key)
             return False
