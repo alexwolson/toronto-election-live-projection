@@ -45,6 +45,21 @@ FEED_BASE_URL=... REDIS_URL=... uv run election-night pipeline --name fly --stag
 runs a pipeline: every 60 s it reads the City's two files and publishes the payload and its
 heartbeat to the store. The store's keys and the newest-pair rule are in [docs/store.md](docs/store.md).
 
+### Image and deploys (#32)
+
+The `Dockerfile` bakes this repo's code and the Night Bundle into one image, so a single digest pins
+everything and a restart fetches nothing from GitHub. Three manual (`workflow_dispatch`) workflows:
+
+- **`image`** builds `linux/amd64`, pushes it to GHCR, copies it by digest to
+  `registry.fly.io/toronto-election-night-image` and DOCR `toronto-election-night/pipeline`, and
+  fails unless all three report the built digest. The job summary prints the tag and digest.
+- **`deploy`** takes the environment (`rehearsal` or `night`), that tag and digest, the feed base URL
+  and the reader-path URL. It deploys the Fly Machine (`deploy/fly.<env>.toml`, `yyz`) and the App
+  Platform worker (`deploy/do.<env>.yaml`, `nyc`), then fails unless each provider runs the input
+  digest. The environments differ only in the store, the healthchecks.io ping key, the archive
+  prefix and the URLs; the secrets come from the Actions secrets.
+- **`teardown`** destroys the Rehearsal apps on both providers. It cannot touch the Night apps.
+
 Tests that need Redis use the server at `REDIS_URL` and are skipped when it is unset. To run them
 locally:
 

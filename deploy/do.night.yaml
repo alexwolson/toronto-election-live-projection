@@ -1,0 +1,46 @@
+# The DigitalOcean pipeline on the Night store (#32): an App Platform worker, deployed by digest
+# from deploy.yml. ${...} are filled by envsubst from Actions secrets and the run's inputs; App
+# Platform stores the SECRET values encrypted. No health check: the process has no port, and its
+# watchdog exits for a restart.
+name: toronto-election-night-do
+region: nyc
+workers:
+  - name: pipeline
+    image:
+      registry_type: DOCR
+      repository: pipeline
+      digest: ${IMAGE_DIGEST}
+    run_command: election-night pipeline --name do --stagger 30
+    instance_count: 1
+    instance_size_slug: apps-d-2vcpu-4gb
+    envs:
+      - key: FEED_BASE_URL
+        value: "${FEED_BASE_URL}"
+      - key: READER_PATH_URL
+        value: "${READER_PATH_URL}"
+      - key: ARCHIVE_BUCKET
+        value: toronto-election-night-archive
+      - key: ARCHIVE_PREFIX
+        value: night/
+      - key: AWS_ENDPOINT_URL_S3
+        value: https://nyc3.digitaloceanspaces.com
+      - key: AWS_REGION
+        value: nyc3
+      - key: REDIS_URL
+        type: SECRET
+        value: "${REDIS_URL}"
+      - key: AWS_ACCESS_KEY_ID
+        type: SECRET
+        value: "${SPACES_ACCESS_KEY_ID}"
+      - key: AWS_SECRET_ACCESS_KEY
+        type: SECRET
+        value: "${SPACES_SECRET_ACCESS_KEY}"
+      - key: PING_URL_PIPELINE
+        type: SECRET
+        value: "https://hc-ping.com/${HC_PING_KEY}/pipeline-do"
+      - key: PING_URL_READER_PATH
+        type: SECRET
+        value: "https://hc-ping.com/${HC_PING_KEY}/reader-path"
+      - key: PING_URL_COUNT_DECREASE
+        type: SECRET
+        value: "https://hc-ping.com/${HC_PING_KEY}/count-decrease"

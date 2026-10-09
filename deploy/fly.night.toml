@@ -1,0 +1,21 @@
+# The Fly pipeline on the Night store (#32). Deployed by digest from deploy.yml, never built
+# here. The workflow stages the secrets (REDIS_URL, PING_URL_*, AWS keys) and FEED_BASE_URL,
+# READER_PATH_URL. No services: the process has no port, and its watchdog exits for a restart.
+app = "toronto-election-night-fly"
+primary_region = "yyz"
+
+[processes]
+  pipeline = "election-night pipeline --name fly --stagger 0"
+
+[env]
+  ARCHIVE_BUCKET = "toronto-election-night-archive"
+  ARCHIVE_PREFIX = "night/"
+  AWS_ENDPOINT_URL_S3 = "https://fly.storage.tigris.dev"
+  AWS_REGION = "auto"
+
+[[restart]]
+  policy = "always"
+
+[[vm]]
+  size = "performance-2x"
+  memory = "4gb"

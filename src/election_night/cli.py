@@ -87,7 +87,7 @@ def cmd_pipeline(args) -> None:
     s3 = boto3.client(
         "s3", config=Config(connect_timeout=10, read_timeout=20, retries={"max_attempts": 3})
     )
-    archive = ArchiveWriter(Archive(s3, _env("ARCHIVE_BUCKET")))
+    archive = ArchiveWriter(Archive(s3, _env("ARCHIVE_BUCKET"), _env("ARCHIVE_PREFIX")))
     client = redis.Redis.from_url(redis_url, socket_timeout=10, socket_connect_timeout=10)
     pipeline = Pipeline(
         args.name,

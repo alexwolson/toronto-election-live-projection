@@ -1,0 +1,77 @@
+name: image
+
+# Builds the pipeline image (this repo's code and the Night Bundle) and publishes one digest to
+# GHCR, registry.fly.io and DOCR nyc3, so restarts don't depend on GHCR (#17 § Night bundle and
+# image, #32). Manual only: DOCR Starter holds about 500 MB. Deploy the printed digest with deploy.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  GHCR_REPO: ghcr.io/${{ github.repository }}
+  FLY_REPO: registry.fly.io/toronto-election-night-image
+  DOCR_REPO: registry.digitalocean.com/${{ vars.DOCR_REGISTRY }}/pipeline
+  # The Fly app that only holds the image; registry.fly.io paths belong to an app.
+  FLY_IMAGE_APP: toronto-election-night-image
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4.4.1
+      - uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push to GHCR
+        id: build
+        uses: docker/build-push-action@v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.GHCR_REPO }}:${{ github.sha }}
+          # One plain manifest, so the digest is the image's and copies byte for byte.
+          provenance: false
+          sbom: false
+      - uses: imjasonh/setup-crane@v0.7
+      - uses: superfly/flyctl-actions/setup-flyctl@1.5
+      - name: Copy by digest to Fly and DOCR
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: |
+          flyctl apps list --json | jq -e --arg app "$FLY_IMAGE_APP" 'any(.[]; .Name == $app)' \
+            || flyctl apps create "$FLY_IMAGE_APP" --org personal
+          crane auth login registry.fly.io -u x -p "$FLY_API_TOKEN"
+          crane auth login registry.digitalocean.com \
+            -u "$DIGITALOCEAN_ACCESS_TOKEN" -p "$DIGITALOCEAN_ACCESS_TOKEN"
+          crane copy "$GHCR_REPO@$DIGEST" "$FLY_REPO:$GITHUB_SHA"
+          crane copy "$GHCR_REPO@$DIGEST" "$DOCR_REPO:$GITHUB_SHA"
+      - name: Check the same digest in all three registries
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          {
+            echo "## Pipeline image"
+            echo
+            echo "Commit \`$GITHUB_SHA\`, built digest \`$DIGEST\`"
+            echo
+            echo "| Registry | Digest |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          status=0
+          for repo in "$GHCR_REPO" "$FLY_REPO" "$DOCR_REPO"; do
+            got=$(crane digest "$repo:$GITHUB_SHA")
+            echo "| \`$repo\` | \`$got\` |" >> "$GITHUB_STEP_SUMMARY"
+            [ "$got" = "$DIGEST" ] || { echo "::error::$repo has $got, built $DIGEST"; status=1; }
+          done
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo "Deploy with tag \`$GITHUB_SHA\` and digest \`$DIGEST\`." >> "$GITHUB_STEP_SUMMARY"
+          exit $status

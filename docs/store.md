@@ -24,12 +24,12 @@ written.
 ```bash
 FEED_BASE_URL=https://mediaresults.toronto.ca/results \
 REDIS_URL=redis://localhost:6379/0 \
-ARCHIVE_BUCKET=night-archive-fly \
+ARCHIVE_BUCKET=toronto-election-night-archive ARCHIVE_PREFIX=rehearsal/ \
 AWS_ENDPOINT_URL_S3=https://fly.storage.tigris.dev AWS_REGION=auto \
 AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... \
-PING_URL_PIPELINE=https://hc-ping.com/<pipeline-fly uuid> \
-PING_URL_READER_PATH=https://hc-ping.com/<reader-path uuid> \
-PING_URL_COUNT_DECREASE=https://hc-ping.com/<count-decrease uuid> \
+PING_URL_PIPELINE=https://hc-ping.com/<ping key>/pipeline-fly \
+PING_URL_READER_PATH=https://hc-ping.com/<ping key>/reader-path \
+PING_URL_COUNT_DECREASE=https://hc-ping.com/<ping key>/count-decrease \
 READER_PATH_URL=https://<site>/live/results.json \
 uv run election-night pipeline --name fly --stagger 0
 ```
@@ -49,6 +49,9 @@ Each pipeline writes to its own provider's S3-compatible bucket (Fly to Tigris, 
 Spaces `nyc3`), in `src/election_night/archive.py`. Keys are `seq` plus the first 16 hex digits of
 the content's SHA-256, written once (a HEAD before each PUT: Spaces doesn't document
 `If-None-Match: *`), so the two buckets merge by key after the night.
+
+Rehearsal and Night share each provider's bucket, `toronto-election-night-archive`, so every key
+below starts with `ARCHIVE_PREFIX` (`rehearsal/` or `night/`, set in `deploy/`).
 
 | Key | Object |
 |---|---|
