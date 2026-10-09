@@ -56,7 +56,7 @@ The Live Tally read as a forecast of the complete count: every candidate finishe
 _Avoid_: Naive model, current shares
 
 **Gate Result**:
-The frozen record of one office level's (or the mayoral variant's) Replays: pass or fail, the scores, and the model version it holds for. A level's Election-Night Projection may show only while a passing Gate Result matches the running model.
+The frozen record of one office level's (or the mayoral variant's) Replays: pass or fail, the scores, and the model version it holds for. A level's Election-Night Projection may show only while a passing Gate Result matches the running model. The one exception is the mayor, live on Alex's approval of its failed Gate Results for the version they scored (ADR 0002).
 _Avoid_: Scoreboard, qualification result
 
 **Night Bundle**:
@@ -82,6 +82,14 @@ _Avoid_: Freeze (alone; Night Close is not a freeze), code freeze
 **Withdrawal**:
 An Election-Night Projection withheld from a race or an office level during the night by an integrity check or a switch, leaving the Live Tally. Unlike a level that failed its gate, it is temporary and can lift.
 _Avoid_: Kill, outage, count only
+
+**Estimated Range**:
+A candidate's central 90% final-share range from the Election-Night Projection: where their final share lands in 9 of 10 simulated finishes. For the mayor it comes from the forecast-weighted variant, or count-only when the variant isn't in effect.
+_Avoid_: Confidence interval, margin of error, prediction
+
+**Possible Range**:
+The mayor's final shares still mathematically possible for a candidate, from none of the outstanding votes going to them up to all of them. It assumes nothing about how the outstanding votes will split, and is shown beside the Estimated Range (ADR 0002).
+_Avoid_: Worst case, best case, scenario
 
 **Night Close**:
 The declared end of election night, after which the City's count is treated as no longer changing and the page shows its final unofficial state. The City's feed has no completion signal, so it is declared, never inferred.
