@@ -1,0 +1,22 @@
+# The Mock Feed (#37): the City's two files for a Rehearsal, at /results/<file>. Deployed by digest
+# from mock-feed.yml, never built here; the workflow passes MOCK_FEED_START, MOCK_FEED_SPEED and
+# MOCK_FEED_FAULTS with --env. Outside yyz, where the Fly pipeline runs.
+app = "toronto-election-mock-feed"
+primary_region = "ord"
+
+[processes]
+  app = "election-night mock-feed --port 8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  min_machines_running = 1
+  processes = ["app"]
+
+[[restart]]
+  policy = "always"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
