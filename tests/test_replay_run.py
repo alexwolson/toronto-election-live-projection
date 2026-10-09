@@ -131,3 +131,26 @@ def test_a_capture_name_the_certified_count_leaves_out_finishes_at_zero():
     assert case.checkpoint == "capture 2022-10-24T21:09" and case.order is None
     assert case.final.size == 3 and case.final[-1] == 0.0
     assert case.final.sum() == pytest.approx(100.0)
+
+
+def test_mayor_gate_results_carry_the_bailao_check_and_fail_it_without_the_capture():
+    nights = {2023: tiny_night(2023)}
+    orders = {2023: [("interleaved", 0, _order(nights[2023]))]}
+    result = replay_level("mayor-count-only", PREREG, nights, orders, [], "v")
+    six = next(c for c in result["criteria"] if c["id"] == 6)
+
+    assert six["value"] is None and six["pass"] is False
+    assert result["pass"] is False
+
+
+def test_the_bailao_check_reads_her_win_probability_at_the_capture():
+    night = tiny_night(2023)
+    order = _order(night)
+    snap = next(snapshots(night, order, steps=[len(order) // 2]))
+    capture = Capture(2023, "2023-06-26T20:26", "ward-by-ward", snap.all_office, snap.ward_by_ward)
+    orders = {2023: [("interleaved", 0, order)]}
+    result = replay_level("mayor-count-only", PREREG, {2023: night}, orders, [capture], "v")
+    six = next(c for c in result["criteria"] if c["id"] == 6)
+
+    assert six["value"] is not None and 0.0 <= six["value"] <= 1.0
+    assert isinstance(six["pass"], bool)

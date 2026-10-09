@@ -14,6 +14,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from election_night.names import name_words
+
 
 @dataclass(frozen=True, eq=False)
 class Case:
@@ -25,6 +27,7 @@ class Case:
     tally: np.ndarray  # (candidates,): counted shares
     final: np.ndarray  # (candidates,): certified shares
     retired: bool = False  # all units in: the projection has retired and the count stands
+    keys: tuple[str, ...] = ()  # the candidates' Ballot Names, in the draws' order
 
 
 @dataclass(frozen=True)
@@ -161,6 +164,34 @@ def criteria(nights: dict[int, dict], prereg: dict, level: str) -> list[dict]:
         {"id": i, "name": listed[i]["name"], "pass": bool(ok), "value": value, "threshold": bar}
         for i, ok, value, bar in results
     ]
+
+
+BAILAO_NIGHT = 2023
+
+
+def bailao_check(cases: list[Case], prereg: dict, candidate: str) -> dict:
+    """The Bailão check: at the 2023 ward-by-ward capture, `candidate`'s win probability (the
+    share of draws she leads) is under the pre-registered maximum. `candidate` is her name as
+    the forecast writes it, matched to the Ballot Names by their words. Without that case the
+    check fails closed, with a null value."""
+    listed = next(c for c in prereg["pass_criteria"]["criteria"] if c["id"] == 6)
+    capture = next(e for e in prereg["real_captures"]["mayor"] if e["night"] == BAILAO_NIGHT)
+    checkpoint = f"capture {capture['time_edt']}"
+    value = None
+    for case in cases:
+        if case.night == BAILAO_NIGHT and case.race == "mayor" and case.checkpoint == checkpoint:
+            (index,) = [
+                i for i, k in enumerate(case.keys) if name_words(k) == name_words(candidate)
+            ]
+            value = float(np.mean(_first_max(case.draws) == index))
+    bar = listed["max_win_probability"]
+    return {
+        "id": 6,
+        "name": listed["name"],
+        "pass": value is not None and value < bar,
+        "value": value,
+        "threshold": bar,
+    }
 
 
 def checkpoint_steps(received: np.ndarray, units: int, percents) -> list[tuple[int, int]]:

@@ -17,7 +17,7 @@ from election_night.alerts import Alerts
 from election_night.archive import Archive, ArchiveWriter
 from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write_bundle
 from election_night.feed import check_status
-from election_night.gates import load_preregistration, s3_record
+from election_night.gates import HOLDOUT_FORECASTS, load_preregistration, s3_record
 from election_night.goldens import write_goldens
 from election_night.name_inputs import fetch_name_inputs, load_name_inputs, refresh_forecast
 from election_night.payload import build_payload
@@ -211,7 +211,7 @@ def main(argv: list[str] | None = None) -> None:
     s3 = commands.add_parser(
         "s3-shift", help="print the stress-test shift block of the pre-registration (S3)"
     )
-    s3.add_argument("--forecasts", type=Path, default=ROOT / "data" / "forecasts" / "holdout-1d")
+    s3.add_argument("--forecasts", type=Path, default=HOLDOUT_FORECASTS)
     s3.add_argument(
         "--outcomes",
         type=Path,

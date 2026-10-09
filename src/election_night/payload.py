@@ -21,10 +21,12 @@ from election_night.feed import (
     read_ward_by_ward,
 )
 from election_night.projection.count_extension import (
+    MayorParams,
     Params,
     RaceInputs,
     bands,
     draw_final_shares,
+    draw_mayor_final_shares,
 )
 
 SCHEMA_VERSION = 1
@@ -187,10 +189,35 @@ def _model(race: dict, spec: dict, params: dict, rng: np.random.Generator, draws
     keys = tuple(c["key"] for c in race["candidates"])
     votes = np.array([c["votes"] for c in race["candidates"]])
     shares = draw_final_shares(inputs, Params(**params), votes, race["progress"]["received"], rng)
+    _projected(race, keys, shares, draws)
+
+
+def _projected(race: dict, keys: tuple[str, ...], shares: np.ndarray | None, draws: dict) -> None:
+    """The race's count-only bands and draws, unless the model showed no projection."""
     if shares is None:
         return
     race["projection"] = {"stub": False, "bands": {"count_only": bands(shares, keys)}}
     draws[race["id"]] = {"count_only": (keys, shares)}
+
+
+def _mayor_model(
+    race: dict, spec: dict, params: dict, rng: np.random.Generator, draws: dict
+) -> None:
+    """The mayor's projection from the ward-by-ward file alone: one unit per City ward, summed
+    to the citywide result. Inputs that don't match the file's wards and their units fail
+    closed: the count stands with no projection."""
+    inputs = RaceInputs.from_bundle(spec["expected"])
+    wards = {w["num"]: w for w in race["wards"]}
+    if sorted(wards) != sorted(w.ward for w in inputs.wards) or any(
+        w.election_day_units + len(w.aggregates) != wards[w.ward]["progress"]["total"]
+        for w in inputs.wards
+    ):
+        return
+    keys = tuple(c["key"] for c in race["candidates"])
+    votes = np.array([[wards[w.ward]["votes"].get(k, 0) for k in keys] for w in inputs.wards])
+    received = np.array([wards[w.ward]["progress"]["received"] for w in inputs.wards])
+    shares = draw_mayor_final_shares(inputs, MayorParams(**params), votes, received, rng)
+    _projected(race, keys, shares, draws)
 
 
 def _seed(a_seq: int, w_seq: int, model_version: str) -> int:
@@ -229,7 +256,8 @@ def project(
             modelled = race["state"] == "counting" and params and "expected" in spec
             if modelled and (only is None or spec["id"] in only):
                 race_rng = np.random.default_rng(np.random.SeedSequence([seed, index]))
-                _model(race, spec, params, race_rng, draws)
+                model = _mayor_model if spec["office_id"] == MAYOR_OFFICE_ID else _model
+                model(race, spec, params, race_rng, draws)
             elif not modelled and race["state"] == "counting" and spec["level"] in VARIANTS:
                 bands = {v: _stub_bands(race, rng) for v in VARIANTS[spec["level"]]}
                 race["projection"] = {"stub": True, "bands": bands}
