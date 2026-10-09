@@ -1,4 +1,4 @@
-# The payload, schema version 1
+# The payload, schema version 2
 
 The payload is the one citywide JSON file each pipeline publishes per Count Snapshot pair
 (#17 § Payload). It is a pure function of the City's two files and the Night Bundle
@@ -13,7 +13,7 @@ Fields marked *v0 null* are in the layout now and filled by later tickets (#46 f
 
 | Field | Type | Meaning |
 |---|---|---|
-| `schema_version` | int | `1` |
+| `schema_version` | int | `2` (2 added a modelled mayor's `projection.variant`, #41) |
 | `model_version` | string | The Night Bundle's model version. `"stub-v0"` while projections are stubs. |
 | `forecast_release_tag` | string or null | The pinned Backend release of the final forecast. *v0 null* |
 | `seq` | object | `{"all_office": int, "ward_by_ward": int}`: each file's `seq` (epoch ms). "City count as of" is the older one. |
