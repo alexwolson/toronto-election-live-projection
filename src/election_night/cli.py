@@ -284,7 +284,7 @@ def main(argv: list[str] | None = None) -> None:
     mock.add_argument(
         "--speed",
         type=float,
-        default=float(os.environ.get("MOCK_FEED_SPEED", "1")),
+        default=os.environ.get("MOCK_FEED_SPEED", "1"),  # converted only for mock-feed
         help="night minutes per wall minute: about 10 for Plumbing, 4 for the Dress "
         "(env MOCK_FEED_SPEED, default 1)",
     )
@@ -296,7 +296,7 @@ def main(argv: list[str] | None = None) -> None:
         default=os.environ.get("MOCK_FEED_FAULTS", "on") != "off",
         help="serve no HTTP faults (env MOCK_FEED_FAULTS=off)",
     )
-    mock.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8080")))
+    mock.add_argument("--port", type=int, default=os.environ.get("PORT", "8080"))
     mock.set_defaults(run=cmd_mock_feed)
 
     args = parser.parse_args(argv)

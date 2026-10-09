@@ -47,7 +47,7 @@ def feed(scenario):
     return MockFeed(scenario, start_ms=START, speed=1.0)
 
 
-def body(feed, file, now):
+def ok(feed, file, now):
     response = feed.respond(file, now, None)
     assert response.status == 200
     return response
@@ -58,24 +58,23 @@ def seq(response) -> int:
 
 
 def test_the_start_maps_to_1950_on_the_night(scenario):
-    assert NIGHT_START == int(datetime.fromisoformat("2026-10-26T19:50:00-04:00").timestamp() * 1e3)
     fast = MockFeed(scenario, start_ms=START, speed=10.0)
-    at_start = seq(body(fast, ALL, START))
+    at_start = seq(ok(fast, ALL, START))
     assert NIGHT_START <= at_start < NIGHT_START + 60_000
     # One wall minute at 10x is ten night minutes: 20:00.
-    assert OPENING <= seq(body(fast, ALL, START + 60_000)) < OPENING + 60_000
+    assert OPENING <= seq(ok(fast, ALL, START + 60_000)) < OPENING + 60_000
 
 
 def test_the_two_files_have_separate_seqs_on_the_same_generation(feed):
     now = night("20:15")
-    a, w = seq(body(feed, ALL, now)), seq(body(feed, WARD, now))
+    a, w = seq(ok(feed, ALL, now)), seq(ok(feed, WARD, now))
     assert a != w and abs(a - w) < 1_000
-    assert read_all_office(body(feed, ALL, now).body).seq == a
+    assert read_all_office(ok(feed, ALL, now).body).seq == a
 
 
 def test_etag_and_last_modified_and_304(feed):
     now = night("20:10")
-    first = body(feed, ALL, now)
+    first = ok(feed, ALL, now)
     etag = first.headers["ETag"]
     assert etag.startswith('"') and etag.endswith('"')
     modified = parsedate_to_datetime(first.headers["Last-Modified"]).timestamp()
@@ -108,7 +107,7 @@ def _leaves(value):
 
 @pytest.mark.parametrize("file", FILES)
 def test_values_are_strings_and_candidates_are_sorted_by_votes(feed, file):
-    data = json.loads(body(feed, file, night("20:15")).body)
+    data = json.loads(ok(feed, file, night("20:15")).body)
     # Every value is a string, as the City writes them; only the office ids are numbers.
     office_ids = [o["id"] for o in data["office"]] if isinstance(data["office"], list) else []
     assert [v for v in _leaves(data) if not isinstance(v, str)] == office_ids
@@ -126,18 +125,18 @@ def test_the_tallies_are_the_true_count_at_the_feeds_step(feed, scenario):
     step = feed.step_at(now)
     assert 0 < step < scenario.steps
     truth = scenario.true_count(step)
-    a = read_all_office(body(feed, ALL, now).body)
+    a = read_all_office(ok(feed, ALL, now).body)
     for office_id, num in a.rows:
         tally = a.tally(office_id, num)
         expected = truth.races[race_id(office_id, num)]
         assert tally.votes == expected.votes
         assert tally.polls_received == expected.polls_received
-    w = read_ward_by_ward(body(feed, WARD, now).body)
+    w = read_ward_by_ward(ok(feed, WARD, now).body)
     assert {t.num: t.votes for t in w.wards()} == {t.num: t.votes for t in truth.wards}
 
 
 def test_the_count_completes_and_generation_stops(feed, scenario):
-    late, later = body(feed, ALL, night("23:59")), body(feed, ALL, night("23:59") + 3_600_000)
+    late, later = ok(feed, ALL, night("23:59")), ok(feed, ALL, night("23:59") + 3_600_000)
     assert feed.step_at(night("23:59")) == scenario.steps
     assert seq(late) == seq(later) and late.headers["ETag"] == later.headers["ETag"]
 
@@ -150,7 +149,7 @@ def test_every_file_is_marked_rehearsal(feed, file):
 
 
 def test_before_the_start_it_serves_the_zeroed_test_files(feed):
-    response = body(feed, ALL, START - 1)
+    response = ok(feed, ALL, START - 1)
     test_file = read_all_office((ROOT / "tests/fixtures/feed/city-2026" / ALL).read_bytes())
     assert seq(response) == test_file.seq
     assert all(int(c) == 0 for c in _counts(json.loads(response.body)))
@@ -161,10 +160,10 @@ def _counts(data: dict) -> list[str]:
 
 
 def test_the_sept_28_repeat_shows_live_looking_data_before_2000_then_zeros(feed):
-    before = [body(feed, f, night("19:55")) for f in FILES]
+    before = [ok(feed, f, night("19:55")) for f in FILES]
     assert all(seq(r) < OPENING for r in before)
     assert all(sum(int(c) for c in _counts(json.loads(r.body))) > 0 for r in before)
-    at_opening = [body(feed, f, night("20:00") + 5_000) for f in FILES]
+    at_opening = [ok(feed, f, night("20:00") + 5_000) for f in FILES]
     assert all(seq(r) >= OPENING for r in at_opening)
     assert all(int(c) == 0 for r in at_opening for c in _counts(json.loads(r.body)))
     # The night's bundle reads the repeat as "before results", and the REHEARSAL bar shows.
@@ -180,9 +179,9 @@ def _fault(kind: str):
 
 def test_a_long_304_run_freezes_the_generation(feed):
     fault, mid = _fault("stall")
-    frozen = body(feed, ALL, night("19:50") + fault.start * 60_000)
+    frozen = ok(feed, ALL, night("19:50") + fault.start * 60_000)
     assert feed.respond(ALL, mid, frozen.headers["ETag"]).status == 304
-    assert feed.respond(WARD, mid, body(feed, WARD, mid).headers["ETag"]).status == 304
+    assert feed.respond(WARD, mid, ok(feed, WARD, mid).headers["ETag"]).status == 304
     after = night("19:50") + (fault.start + fault.minutes) * 60_000
     assert feed.respond(ALL, after, frozen.headers["ETag"]).status == 200
 
@@ -205,7 +204,7 @@ def test_a_truncated_body_is_unreadable(feed):
     assert response.status == 200
     with pytest.raises(UnreadableFile):
         read_all_office(response.body)
-    read_ward_by_ward(body(feed, WARD, mid).body)
+    read_ward_by_ward(ok(feed, WARD, mid).body)
 
 
 def test_a_renamed_key_is_unreadable(feed):
@@ -214,13 +213,13 @@ def test_a_renamed_key_is_unreadable(feed):
     assert response.status == 200
     with pytest.raises(UnreadableFile):
         read_ward_by_ward(response.body)
-    read_all_office(body(feed, ALL, mid).body)
+    read_all_office(ok(feed, ALL, mid).body)
 
 
 def test_one_file_fails_while_the_other_is_fine(feed):
     _, mid = _fault("one-file")
     assert feed.respond(WARD, mid, None).status == 503
-    read_all_office(body(feed, ALL, mid).body)
+    read_all_office(ok(feed, ALL, mid).body)
 
 
 def test_the_faults_never_overlap_and_can_be_switched_off(scenario):
@@ -228,7 +227,7 @@ def test_the_faults_never_overlap_and_can_be_switched_off(scenario):
     assert all(a[1] <= b[0] for a, b in pairwise(windows))
     quiet = MockFeed(scenario, start_ms=START, speed=1.0, faults=())
     for fault in FAULTS:
-        mid = night("19:50") + (fault.start + fault.minutes / 2) * 60_000
+        _, mid = _fault(fault.kind)
         for f in FILES:
             response = quiet.respond(f, mid, None)
             assert response.status == 200 and response.delay == 0

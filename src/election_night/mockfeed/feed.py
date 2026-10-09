@@ -46,7 +46,7 @@ class Fault:
 
 
 # The fault script's HTTP faults (#17 § Rehearsal plan), 20 night minutes or more each: about two
-# polls at 10x.
+# pipeline ticks at 10x.
 FAULTS = (
     Fault("stall", FILES, 30, 30),  # 20:20-20:50: a long 304 run
     Fault("5xx", FILES, 70, 20),  # 21:00-21:20
@@ -56,9 +56,10 @@ FAULTS = (
     Fault("renamed", (WARD_BY_WARD,), 190, 20),  # 23:00-23:20
     Fault("one-file", (WARD_BY_WARD,), 220, 20),  # 23:30-23:50: a 503, all-office fine
 )
+UNAVAILABLE = (503, b"<html><body><h1>503 Service Unavailable</h1></body></html>\n")
 ERRORS = {
-    "5xx": (503, b"<html><body><h1>503 Service Unavailable</h1></body></html>\n"),
-    "one-file": (503, b"<html><body><h1>503 Service Unavailable</h1></body></html>\n"),
+    "5xx": UNAVAILABLE,
+    "one-file": UNAVAILABLE,
     "throttle": (
         403,
         (
@@ -158,8 +159,7 @@ class MockFeed:
         g = self.generation(now_ms)
         current = self._zeroed[file] if g is None else self._generation_files(g)[file]
         fault = self._fault(self.night_ms(now_ms)) if g is not None else None
-        fault = fault if fault and file in fault.files else None
-        kind = fault.kind if fault else None
+        kind = fault.kind if fault and file in fault.files else None
         if kind in ERRORS:
             status, body = ERRORS[kind]
             return Response(status, {"Content-Type": "text/html"}, body)
