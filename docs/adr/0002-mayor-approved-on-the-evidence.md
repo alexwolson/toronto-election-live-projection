@@ -17,7 +17,12 @@ The mayor card shows each candidate:
   ESS floor (1,000 of 10,000 draws), that refresh shows count-only's range instead, and with the
   forecast off, count-only's all night (#41).
 - **Possible Range:** the final share that is still mathematically possible, from none of the
-  outstanding votes going to the candidate up to all of them.
+  outstanding votes going to the candidate up to all of them. The outstanding votes are bounded by
+  **every remaining elector** (Alex, 2026-10-09): in each City ward not fully reported, the
+  ward-by-ward file's electors (`totalVoters`) less its votes counted, floored at 0; 0 in a ward
+  fully reported. With R that bound summed over the wards, V the votes counted and v a candidate's
+  votes, the range is v / (V + R) to (v + R) / (V + R). It is strictly possible but wide early in
+  the night, by design.
 - **No win probability**, ever, and no chance-to-win or race-call wording (#17).
 - **A plain statement** that the model did worse than expected on the 2023 by-election and very
   well on the regular elections it was tested on (2014, 2018, 2022).
@@ -72,12 +77,12 @@ forecast weights never fell below the ESS floor, so the card would never have sw
 - **No hidden claim.** The page states that the model did worse than expected on 2023, as above.
   Its wording is drafted with the rest of the on-night wording and approved by Alex (#54).
 
-## Open, for the implementing tickets
+## For the implementing tickets
 
-- **The Possible Range's bound on the outstanding votes.** "All of them" needs an upper bound on
-  the votes still to be counted. The feed doesn't give one. The candidates are every remaining
-  elector in the unreported units (strictly possible, very wide early), or the top of the
-  expected-totals grid (turnout 0.70, an assumption). Alex chooses before it is built.
+- **Election-day registrations.** If the feed's `totalVoters` is the pre-night electors list, a
+  ward's votes can exceed it once election-day registrations are counted, and the floor at 0 then
+  understates what is possible there. #45 checks `totalVoters` against the historical files before
+  relying on it.
 - **Payload and page.** The mayor payload already carries both bands and the variant marker (#41,
   schema 2). The Possible Range, the approval record and the gating that honours it are new: #45
   takes them.
