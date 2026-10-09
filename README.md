@@ -113,4 +113,19 @@ uv run election-night replay --level council --timeout 3600
 Levels are `council`, `trustee`, `mayor-count-only` and `mayor-forecast-weighted`. The smoke run
 prints its timing and an extrapolation to the full run.
 
+## Mock Feed scenario
+
+`election_night.mockfeed.scenario` builds the invented, 2026-shaped true count the Rehearsals run
+against (#34, S6). `load_scenario(seed)` takes the races, Ballot Names, `polls` and `totalVoters`
+from the City's zeroed test files and carries votes over by rank: the mayor from 2023 in the final
+forecast's rank (Bradford takes Bailão's election-day lead, and Chow wins on the late Ward
+Aggregates), council and the English boards from 2022 in ballot order. The French boards have no
+workbooks and stay at 0 votes. The units arrive in the pre-registered "late" order with that
+seed, and `scenario.true_count(step)` gives each race's tally and the mayor's ward tallies after
+`step` units: the reference for the Rehearsals' exact-tallies check. `scenario.count_snapshot(step)`
+gives the same count as the City's two files, in the test files' layout (names, `polls` and
+`totalVoters` kept, candidates re-sorted, strings throughout); the `mock-feed` command (#37) stamps
+the `seq`s and serves them. The 2026 trustee map it
+reads is in [data/mock-feed/](data/mock-feed/README.md).
+
 This is an independent Git repository within the Toronto election workspace.

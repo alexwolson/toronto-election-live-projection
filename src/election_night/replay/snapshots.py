@@ -43,7 +43,7 @@ def _dumps(data: dict) -> bytes:
     return json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
 
 
-class _Cumulative:
+class Cumulative:
     """A race's (or one mayoral ward's) counted votes after each step of an order."""
 
     def __init__(self, race: Race, night: Night, order: np.ndarray, ward: int | None = None):
@@ -62,7 +62,7 @@ def _ranked(candidates: tuple[str, ...], votes: np.ndarray) -> list[int]:
     return sorted(range(len(candidates)), key=lambda c: (-votes[c], c))
 
 
-def _row(race: Race, cum: _Cumulative, step: int, with_name: bool) -> dict:
+def _row(race: Race, cum: Cumulative, step: int, with_name: bool) -> dict:
     votes = cum.votes[step]
     total = int(votes.sum())
     row = {"name": race.name} if with_name else {}
@@ -95,9 +95,9 @@ def snapshots(
     order = np.asarray(order)
     if sorted(order.tolist()) != list(range(len(night.units))):
         raise ValueError("the order must be a permutation of the night's units")
-    cums = [_Cumulative(race, night, order) for race in night.races]
+    cums = [Cumulative(race, night, order) for race in night.races]
     mayor = night.mayor
-    wards = [(num, name, _Cumulative(mayor, night, order, ward=num)) for num, name in night.wards]
+    wards = [(num, name, Cumulative(mayor, night, order, ward=num)) for num, name in night.wards]
     opening = _opening_ms(night)
 
     for step in range(len(order) + 1) if steps is None else steps:
