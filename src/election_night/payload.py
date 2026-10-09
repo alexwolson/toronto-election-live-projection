@@ -37,7 +37,7 @@ from election_night.projection.forecast_weighted import (
     weighted_bands,
 )
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 STUB_DRAWS = 1000
 
 # A race's draws per variant: the candidates' keys in payload order, a (draws, candidates) array
