@@ -26,7 +26,8 @@ Fields marked *v0 null* are in the layout now and filled by later tickets (#46 f
 `levels` has keys `mayor`, `council`, `trustee` (TDSB and TCDSB) and `french_trustee`. Each is
 `{"projection": status}`, and mayor also has `"variant"` for the forecast-weighted variant.
 Statuses: `"stub"` (deterministic stub bands, not a projection) and `"none"` (the level never has
-one). Later tickets add the gated statuses.
+one). Later tickets add the gated statuses (#45). Until then council and trustee keep `"stub"`
+here even when their races carry the model's bands; the race's own `projection.stub` says which.
 
 ## Race
 
@@ -83,11 +84,20 @@ published: the `council-counting-2022` golden carries MonAvenir 4 at 539 of 0 un
   row unreadable. School-board `totalVoters` are never read.
 - Counts that go down are published as they are.
 - Stub bands are seeded from both `seq`s and the model version.
+- **Council and trustee projections** (#33): when the Night Bundle carries a level's fitted
+  parameters (`projection.params`) and a race's expected-total inputs (`races[].expected`), a
+  `counting` race gets the count-extension model's bands, `"stub": false`, variant `count_only`
+  (`src/election_night/projection/count_extension.py`). Each candidate's band is the 5th, 50th and
+  95th percentile of 10,000 draws of their final share. Each race draws from its own stream, seeded
+  by both `seq`s, the model version and the race's place in the bundle. Inputs that don't add up to
+  the race's `polls`, or a count no hypothesis fits, leave the race with no projection: the count
+  stands. A bundle without these inputs keeps the stub bands; the 2026 bundle gains them in #46.
 - A pair is rejected (`UnreadableFile`) only when a file is not JSON or misses a structural key:
   `seq`, `office`, the ward or candidate arrays. A response status other than 200 or 304 is
   rejected by `check_status` before the body is read.
 
 Golden payloads for each reachable state are in `goldens/payload/`, emitted by
 `uv run election-night goldens` from the real City files in `tests/fixtures/feed/` and, for
-`replay-counting-2022`, from a short Replay of the certified 2022 counts (#28). Replay payloads
+`replay-counting-2022`, from a short Replay of the certified 2022 counts (#28), with council and
+trustee projected by the model fitted without 2022 (#33). Replay payloads
 key candidates by the workbooks' Ballot Names (`Tory John`) and carry no registry fields.

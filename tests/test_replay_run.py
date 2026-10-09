@@ -79,8 +79,8 @@ def test_a_projection_at_the_truth_passes_and_the_tally_alone_does_not(monkeypat
     nights = {2014: tiny_night(2014), 2018: tiny_night(2018), 2022: night}
     orders = {y: [("interleaved", 0, _order(n))] for y, n in nights.items()}
 
-    def at_the_truth(all_office, ward_by_ward, bundle):
-        body, draws = real_project(all_office, ward_by_ward, bundle)
+    def at_the_truth(all_office, ward_by_ward, bundle, only=None):
+        body, draws = real_project(all_office, ward_by_ward, bundle, only)
         for rid, variants in draws.items():
             race = next(r for r in night.races if race_id(r.office_id, r.num) == rid)
             certified = dict(zip(race.candidates, 100 * race.certified / race.certified.sum()))
