@@ -55,8 +55,8 @@ LEVELS = {
 }
 
 
-def _bundle(night: Night, model_version: str) -> dict:
-    return {**night_bundle(night), "model_version": model_version}
+def _bundle(night: Night, model_version: str, make_bundle=night_bundle) -> dict:
+    return {**make_bundle(night), "model_version": model_version}
 
 
 def _scored(night: Night, bundle: dict, level: Level) -> list[tuple[dict, Race]]:
@@ -101,9 +101,10 @@ def order_cases(
     prereg: dict,
     model_version: str,
     project=payload.project,
+    make_bundle=night_bundle,
 ) -> list[Case]:
     """Every scored race of the level at each of its checkpoints along one arrival order."""
-    bundle = _bundle(night, model_version)
+    bundle = _bundle(night, model_version, make_bundle)
     percents = prereg["checkpoints"]["reporting_progress_percent"]
     keys = [night.units[i].key for i in order]
     at_step: dict[int, list] = {}
@@ -114,7 +115,8 @@ def order_cases(
             at_step.setdefault(step, []).append((spec["id"], race, f"{p}%"))
     cases = []
     for snap in snapshots(night, order, steps=sorted(at_step)):
-        body, draws = project(snap.all_office, snap.ward_by_ward, bundle)
+        scored = {race_id for race_id, _, _ in at_step[snap.step]}
+        body, draws = project(snap.all_office, snap.ward_by_ward, bundle, only=scored)
         rows = {r["id"]: r for r in body["races"]}
         for race_id, race, checkpoint in at_step[snap.step]:
             cases.append(_case(night, race, rows[race_id], draws, level, checkpoint, label))
@@ -128,13 +130,14 @@ def capture_cases(
     prereg: dict,
     model_version: str,
     project=payload.project,
+    make_bundle=night_bundle,
 ) -> list[Case]:
     """The level's races the captured file holds, from the grid's lowest point of Reporting
     Progress up to but not including 100%."""
     if not level.reads(capture):
         return []
     lowest = min(prereg["checkpoints"]["reporting_progress_percent"])
-    bundle = _bundle(night, model_version)
+    bundle = _bundle(night, model_version, make_bundle)
     body, draws = project(capture.all_office, capture.ward_by_ward, bundle)
     rows = {r["id"]: r for r in body["races"]}
     cases = []
@@ -175,6 +178,7 @@ def replay_level(
     model_version: str,
     smoke: bool = False,
     project=payload.project,
+    make_bundle=night_bundle,
 ) -> dict:
     """The level's Gate Result, without its run number."""
     level = LEVELS[level_name]
@@ -183,13 +187,13 @@ def replay_level(
     for year, night in nights.items():
         for kind, index, order in orders[year]:
             cases = order_cases(
-                night, order, f"{kind}-{index}", level, prereg, model_version, project
+                night, order, f"{kind}-{index}", level, prereg, model_version, project, make_bundle
             )
             (deciding if kind in patterns else stress).extend(cases)
     for capture in captures:
         if capture.night in nights:
             deciding += capture_cases(
-                nights[capture.night], capture, level, prereg, model_version, project
+                nights[capture.night], capture, level, prereg, model_version, project, make_bundle
             )
 
     by_night = _summary(deciding, prereg)
@@ -233,13 +237,17 @@ def run_replay(level_name: str, prereg: dict, years: list[int], smoke: bool) -> 
     of each timing pattern and no stress orders. Returns the Gate Result and timing figures."""
     import time
 
+    from election_night.projection.history import replay_bundle
     from election_night.replay.captures import real_captures
     from election_night.replay.gate_result import model_files, model_version
-    from election_night.replay.historical import load_night
+    from election_night.replay.historical import YEARS, load_night
     from election_night.replay.orders import arrival_order, orders
 
     start = time.monotonic()
-    nights = {year: load_night(year, prereg) for year in years}
+    # Every night is loaded for the folds' history; only `years` are replayed.
+    history = {year: load_night(year, prereg) for year in YEARS}
+    nights = {year: history[year] for year in years}
+    bundles = {year: replay_bundle(history[year], history, prereg) for year in years}
     patterns = list(prereg["arrival_orders"]["ward_aggregates"]["timing_patterns"])
     if smoke:
         drawn = {
@@ -256,7 +264,16 @@ def run_replay(level_name: str, prereg: dict, years: list[int], smoke: bool) -> 
     captures = real_captures({"real_captures": kept}, ROOT, nights)
     loaded = time.monotonic()
     version = model_version(ROOT, model_files(ROOT))
-    result = replay_level(level_name, prereg, nights, drawn, captures, version, smoke=smoke)
+    result = replay_level(
+        level_name,
+        prereg,
+        nights,
+        drawn,
+        captures,
+        version,
+        smoke=smoke,
+        make_bundle=lambda night: bundles[night.year],
+    )
     done = time.monotonic()
     arrival = prereg["arrival_orders"]
     full_orders = arrival["orders_per_night"] + sum(

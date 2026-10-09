@@ -20,6 +20,12 @@ from election_night.feed import (
     read_all_office,
     read_ward_by_ward,
 )
+from election_night.projection.count_extension import (
+    Params,
+    RaceInputs,
+    bands,
+    draw_final_shares,
+)
 
 SCHEMA_VERSION = 1
 STUB_DRAWS = 1000
@@ -172,15 +178,35 @@ def _all_office_race(race: dict, spec: dict, a: AllOffice) -> None:
     _with_tally(race, spec, tally)
 
 
+def _model(race: dict, spec: dict, params: dict, rng: np.random.Generator, draws: dict) -> None:
+    """The count-extension projection for a counting single-unit race. Inputs that don't cover
+    the race's units fail closed: the count stands with no projection."""
+    inputs = RaceInputs.from_bundle(spec["expected"])
+    if inputs.units != race["progress"]["total"]:
+        return
+    keys = tuple(c["key"] for c in race["candidates"])
+    votes = np.array([c["votes"] for c in race["candidates"]])
+    shares = draw_final_shares(inputs, Params(**params), votes, race["progress"]["received"], rng)
+    if shares is None:
+        return
+    race["projection"] = {"stub": False, "bands": {"count_only": bands(shares, keys)}}
+    draws[race["id"]] = {"count_only": (keys, shares)}
+
+
 def _seed(a_seq: int, w_seq: int, model_version: str) -> int:
     digest = hashlib.sha256(f"{a_seq}:{w_seq}:{model_version}".encode()).digest()
     return int.from_bytes(digest[:8], "big")
 
 
-def project(all_office: bytes, ward_by_ward: bytes, bundle: dict) -> tuple[dict, dict[str, Draws]]:
+def project(
+    all_office: bytes, ward_by_ward: bytes, bundle: dict, only: set[str] | None = None
+) -> tuple[dict, dict[str, Draws]]:
     """The payload, and the draws behind each projected race's bands, by race id and variant.
 
-    Raises UnreadableFile if the pair is rejected.
+    Each modelled race draws from its own stream, seeded by the pair, the model version and its
+    place in the bundle, so its draws don't depend on any other race. The Replays pass `only`,
+    the races they score at this snapshot, and skip every other modelled race's projection; stub
+    races are always drawn, so they never change. The night never passes it. Raises UnreadableFile if the pair is rejected.
     """
     a = read_all_office(all_office)
     w = read_ward_by_ward(ward_by_ward)
@@ -191,14 +217,20 @@ def project(all_office: bytes, ward_by_ward: bytes, bundle: dict) -> tuple[dict,
     rng = random.Random(seed)
     draw_rng = np.random.default_rng(seed)
     races, draws = [], {}
-    for spec in bundle["races"]:
+    fitted = bundle.get("projection", {}).get("params", {})
+    for index, spec in enumerate(bundle["races"]):
         race = _race(spec)
         if not before:
             if spec["office_id"] == MAYOR_OFFICE_ID:
                 _mayor_race(race, spec, w)
             else:
                 _all_office_race(race, spec, a)
-            if race["state"] == "counting" and spec["level"] in VARIANTS:
+            params = fitted.get(spec["level"])
+            modelled = race["state"] == "counting" and params and "expected" in spec
+            if modelled and (only is None or spec["id"] in only):
+                race_rng = np.random.default_rng(np.random.SeedSequence([seed, index]))
+                _model(race, spec, params, race_rng, draws)
+            elif not modelled and race["state"] == "counting" and spec["level"] in VARIANTS:
                 bands = {v: _stub_bands(race, rng) for v in VARIANTS[spec["level"]]}
                 race["projection"] = {"stub": True, "bands": bands}
                 keys = tuple(c["key"] for c in race["candidates"])
