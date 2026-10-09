@@ -84,11 +84,11 @@ An Election-Night Projection withheld from a race or an office level during the 
 _Avoid_: Kill, outage, count only
 
 **Estimated Range**:
-A candidate's central 90% final-share range from the Election-Night Projection: where their final share lands in 9 of 10 simulated finishes. For the mayor it comes from the forecast-weighted variant, or count-only when the variant isn't in effect.
+A candidate's central 90% final-share range from the Election-Night Projection: where their final share lands in 9 of 10 simulated finishes. For the mayor it comes only from the forecast-weighted variant; at a refresh where the variant isn't in effect, the mayor shows none (ADR 0002).
 _Avoid_: Confidence interval, margin of error, prediction
 
 **Possible Range**:
-The mayor's final shares still mathematically possible for a candidate, from none of the outstanding votes going to them up to all of them. It assumes nothing about how the outstanding votes will split, and is shown beside the Estimated Range (ADR 0002).
+A candidate's final shares still mathematically possible, from none of the outstanding votes going to them up to all of them, with the outstanding votes bounded by every remaining elector. It assumes nothing about how they will split, needs no gate, and is shown for mayor, council and trustee races beside any Estimated Range (ADR 0002).
 _Avoid_: Worst case, best case, scenario
 
 **Night Close**:

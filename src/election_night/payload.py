@@ -267,10 +267,15 @@ def _gate_status(record: dict | None, version: str) -> str:
     return "live" if record["pass"] or record.get("approved") else "gate_failed"
 
 
+# Statuses under which a level's projection shows: a live gate, a level with no fitted
+# parameters (stub bands), or a bundle with no Gate Results at all (the Replays).
+SHOWS = ("live", "stub", "ungated")
+
+
 def _levels(bundle: dict) -> tuple[dict, str]:
-    """Each level's projection status, and the mayor's count-only status. A level with no fitted parameters keeps its stub bands;
-    a bundle without Gate Results (the Replays, the historical goldens) leaves its projections
-    ungated."""
+    """Each level's projection status, and the mayor's count-only status. A level with no
+    fitted parameters keeps its stub bands; a bundle without Gate Results (the Replays, the
+    historical goldens) leaves its projections ungated."""
     fitted = bundle.get("projection", {}).get("params", {})
     records = bundle.get("gates")
     version = bundle["model_version"]
@@ -284,17 +289,15 @@ def _levels(bundle: dict) -> tuple[dict, str]:
 
     variant = status("mayor", "mayor-forecast-weighted")
     count_only = status("mayor", "mayor-count-only")
-    # The mayor is live if either version is; otherwise the likeliest operator fault first.
     mayor = variant
-    for candidate in ("live", "version_mismatch", "gate_missing", "gate_failed"):
-        if variant not in ("stub", "ungated") and candidate in (variant, count_only):
-            mayor = candidate
-            break
-    approved = bool(
-        records
-        and variant == "live"
+    if records is not None and variant != "stub":
+        # The mayor is live if either version is; otherwise the likeliest operator fault first.
+        order = ("live", "version_mismatch", "gate_missing", "gate_failed")
+        mayor = next(s for s in order if s in (variant, count_only))
+    approved = (
+        variant == "live"
         and not records["mayor-forecast-weighted"]["pass"]
-        and records["mayor-forecast-weighted"].get("approved")
+        and bool(records["mayor-forecast-weighted"].get("approved"))
     )
     return {
         "mayor": {"projection": mayor, "variant": variant, "approved": approved},
@@ -304,29 +307,26 @@ def _levels(bundle: dict) -> tuple[dict, str]:
     }, count_only
 
 
-def _gated(race: dict, levels: dict, mayor_count_only: str) -> None:
-    """Name the band the page shows, and on a gated night publish only that one: for the mayor,
-    the forecast-weighted range while it is in effect, else count-only's if count-only is live,
-    else none (ADR 0002). A level that isn't live shows the tally. Ungated (the Replays), every
-    band stays."""
+def _gated(race: dict, levels: dict, mayor_count_only: str, gated: bool) -> None:
+    """Apply the level's gate to a race's projection. A level that isn't live shows the tally,
+    stub bands included. Otherwise name the band the page shows: council and trustee count-only;
+    the mayor the forecast-weighted range while it is in effect, else count-only's if count-only
+    is live, else none (ADR 0002). On a gated night only that band is published; ungated (the
+    Replays) every band stays."""
     projection = race["projection"]
-    if not projection or projection["stub"] or race["level"] not in ("mayor", "council", "trustee"):
+    level = race["level"]
+    if not projection or level not in ("mayor", "council", "trustee"):
         return
-    if race["level"] != "mayor":
-        status = levels[race["level"]]["projection"]
-        if status in ("live", "ungated"):
-            projection["shown"] = "count_only"
-        else:
-            race["projection"] = None
-        return
-    open_ = ("live", "ungated")
-    variant_live = levels["mayor"]["variant"] in open_
-    count_only_live = mayor_count_only in open_
-    if not (variant_live or count_only_live):
+    if levels[level]["projection"] not in SHOWS:
         race["projection"] = None
         return
-    allowed = {"forecast_weighted": variant_live, "count_only": count_only_live}
-    projection["bands"] = {k: v for k, v in projection["bands"].items() if allowed[k]}
+    if projection["stub"]:
+        return
+    if level != "mayor":
+        projection["shown"] = "count_only"
+        return
+    variant_live = levels["mayor"]["variant"] in SHOWS
+    count_only_live = mayor_count_only in SHOWS
     in_effect = projection.get("variant", {}).get("in_effect")
     if variant_live and in_effect == "forecast_weighted":
         projection["shown"] = "forecast_weighted"
@@ -334,8 +334,8 @@ def _gated(race: dict, levels: dict, mayor_count_only: str) -> None:
         projection["shown"] = "count_only"
     else:
         projection["shown"] = None
-    if "live" in (levels["mayor"]["variant"], mayor_count_only):
-        # On a gated night the payload is public: a band set aside is not published.
+    if gated:
+        # The payload is public: a band set aside is not published.
         shown = projection["shown"]
         projection["bands"] = {k: v for k, v in projection["bands"].items() if k == shown}
 
@@ -425,7 +425,7 @@ def project(
         races.append(race)
     levels, mayor_count_only = _levels(bundle)
     for race in races:
-        _gated(race, levels, mayor_count_only)
+        _gated(race, levels, mayor_count_only, gated="gates" in bundle)
 
     desc = a.election_desc
     payload = {

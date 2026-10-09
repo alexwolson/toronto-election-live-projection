@@ -188,3 +188,16 @@ def test_gating_keeps_the_payload_deterministic(council_2022):
     records = gates(council=(True, VERSION))
     first = json.dumps(run(*council_2022, records))
     assert first == json.dumps(run(*council_2022, records))
+
+
+def test_a_level_not_live_publishes_no_bands_at_all_not_even_stub_ones(council_2022):
+    # A council race the bundle can't model (no expected totals) falls back to stub bands; on a
+    # gated night whose council gate failed, the whole level shows the tally (#17).
+    snap, bundle = council_2022
+    bundle = json.loads(json.dumps(bundle))
+    spec = next(r for r in bundle["races"] if r["id"] == "councillor-1")
+    del spec["expected"]
+    body = run(snap, bundle, gates(council=(False, VERSION)))
+
+    assert next(r for r in body["races"] if r["id"] == "councillor-1")["projection"] is None
+    assert all(r["projection"] is None for r in races(body, "council"))
