@@ -13,6 +13,8 @@ RUN uv sync --locked --no-dev --no-install-project
 COPY src/ src/
 COPY data/ data/
 COPY gates/ gates/
+# The City's zeroed test files: the Mock Feed's shape (mock-feed, #37).
+COPY tests/fixtures/feed/city-2026/ tests/fixtures/feed/city-2026/
 RUN uv sync --locked --no-dev
 
 ENV PATH="/app/.venv/bin:$PATH"

@@ -128,4 +128,32 @@ gives the same count as the City's two files, in the test files' layout (names, 
 the `seq`s and serves them. The 2026 trustee map it
 reads is in [data/mock-feed/](data/mock-feed/README.md).
 
+## The `mock-feed` command
+
+`election-night mock-feed --start <ISO time with offset> --speed <n>` serves the scenario as the
+City serves its two files, at any path ending in `unofficialresult.json` or
+`unofficialresult-wardbyward.json` (#37). Point a pipeline's `FEED_BASE_URL` at
+`http://<host>:8080/results`. Every response is a pure function of the scenario, start, speed,
+clock and request (`election_night.mockfeed.feed.MockFeed.respond`):
+
+- **The night's clock.** `--start` maps to 19:50 EDT on Oct 26, and the night clock runs `--speed`
+  night minutes per wall minute: about 10 for Plumbing, 1 for the Full night, 4 for the Dress.
+  Before the start it serves the zeroed test files as they are.
+- **Generations.** Each file is regenerated once a night minute, with its own `seq` (the
+  ward-by-ward file 20 ms before the all-office one), ETag, Last-Modified and 304s, until the
+  count completes at 23:37 and its last `seq` stays frozen. Units arrive on 2023's observed curve
+  from 20:00: 84% by 20:26, 97% by 21:24, the rest by 23:37.
+- **The Sept 28 repeat.** From 19:50 the files carry live-looking counts, then are regenerated as
+  zeros at 20:00 when the count starts. The pipeline's payload stays "before results" throughout.
+- **REHEARSAL.** Every file's `electionDesc` ends in "REHEARSAL", which raises the page's bar.
+- **HTTP faults** on the night clock (`--no-faults` or `MOCK_FEED_FAULTS=off` turns them off):
+  20:20-20:50 a long 304 run, 21:00-21:20 503s, 21:30-21:50 a 403 "throttle", 22:00-22:20 responses
+  held 25 s (past the pipeline's 20 s timeout), 22:30-22:50 a truncated all-office body,
+  23:00-23:20 the ward-by-ward `candidate` key renamed, 23:30-23:50 the ward-by-ward file failing
+  (503) while the all-office file is fine.
+
+`MockFeed.step_at(now)` gives the scenario step the files hold, so `scenario.true_count(step)` is
+the exact-tallies reference. The Mock Feed runs as its own Fly app in `ord`, outside `yyz`,
+deployed by digest with the `mock-feed` workflow (`deploy/fly.mockfeed.toml`).
+
 This is an independent Git repository within the Toronto election workspace.

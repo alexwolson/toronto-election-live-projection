@@ -7,6 +7,7 @@ import signal
 import sys
 import urllib.error
 import urllib.request
+from datetime import datetime
 from pathlib import Path
 
 import boto3
@@ -19,6 +20,9 @@ from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write
 from election_night.feed import check_status
 from election_night.gates import HOLDOUT_FORECASTS, load_preregistration, s3_record
 from election_night.goldens import write_goldens
+from election_night.mockfeed.feed import FAULTS, MockFeed
+from election_night.mockfeed.scenario import load_scenario
+from election_night.mockfeed.server import serve
 from election_night.name_inputs import fetch_name_inputs, load_name_inputs, refresh_forecast
 from election_night.payload import build_payload
 from election_night.pipeline import FILES, Pipeline, Watchdog, now_ms, run
@@ -131,6 +135,19 @@ def cmd_name_inputs(args) -> None:
     fetch = refresh_forecast if args.forecast_only else fetch_name_inputs
     source = fetch(args.backend_release, args.out)
     print(json.dumps(source, indent=1))
+
+
+def cmd_mock_feed(args) -> None:
+    start = datetime.fromisoformat(args.start)
+    if start.tzinfo is None:
+        sys.exit("--start needs a UTC offset, e.g. 2026-10-15T19:00:00-04:00")
+    feed = MockFeed(
+        load_scenario(args.seed),
+        start_ms=int(start.timestamp() * 1000),
+        speed=args.speed,
+        faults=FAULTS if args.faults else (),
+    )
+    serve(feed, args.port)
 
 
 def _timed_out(signum, frame):
@@ -253,6 +270,34 @@ def main(argv: list[str] | None = None) -> None:
     )
     replay.add_argument("--out", type=Path, help="where to write the Gate Result")
     replay.set_defaults(run=cmd_replay)
+
+    mock = commands.add_parser(
+        "mock-feed",
+        help="serve the Mock Feed for a Rehearsal: the start maps to 19:50 EDT on Oct 26",
+    )
+    mock.add_argument(
+        "--start",
+        default=os.environ.get("MOCK_FEED_START"),
+        required="MOCK_FEED_START" not in os.environ,
+        help="the Rehearsal's start, ISO 8601 with an offset (env MOCK_FEED_START)",
+    )
+    mock.add_argument(
+        "--speed",
+        type=float,
+        default=os.environ.get("MOCK_FEED_SPEED", "1"),  # converted only for mock-feed
+        help="night minutes per wall minute: about 10 for Plumbing, 4 for the Dress "
+        "(env MOCK_FEED_SPEED, default 1)",
+    )
+    mock.add_argument("--seed", type=int, default=0, help="the scenario's arrival order")
+    mock.add_argument(
+        "--no-faults",
+        dest="faults",
+        action="store_false",
+        default=os.environ.get("MOCK_FEED_FAULTS", "on") != "off",
+        help="serve no HTTP faults (env MOCK_FEED_FAULTS=off)",
+    )
+    mock.add_argument("--port", type=int, default=os.environ.get("PORT", "8080"))
+    mock.set_defaults(run=cmd_mock_feed)
 
     args = parser.parse_args(argv)
     args.run(args)
