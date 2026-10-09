@@ -18,6 +18,7 @@ from election_night.alerts import Alerts
 from election_night.archive import Archive, ArchiveWriter
 from election_night.bundle import OPENING_2026, build_bundle, load_bundle, write_bundle
 from election_night.feed import check_status
+from election_night.freeze_gate import FRONTEND_REPO, check_archives
 from election_night.gates import HOLDOUT_FORECASTS, load_preregistration, s3_record
 from election_night.goldens import write_goldens
 from election_night.mockfeed.feed import FAULTS, MockFeed
@@ -148,6 +149,19 @@ def cmd_mock_feed(args) -> None:
         faults=FAULTS if args.faults else (),
     )
     serve(feed, args.port)
+
+
+def cmd_freeze_gate(args) -> None:
+    count, failures = check_archives(
+        args.archive, args.frontend_repo, args.frontend_commit, args.backend_release_tag
+    )
+    for failure in failures:
+        print(f"FAIL {failure}")
+    if failures:
+        sys.exit(f"freeze gate failed: {len(failures)} failures in {count} payloads")
+    print(
+        f"freeze gate: {count} payloads pass at {args.frontend_commit}, {args.backend_release_tag}"
+    )
 
 
 def _timed_out(signum, frame):
@@ -298,6 +312,26 @@ def main(argv: list[str] | None = None) -> None:
     )
     mock.add_argument("--port", type=int, default=os.environ.get("PORT", "8080"))
     mock.set_defaults(run=cmd_mock_feed)
+
+    freeze = commands.add_parser(
+        "freeze-gate",
+        help="check archived payloads against one Frontend commit's validator and release tag",
+    )
+    freeze.add_argument(
+        "--archive",
+        type=Path,
+        action="append",
+        required=True,
+        help="a local copy of an archive bucket; repeat for each pipeline's",
+    )
+    freeze.add_argument("--frontend-commit", required=True, help="the production build's full SHA")
+    freeze.add_argument(
+        "--backend-release-tag",
+        required=True,
+        help="the production BACKEND_RELEASE_TAG, as given to `npm run deploy:production`",
+    )
+    freeze.add_argument("--frontend-repo", default=FRONTEND_REPO, help="a local repo, in tests")
+    freeze.set_defaults(run=cmd_freeze_gate)
 
     args = parser.parse_args(argv)
     args.run(args)
