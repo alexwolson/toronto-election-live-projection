@@ -95,6 +95,7 @@ class Scenario:
                 polls=cum.polls,
                 polls_received=int(cum.received[step]),
                 votes=dict(zip(race.candidates, cum.votes[step].tolist())),
+                votes_received=int(cum.votes[step].sum()),
             )
             for rid, (race, cum) in self._cums.items()
         }

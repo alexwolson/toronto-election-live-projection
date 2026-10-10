@@ -13,6 +13,7 @@ def _tree(root):
     for path, text in {
         "src/election_night/payload.py": "def build(): ...\n",
         "src/election_night/feed.py": "def read(): ...\n",
+        "src/election_night/checks.py": "def votes(): ...\n",
         "src/election_night/projection/council.py": "def project(): ...\n",
         "src/election_night/cli.py": "def main(): ...\n",
         "gates/params/council.json": '{"spread": 1.0}\n',
@@ -30,6 +31,15 @@ def test_the_model_version_changes_with_the_code(tmp_path):
     _tree(tmp_path)
     before = _version(tmp_path)
     (tmp_path / "src/election_night/projection/council.py").write_text("def project(): 1\n")
+
+    assert _version(tmp_path) != before
+
+
+def test_the_model_version_changes_with_the_per_race_checks(tmp_path):
+    # The checks decide which races are projected (#43), so they are model code.
+    _tree(tmp_path)
+    before = _version(tmp_path)
+    (tmp_path / "src/election_night/checks.py").write_text("def votes(): 1\n")
 
     assert _version(tmp_path) != before
 

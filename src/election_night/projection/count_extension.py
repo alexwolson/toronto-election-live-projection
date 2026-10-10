@@ -92,6 +92,11 @@ class RaceInputs:
     def units(self) -> int:
         return sum(w.election_day_units + len(w.aggregates) for w in self.wards)
 
+    @property
+    def top_total(self) -> float:
+        """The race's expected total at the top of the turnout grid: no count above it fits."""
+        return sum(w.base for w in self.wards) * float(TURNOUT_GRID[-1])
+
     @classmethod
     def from_bundle(cls, expected: dict) -> RaceInputs:
         """From a bundle race's `expected` entry."""

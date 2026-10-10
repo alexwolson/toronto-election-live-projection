@@ -14,6 +14,7 @@ from election_night.bundle import OPENING_2026, build_bundle
 from election_night.gates import ROOT, load_preregistration
 from election_night.names import NameInputs
 from election_night.payload import build_payload
+from election_night.projection.count_extension import RaceInputs
 from election_night.projection.history import replay_bundle
 from election_night.replay.historical import YEARS, load_night
 from election_night.replay.orders import arrival_order
@@ -77,6 +78,50 @@ def _faulted(data: dict) -> None:
     """Councillor ward 14's row made unreadable, and TDSB area 5 dropped from the file."""
     data["office"][1]["ward"][13]["pollsReceived"] = 12
     data["office"][2]["ward"].pop(4)
+
+
+def _row(data: dict, office_id: int, num: str) -> dict:
+    office = next(o for o in data["office"] if o["id"] == office_id)
+    return next(w for w in office["ward"] if w["num"] == num)
+
+
+def _withdrawals(bundle: dict):
+    """Faults for the gated 2022 midpoint (#43), one per per-race check, as edits of the
+    all-office and the ward-by-ward file."""
+    spec = next(r for r in bundle["races"] if r["id"] == "councillor-5")
+    top = RaceInputs.from_bundle(spec["expected"]).top_total
+
+    def all_office(data: dict) -> None:
+        # More units in than the race has: Reporting Progress hidden, projection withdrawn.
+        ward_3 = _row(data, 2, "3")
+        ward_3["pollsReceived"] = str(int(ward_3["polls"]) + 1)
+        # A count past the top of the expected-totals grid.
+        ward_5 = _row(data, 2, "5")
+        extra = int(top) + 1 - int(ward_5["votesReceived"])
+        lead = ward_5["candidate"][0]
+        lead["votesReceived"] = str(int(lead["votesReceived"]) + extra)
+        ward_5["votesReceived"] = str(int(ward_5["votesReceived"]) + extra)
+        # A feed name the bundle doesn't hold: shown as written, count-only continues.
+        _row(data, 2, "8")["candidate"][-1]["name"] = "Someone Unregistered"
+        # The row's total one above its candidates' votes.
+        ward_10 = _row(data, 2, "10")
+        ward_10["votesReceived"] = str(int(ward_10["votesReceived"]) + 1)
+        # 2022 MonAvenir 4's fault, `polls: "0"`, at a TDSB area.
+        _row(data, 3, "5")["polls"] = "0"
+
+    def ward_by_ward(data: dict) -> None:
+        # Ward 4's votesCounted above its candidates' sum: the whole mayoral projection goes.
+        for candidate in data["office"]["candidate"]:
+            entry = next(w for w in candidate["ward"] if w["num"] == "4")
+            entry["votesCounted"] = str(int(entry["votesCounted"]) + 5)
+
+    return all_office, ward_by_ward
+
+
+def _withdrawn(pair: tuple[bytes, bytes, dict]) -> tuple[bytes, bytes, dict]:
+    all_office, ward_by_ward, bundle = pair
+    edit_all_office, edit_ward_by_ward = _withdrawals(bundle)
+    return _edited(all_office, edit_all_office), _edited(ward_by_ward, edit_ward_by_ward), bundle
 
 
 def _replay_midpoint(year: int) -> tuple[bytes, bytes, dict]:
@@ -146,6 +191,14 @@ def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
     ao_2023_2056 = (wayback / "2023-20230627005628-all-office.json").read_bytes()
     wb_2023_2026 = (wayback / "2023-20230627002639-wardbyward.json").read_bytes()
 
+    gated_live = _gated_2022(
+        {
+            "council": _gate(True),
+            "trustee": _gate(True),
+            "mayor-count-only": _gate(),
+            "mayor-forecast-weighted": _gate(approved=True),
+        }
+    )
     pairs = {
         # The City's 2026 test files as they stand: before results.
         "before-results-2026": (ao_2026, wb_2026, bundle_2026),
@@ -167,8 +220,8 @@ def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
             wb_2023_2026,
             build_bundle(ao_2023_zero, wb_2023_2026, opening_time="2023-06-26T20:00:00-04:00"),
         ),
-        # 2022 at 21:46: council and trustee counting. MonAvenir 4's `polls: "0"` row shows as
-        # published (539 of 0) until the per-race checks (#43) hide its Reporting Progress.
+        # 2022 at 21:46: council and trustee counting. MonAvenir 4's `polls: "0"` row (539 of
+        # 0 units) keeps its tally with its Reporting Progress hidden (#43).
         "council-counting-2022": (
             ao_2022_2146,
             zeroed_ward_by_ward(ao_2022_zero, seq=int(seq_2022_2146)),
@@ -184,14 +237,7 @@ def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
         # The same on a gated night (#45, ADR 0002): council and trustee live, and the mayor live
         # on Alex's approval of its failed forecast-weighted Gate Result, with every Possible
         # Range.
-        "gated-live-2022": _gated_2022(
-            {
-                "council": _gate(True),
-                "trustee": _gate(True),
-                "mayor-count-only": _gate(),
-                "mayor-forecast-weighted": _gate(approved=True),
-            }
-        ),
+        "gated-live-2022": gated_live,
         # The same refresh under a constructed forecast whose weights fall below the ESS floor:
         # the approved mayor shows no Estimated Range, only the Possible Range (ADR 0002). No
         # real night came near the floor (#44).
@@ -214,6 +260,9 @@ def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
                 "mayor-forecast-weighted": _gate(),
             }
         ),
+        # The gated-live refresh with one fault per per-race check (#43): each faulty race keeps
+        # its tally with its projection withdrawn, every other race as in gated-live-2022.
+        "withdrawals-2022": _withdrawn(gated_live),
         # 2018's final pair: every race with all units in.
         "all-units-in-2018": (
             ao_2018,

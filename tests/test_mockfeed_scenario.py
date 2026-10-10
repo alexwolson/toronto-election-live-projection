@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 
+from election_night.bundle import load_bundle
 from election_night.feed import (
     COUNCILLOR_OFFICE_ID,
     MAYOR_OFFICE_ID,
@@ -18,7 +19,9 @@ from election_night.feed import (
     read_ward_by_ward,
 )
 from election_night.gates import load_preregistration
+from election_night.goldens import AFTER_OPENING_2026
 from election_night.mockfeed.scenario import load_scenario
+from election_night.payload import project
 from election_night.replay.historical import load_night
 
 ROOT = Path(__file__).parent.parent
@@ -177,3 +180,20 @@ def test_each_step_is_a_city_shaped_count_snapshot_pair_reading_as_the_true_coun
                 votes = [int(c["votesReceived"]) for c in row["candidate"]]
                 assert votes == sorted(votes, reverse=True)
                 assert all(isinstance(v, str) for c in row["candidate"] for v in c.values())
+
+
+def test_a_rehearsals_counts_pass_every_per_race_check(scenario):
+    # The invented count must never trip a Withdrawal (#43): a Rehearsal tests the system.
+    bundle = load_bundle(ROOT / "data" / "night-bundle" / "night-bundle.json")
+
+    def restamped(body: bytes) -> bytes:
+        data = json.loads(body)
+        data["seq"] = str(AFTER_OPENING_2026)
+        return json.dumps(data).encode("utf-8")
+
+    for step in (1, scenario.steps // 2, scenario.steps - 1, scenario.steps):
+        all_office, ward_by_ward = scenario.count_snapshot(step)
+        body, _ = project(restamped(all_office), restamped(ward_by_ward), bundle)
+        assert body["state"] == "results"
+        assert [r["id"] for r in body["races"] if r["withdrawal"]] == [], step
+        assert all(r["progress"] for r in body["races"] if r["state"] == "counting"), step
