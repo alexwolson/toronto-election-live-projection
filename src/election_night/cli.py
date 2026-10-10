@@ -40,6 +40,7 @@ from election_night.replay.gate_result import write_gate_result
 from election_night.replay.run import LEVELS, PREREGISTRATION, run_replay
 from election_night.status import read_status, render_status
 from election_night.store import PIPELINES, Store
+from election_night.switches import SWITCHES, VALUES, flip, switch_key
 
 CITY_FEED = "https://mediaresults.toronto.ca/results"
 # Defaults resolve against the repo root, wherever the command is run from.
@@ -130,6 +131,14 @@ def cmd_pipeline(args) -> None:
 def cmd_status(args) -> None:
     client = redis.Redis.from_url(_env("REDIS_URL"), socket_timeout=10, socket_connect_timeout=10)
     sys.stdout.write(render_status(read_status(client), now_ms()))
+
+
+def cmd_switch(args) -> None:
+    client = redis.Redis.from_url(_env("REDIS_URL"), socket_timeout=10, socket_connect_timeout=10)
+    state = flip(client, args.switch, args.state)
+    print(f"`{switch_key(args.switch)}` set to `{args.state}`; read back: **{state}**.")
+    if state != args.state:
+        sys.exit(f"{switch_key(args.switch)} reads back {state!r}, not {args.state!r}")
 
 
 def cmd_bundle(args) -> None:
@@ -277,6 +286,13 @@ def main(argv: list[str] | None = None) -> None:
         "status", help="print night status from the store at REDIS_URL, as Markdown; read-only"
     )
     status.set_defaults(run=cmd_status)
+
+    switch = commands.add_parser(
+        "switch", help="flip one switch in the store at REDIS_URL and read it back (#49)"
+    )
+    switch.add_argument("switch", choices=SWITCHES)
+    switch.add_argument("state", choices=VALUES)
+    switch.set_defaults(run=cmd_switch)
 
     bundle = commands.add_parser(
         "bundle", help="build the Night Bundle from the City test files and the name inputs"

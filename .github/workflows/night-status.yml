@@ -1,7 +1,7 @@
 name: night status
 
-# Read-only: prints both heartbeats, the stored seq pair, current Withdrawals and count decreases
-# to the job summary (#50). Run it from the GitHub mobile app.
+# Read-only: prints both heartbeats, the stored seq pair, the switches, current Withdrawals and
+# count decreases to the job summary (#50, #49). Run it from the GitHub mobile app.
 on:
   workflow_dispatch:
     inputs:

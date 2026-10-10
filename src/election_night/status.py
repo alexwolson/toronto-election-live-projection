@@ -1,8 +1,9 @@
 """`night status` (#50): a read-only summary of the store, for the job summary on the phone.
 
 It prints both heartbeats, the stored `seq` pair, the current Withdrawals with their machine
-reasons, and the count decreases the pipelines recorded (#17 § On the night). It reads with one
-MGET and one LRANGE and never writes. A malformed key spoils only its own section or row. Switch states arrive with the switches (#49).
+reasons, the switches, and the count decreases the pipelines recorded (#17 § On the night). It reads with one
+MGET and one LRANGE and never writes. A malformed key spoils only its own section or row. It also shows each switch
+as the route reads it (#49).
 """
 
 import json
@@ -11,9 +12,15 @@ from zoneinfo import ZoneInfo
 
 from election_night.alerts import FRESH_MS as STALE_MS  # one rule (#17 § Staleness)
 from election_night.store import DECREASES_KEY, PAYLOAD_KEY, PIPELINES, SEQ_KEY, heartbeat_key
+from election_night.switches import SWITCHES, switch_key, switch_state
 
 TORONTO = ZoneInfo("America/Toronto")
-KEYS = (PAYLOAD_KEY, SEQ_KEY, *(heartbeat_key(p) for p in PIPELINES))
+KEYS = (
+    PAYLOAD_KEY,
+    SEQ_KEY,
+    *(heartbeat_key(p) for p in PIPELINES),
+    *(switch_key(s) for s in SWITCHES),
+)
 
 
 def read_status(client) -> dict:
@@ -83,6 +90,17 @@ def _withdrawals(values: dict, now_ms: int) -> list[str]:
     return _table(["Race", "Reason"], rows) if rows else ["None."]
 
 
+def _switches(values: dict, now_ms: int) -> list[str]:
+    rows = []
+    for name in SWITCHES:
+        raw = values.get(switch_key(name))
+        state = switch_state(raw)
+        rows.append(
+            [name, "on (not set)" if raw is None else state if state == "on" else f"**{state}**"]
+        )
+    return _table(["Switch", "State"], rows)
+
+
 def _decreases(values: dict, now_ms: int) -> list[str]:
     entries = sorted(
         (json.loads(e) for e in values[DECREASES_KEY]), key=lambda e: e["ms"], reverse=True
@@ -107,6 +125,7 @@ def _decreases(values: dict, now_ms: int) -> list[str]:
 SECTIONS = (
     ("Heartbeats", _heartbeats),
     ("Stored seq pair", _seq),
+    ("Switches", _switches),
     ("Withdrawals", _withdrawals),
     ("Count decreases", _decreases),
 )

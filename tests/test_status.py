@@ -4,6 +4,7 @@ import json
 
 from election_night.status import read_status, render_status
 from election_night.store import Store
+from election_night.switches import SWITCHES
 
 # 2026-10-26 20:10:00 EDT
 NOW = 1793059800000
@@ -32,6 +33,7 @@ def stored(**overrides) -> dict:
         "heartbeat:fly": str(NOW - MIN).encode(),
         "heartbeat:do": str(NOW - 30_000).encode(),
         "count_decreases": [],
+        **{f"switch:{name}": None for name in SWITCHES},
     }
     values.update(overrides)
     return values
@@ -97,7 +99,7 @@ def test_count_decreases_newest_first_with_citywide_marked():
 
 
 def test_an_empty_store_renders_without_failing():
-    empty = {key: None for key in ("payload", "payload:seq", "heartbeat:fly", "heartbeat:do")}
+    empty = {key: None for key in stored() if key != "count_decreases"}
     text = render_status({**empty, "count_decreases": []}, NOW)
     assert "No payload in the store." in text
 
@@ -146,3 +148,22 @@ def test_a_malformed_key_spoils_only_its_own_section():
     assert "| fly | 20:09:00 EDT | 1 min ago |  |" in text
     assert "## Withdrawals\n\nNone." in text
     assert text.count("Unreadable in the store.") == 2
+
+
+def test_switches_show_each_state_with_a_missing_key_on():
+    text = render_status(
+        stored(**{"switch:council": b"off", "switch:page": b"on", "switch:trustee": b"of"}), NOW
+    )
+    section = text.split("## Switches")[1].split("##")[0]
+    assert "| mayor | on (not set) |" in section
+    assert "| council | **off** |" in section
+    assert "| trustee | **off (unrecognized value 'of')** |" in section
+    assert "| page | on |" in section
+
+
+def test_read_status_reads_the_switches(redis_client):
+    redis_client.flushdb()
+    redis_client.set("switch:projections", "off")
+    values = read_status(redis_client)
+    assert values["switch:projections"] == b"off"
+    assert values["switch:page"] is None
