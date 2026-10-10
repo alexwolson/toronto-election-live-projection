@@ -63,7 +63,8 @@ FAULTS = (
     Fault("renamed", (WARD_BY_WARD,), 190, 20),  # 23:00-23:20
     Fault("one-file", (WARD_BY_WARD,), 220, 20),  # 23:30-23:50: a 503, all-office fine
 )
-HTTP_KINDS = {f.kind for f in FAULTS}
+# Faults on the HTTP response; every other kind changes the files a generation holds.
+HTTP_KINDS = {"stall", "5xx", "throttle", "timeout", "truncated", "renamed", "one-file"}
 
 # The Full-night fault script (#48): every fault in #17's script, with clean minutes between the
 # file-level ones. The per-race faults run together, one race each.
@@ -130,13 +131,12 @@ def _etag(body: bytes) -> str:
     return f'"{hashlib.md5(body).hexdigest()}"'
 
 
-def _seq_of(file: _File) -> int:
-    return int(json.loads(file.body)["seq"])
+def _seq_of(body: bytes) -> int:
+    return int(json.loads(body)["seq"])
 
 
 def _file(body: bytes) -> _File:
-    seq = int(json.loads(body)["seq"])
-    return _File(body, _etag(body), formatdate(seq / 1000, usegmt=True))
+    return _File(body, _etag(body), formatdate(_seq_of(body) / 1000, usegmt=True))
 
 
 def _stamped(raw: bytes | dict, seq: int | None) -> bytes:
@@ -323,15 +323,14 @@ class MockFeed:
         """The exact-tallies reference for a `seq` pair: `served_tallies` of each pair of files
         served under it, faults included. There is more than one only while a `seq` is stalled."""
         served = []
-        if (_seq_of(self._zeroed[ALL_OFFICE]), _seq_of(self._zeroed[WARD_BY_WARD])) == (
-            a_seq,
-            w_seq,
-        ):
-            served.append(self._zeroed)
+        zeroed = self._zeroed[ALL_OFFICE].body, self._zeroed[WARD_BY_WARD].body
+        if (_seq_of(zeroed[0]), _seq_of(zeroed[1])) == (a_seq, w_seq):
+            served.append(zeroed)
         for g in (*range(COMPLETE_MINUTE + 1), *self.tail):
             if (self._seq(ALL_OFFICE, g), self._seq(WARD_BY_WARD, g)) == (a_seq, w_seq):
-                served.append(self._generation_files(g))
-        return [served_tallies(f[ALL_OFFICE].body, f[WARD_BY_WARD].body) for f in served]
+                files = self._files(g)  # not the serving cache
+                served.append((files[ALL_OFFICE].body, files[WARD_BY_WARD].body))
+        return [served_tallies(a, w) for a, w in served]
 
     def respond(self, file: str, now_ms: float, if_none_match: str | None) -> Response:
         """The response to a GET of `file` at wall-clock `now_ms`."""

@@ -170,7 +170,8 @@ clock and request (`election_night.mockfeed.feed.MockFeed.respond`):
 - **The Sept 28 repeat.** From 19:50 the files carry live-looking counts, then are regenerated as
   zeros at 20:00 when the count starts. The pipeline's payload stays "before results" throughout.
 - **REHEARSAL.** Every file's `electionDesc` ends in "REHEARSAL", which raises the page's bar.
-- **HTTP faults** on the night clock (`--no-faults` or `MOCK_FEED_FAULTS=off` turns them off):
+- **HTTP faults** on the night clock (`--faults off` or `MOCK_FEED_FAULTS=off` turns them off;
+  `full-night` serves the Full night's script instead, listed in `docs/full-night-faults.md`):
   20:20-20:50 a long 304 run, 21:00-21:20 503s, 21:30-21:50 a 403 "throttle", 22:00-22:20 responses
   held 25 s (past the pipeline's 20 s timeout), 22:30-22:50 a truncated all-office body,
   23:00-23:20 the ward-by-ward `candidate` key renamed, 23:30-23:50 the ward-by-ward file failing

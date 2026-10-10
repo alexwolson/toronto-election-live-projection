@@ -21,7 +21,7 @@ no figures reads "No figures from the City for this race right now".
 | 19:50–20:00 | Sept 28 repeat (built in) | "Before results" and the REHEARSAL bar, despite live-looking counts | `state: before_results`, `rehearsal: true` |
 | 20:00–20:10 | none | Counting starts | |
 | 20:10–20:25 | the per-race faults below, all at once | each race as listed; every other race is unaffected | |
-| 20:25–20:30 | none | All races are back to normal | Withdrawals lift |
+| 20:25–20:30 | none | All races are back to normal | Withdrawals lift; `councillor-10` drops back from its inflated count, a second ward-scope entry in `count_decreases` (badge only) |
 | 20:30–20:40 | `zeros`: both files regenerated as the zeroed test files, with current `seq`s | Every race shows zero votes ("no voting areas in") | Citywide decrease: `count-decrease` sounds once; every race and ward is recorded in `count_decreases`. Alex may test the page pause here |
 | 20:40 | none | The counts return, higher than before | |
 | 20:45–21:15 | `stall`: a long 304 run | The count holds; "City count as of 8:45 p.m."; no banner | Heartbeats stay fresh |
@@ -36,7 +36,7 @@ no figures reads "No figures from the City for this race right now".
 | 23:37 | none: the main count ends with 4 units held back | | |
 | 23:37–01:37 | `all-in`: `councillor-13` shows `pollsReceived = polls` | "All voting areas in", no range, and the votes still rise at 01:07 and 01:37 | `state: all_units_in`, `projection: null`, no Withdrawal |
 | 00:07, 00:37, 01:07, 01:37 | the near-silent tail: one unit at each (wards 24, 9, 13, 13) | Small changes, with 304s between | Files regenerate only at arrivals |
-| from 01:37 | none | The count is complete | Night Close may be declared after two quiet hours (03:37 or later) |
+| from 01:37 | none | The last Reporting Unit is in | Night Close may be declared after two quiet hours (03:37 or later) |
 
 ## Per-race faults (20:10–20:25)
 

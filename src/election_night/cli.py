@@ -175,6 +175,8 @@ def cmd_mock_feed(args) -> None:
     start = datetime.fromisoformat(args.start)
     if start.tzinfo is None:
         sys.exit("--start needs a UTC offset, e.g. 2026-10-15T19:00:00-04:00")
+    if args.faults not in SCRIPTS:  # an env default skips argparse's choices
+        sys.exit(f"MOCK_FEED_FAULTS must be one of {', '.join(sorted(SCRIPTS))}")
     faults, tail = SCRIPTS[args.faults]
     feed = MockFeed(
         load_scenario(args.seed),

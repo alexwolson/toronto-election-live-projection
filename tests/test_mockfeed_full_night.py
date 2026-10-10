@@ -13,6 +13,7 @@ import pytest
 
 from election_night.alerts import count_decreases
 from election_night.bundle import load_bundle
+from election_night.feed import OFFICES
 from election_night.mockfeed.feed import (
     COMPLETE_MINUTE,
     FULL_NIGHT,
@@ -232,13 +233,10 @@ def test_the_reference_is_what_was_served_faults_included(feed):
         mayor = {c["name"]: int(c["votesReceived"]) for c in w["office"]["candidate"]}
         assert ref["mayor"] == mayor
         if fault.race:
-            office = {"councillor": 2, "tdsb": 3, "tcdsb": 4}[fault.race.split("-")[0]]
+            prefix, num = fault.race.split("-")
+            (office,) = [k for k, (p, _) in OFFICES.items() if p == prefix]
             (row,) = [
-                r
-                for o in a["office"]
-                if o["id"] == office
-                for r in o["ward"]
-                if r["num"] == fault.race.split("-")[1]
+                r for o in a["office"] if o["id"] == office for r in o["ward"] if r["num"] == num
             ]
             if kind == "row-unreadable":
                 assert ref[fault.race] is None
@@ -258,3 +256,11 @@ def test_the_doc_lists_every_fault():
     doc = (ROOT / "docs" / "full-night-faults.md").read_text()
     for fault in FULL_NIGHT:
         assert f"`{fault.kind}`" in doc
+
+
+def test_the_per_race_batch_ends_with_one_more_decrease(feed, bundle):
+    """When the batch ends, the inflated race drops back to its real count: a second
+    ward-scope decrease, listed in the doc."""
+    end = minute(the("above-expected").start + the("above-expected").minutes)
+    decreases = count_decreases(payload(feed, end - 1, bundle), payload(feed, end, bundle))
+    assert [d["race"] for d in decreases] == ["councillor-10"]
