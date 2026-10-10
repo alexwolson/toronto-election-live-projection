@@ -1,9 +1,10 @@
 """Gate Results and the model version they hold for (`gates/preregistration.json` § gate_result).
 
 The model version is a sha256 over the model's code and its frozen parameters: the payload
-function, the feed reader it calls, the projection package and `gates/params/`. Code outside the
-model (the command, the pipeline shell, the Replay harness) and the final forecast, an input, are
-left out, so neither changes the version a Gate Result holds for.
+function, the feed reader and the per-race checks it calls, the projection package and
+`gates/params/`. Code outside the model (the command, the pipeline shell, the Replay harness) and
+the final forecast, an input, are left out, so neither changes the version a Gate Result holds
+for.
 
 A Gate Result is written once and never overwritten. Each level's results are numbered by run,
 and every run is kept.
@@ -16,6 +17,7 @@ from pathlib import Path
 MODEL_CODE = (
     "src/election_night/payload.py",
     "src/election_night/feed.py",
+    "src/election_night/checks.py",
     "src/election_night/projection",
 )
 FROZEN_PARAMS = "gates/params"

@@ -11,6 +11,7 @@ from datetime import datetime
 
 import numpy as np
 
+from election_night import checks
 from election_night.feed import (
     MAYOR_OFFICE_ID,
     AllOffice,
@@ -81,12 +82,13 @@ def _ranked(spec: dict, votes: dict[str, int]) -> list[str]:
     return sorted(votes, key=lambda k: (-votes[k], ballot.get(k, len(ballot)), k))
 
 
-def _state(spec: dict, tally: Tally) -> str:
+def _state(spec: dict, tally: Tally, progress_ok: bool) -> str:
+    """The race's state. Reporting Progress that fails its check can't say all units are in."""
     if spec["acclaimed"]:
         return "acclaimed"
     if tally.polls_received == 0:
         return "no_units_in"
-    if tally.polls_received == tally.polls:
+    if progress_ok and tally.polls_received == tally.polls:
         return "all_units_in"
     return "counting"
 
@@ -119,15 +121,20 @@ def _race(spec: dict) -> dict:
     return race
 
 
-def _with_tally(race: dict, spec: dict, tally: Tally) -> None:
+def _with_tally(race: dict, spec: dict, tally: Tally) -> str | None:
+    """The race's Live Tally, and why its rows fail a check, or None. Reporting Progress that
+    fails its check is hidden; shares are always from the candidates' votes."""
     entries = {c["key"]: c for c in spec["candidates"]}
     total = sum(tally.votes.values())
-    race["state"] = _state(spec, tally)
-    race["progress"] = {"received": tally.polls_received, "total": tally.polls}
+    fault = checks.progress(tally.polls_received, tally.polls, spec["polls"])
+    race["state"] = _state(spec, tally, progress_ok=fault is None)
+    if fault is None:
+        race["progress"] = {"received": tally.polls_received, "total": tally.polls}
     race["candidates"] = [
         _candidate(entries.get(key), key, tally.votes[key], _share(tally.votes[key], total))
         for key in _ranked(spec, tally.votes)
     ]
+    return fault or checks.votes(tally)
 
 
 def _no_figures(race: dict, reason: str) -> None:
@@ -157,49 +164,72 @@ def _stub_draws(bands: dict, keys: tuple[str, ...], rng: np.random.Generator) ->
     return rng.uniform(low, high, size=(STUB_DRAWS, len(keys)))
 
 
-def _mayor_race(race: dict, spec: dict, w: WardByWard) -> None:
+def _mayor_race(race: dict, spec: dict, w: WardByWard) -> str | None:
+    """The mayor card from the ward-by-ward file alone, and why its rows fail a check, or None.
+    A ward whose Reporting Progress fails its check hides it, and fails the mayor."""
     try:
         tally = w.tally()
         wards = w.wards()
     except UnreadableRow:
         _no_figures(race, "row_unreadable")
-        return
-    _with_tally(race, spec, tally)
+        return None
+    fault = _with_tally(race, spec, tally) or checks.mayor_wards(w, tally, wards)
+    bundle_polls = {ward["num"]: ward["polls"] for ward in spec["wards"]}
     order = [c["key"] for c in race["candidates"]]
-    race["wards"] = [
-        {
-            "num": ward.num,
-            "name": ward.name,
-            "progress": {"received": ward.polls_received, "total": ward.polls},
-            "votes_counted": ward.votes_counted,
-            "votes": {key: ward.votes[key] for key in order if key in ward.votes},
-        }
-        for ward in wards
-    ]
+    race["wards"] = []
+    for ward in wards:
+        # A ward the bundle doesn't hold has no polls to match: -1 fails it as differing.
+        ward_fault = checks.progress(
+            ward.polls_received, ward.polls, bundle_polls.get(ward.num, -1)
+        )
+        fault = fault or (ward_fault and f"ward_{ward_fault}")
+        race["wards"].append(
+            {
+                "num": ward.num,
+                "name": ward.name,
+                "progress": None
+                if ward_fault
+                else {"received": ward.polls_received, "total": ward.polls},
+                "votes_counted": ward.votes_counted,
+                "votes": {key: ward.votes[key] for key in order if key in ward.votes},
+            }
+        )
+    return fault
 
 
-def _all_office_race(race: dict, spec: dict, a: AllOffice) -> None:
+def _all_office_race(race: dict, spec: dict, a: AllOffice) -> str | None:
+    """A race from its all-office row, and why its row fails a check, or None."""
     try:
         tally = a.tally(spec["office_id"], spec["num"])
     except KeyError:
         _no_figures(race, "race_missing")
-        return
+        return None
     except UnreadableRow:
         _no_figures(race, "row_unreadable")
-        return
-    _with_tally(race, spec, tally)
+        return None
+    return _with_tally(race, spec, tally)
 
 
-def _model(race: dict, spec: dict, params: dict, rng: np.random.Generator, draws: dict) -> None:
-    """The count-extension projection for a counting single-unit race. Inputs that don't cover
-    the race's units fail closed: the count stands with no projection."""
+def _names_match(race: dict, spec: dict) -> bool:
+    """Whether the feed names exactly the bundle's candidates."""
+    return {c["key"] for c in race["candidates"]} == {c["key"] for c in spec["candidates"]}
+
+
+def _model(
+    race: dict, spec: dict, params: dict, rng: np.random.Generator, draws: dict
+) -> str | None:
+    """The count-extension projection for a counting single-unit race, or why it is withdrawn.
+    Inputs that don't cover the race's units fail closed: the count stands with no projection."""
     inputs = RaceInputs.from_bundle(spec["expected"])
     if inputs.units != race["progress"]["total"]:
-        return
+        return None
     keys = tuple(c["key"] for c in race["candidates"])
     votes = np.array([c["votes"] for c in race["candidates"]])
+    if fault := checks.above_expected(votes.sum(), inputs.top_total):
+        return fault
     shares = draw_final_shares(inputs, Params(**params), votes, race["progress"]["received"], rng)
     _projected(race, keys, shares, draws)
+    return _numerics(race, draws)
 
 
 def _projected(race: dict, keys: tuple[str, ...], shares: np.ndarray | None, draws: dict) -> None:
@@ -210,37 +240,56 @@ def _projected(race: dict, keys: tuple[str, ...], shares: np.ndarray | None, dra
     draws[race["id"]] = {"count_only": (keys, shares, None)}
 
 
+def _numerics(race: dict, draws: dict) -> str | None:
+    """Withdraw a projection whose numbers fail: NaN, or a band outside 0-100%."""
+    if race["projection"] is None:
+        return None
+    fault = checks.bands(race["projection"])
+    if fault:
+        race["projection"] = None
+        draws.pop(race["id"], None)
+    return fault
+
+
 def _mayor_model(
     race: dict, spec: dict, params: dict, rng: np.random.Generator, draws: dict, bundle: dict
-) -> None:
-    """The mayor's projection from the ward-by-ward file alone: one unit per City ward, summed
-    to the citywide result. Inputs that don't match the file's wards and their units fail
-    closed: the count stands with no projection."""
+) -> str | None:
+    """The mayor's projection from the ward-by-ward file alone, or why it is withdrawn: one
+    unit per City ward, summed to the citywide result. Inputs that don't match the file's wards
+    and their units fail closed: the count stands with no projection."""
     inputs = RaceInputs.from_bundle(spec["expected"])
     wards = {w["num"]: w for w in race["wards"]}
     if sorted(wards) != sorted(w.ward for w in inputs.wards) or any(
         w.election_day_units + len(w.aggregates) != wards[w.ward]["progress"]["total"]
         for w in inputs.wards
     ):
-        return
+        return None
     keys = tuple(c["key"] for c in race["candidates"])
     votes = np.array([[wards[w.ward]["votes"].get(k, 0) for k in keys] for w in inputs.wards])
+    if fault := checks.above_expected(votes.sum(), inputs.top_total):
+        return fault
     received = np.array([wards[w.ward]["progress"]["received"] for w in inputs.wards])
     shares = draw_mayor_final_shares(inputs, MayorParams(**params), votes, received, rng)
     _projected(race, keys, shares, draws)
     if shares is not None:
-        _forecast_weighted(race, keys, shares, bundle, draws)
+        _forecast_weighted(race, keys, shares, bundle, draws, _names_match(race, spec))
+    return _numerics(race, draws)
 
 
 def _forecast_weighted(
-    race: dict, keys: tuple[str, ...], shares: np.ndarray, bundle: dict, draws: dict
+    race: dict,
+    keys: tuple[str, ...],
+    shares: np.ndarray,
+    bundle: dict,
+    draws: dict,
+    names_match: bool,
 ) -> None:
     """The forecast-weighted band from the count-only draws, and which band is in effect.
-    Below the ESS floor the refresh falls back to count-only; with no resolved forecast, or its
-    pair not among the feed's names, the variant is off."""
+    Below the ESS floor the refresh falls back to count-only; with no resolved forecast, its
+    pair not among the feed's names, or any feed name not the bundle's, the variant is off."""
     density = bundle.get("forecast_density")
     variant = {"in_effect": "count_only", "ess": None, "off_reason": None}
-    found = weigh(density, keys, shares) if density is not None else None
+    found = weigh(density, keys, shares) if density is not None and names_match else None
     if density is None:
         variant["off_reason"] = bundle.get("forecast_off", FORECAST_MISSING)
     elif found is None:
@@ -354,6 +403,8 @@ def _possible(race: dict, spec: dict, electors: dict[str, int] | None) -> dict |
     if race["level"] == "mayor":
         remaining = 0
         for ward in race["wards"]:
+            if ward["progress"] is None:
+                return None
             if ward["progress"]["received"] < ward["progress"]["total"]:
                 if ward["num"] not in electors:
                     return None
@@ -403,17 +454,21 @@ def project(
         race = _race(spec)
         if not before:
             if spec["office_id"] == MAYOR_OFFICE_ID:
-                _mayor_race(race, spec, w)
+                fault = _mayor_race(race, spec, w)
             else:
-                _all_office_race(race, spec, a)
+                fault = _all_office_race(race, spec, a)
+            # Withdrawals are recorded where a projection could show: never the French boards.
+            projectable = spec["level"] in VARIANTS and race["state"] != "acclaimed"
             params = fitted.get(spec["level"])
             modelled = race["state"] == "counting" and params and "expected" in spec
-            if modelled and (only is None or spec["id"] in only):
+            if fault:
+                pass  # withdrawn: neither modelled nor stub bands
+            elif modelled and (only is None or spec["id"] in only):
                 race_rng = np.random.default_rng(np.random.SeedSequence([seed, index]))
                 if spec["office_id"] == MAYOR_OFFICE_ID:
-                    _mayor_model(race, spec, params, race_rng, draws, bundle)
+                    fault = _mayor_model(race, spec, params, race_rng, draws, bundle)
                 else:
-                    _model(race, spec, params, race_rng, draws)
+                    fault = _model(race, spec, params, race_rng, draws)
             elif not modelled and race["state"] == "counting" and spec["level"] in VARIANTS:
                 bands = {v: _stub_bands(race, rng) for v in VARIANTS[spec["level"]]}
                 race["projection"] = {"stub": True, "bands": bands}
@@ -421,6 +476,8 @@ def project(
                 draws[race["id"]] = {
                     v: (keys, _stub_draws(b, keys, draw_rng), None) for v, b in bands.items()
                 }
+            if fault and projectable:
+                race["withdrawal"] = {"reason": fault}
             race["possible"] = _possible(race, spec, bundle.get("electors"))
         races.append(race)
     levels, mayor_count_only = _levels(bundle)

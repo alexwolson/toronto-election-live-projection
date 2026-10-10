@@ -54,6 +54,7 @@ class Tally:
     polls: int
     polls_received: int
     votes: dict[str, int]  # Ballot Name -> votes, in the feed's order
+    votes_received: int  # the row's own total, which the checks compare with the candidates'
 
 
 @dataclass(frozen=True)
@@ -81,6 +82,7 @@ class AllOffice:
             polls=count(row.get("polls")),
             polls_received=count(row.get("pollsReceived")),
             votes=_votes(row["candidate"]),
+            votes_received=count(row.get("votesReceived")),
         )
 
 
@@ -97,6 +99,7 @@ class WardByWard:
             polls=count(self.office.get("polls")),
             polls_received=count(self.office.get("pollsReceived")),
             votes=_votes(self.office["candidate"]),
+            votes_received=count(self.office.get("votesReceived")),
         )
 
     def wards(self) -> list[WardTally]:
@@ -126,6 +129,19 @@ class WardByWard:
                 )
             )
         return wards
+
+    def repeats_agree(self) -> bool:
+        """Whether every candidate repeats each ward's fields exactly as the first one does.
+        Call after `wards()`, which rejects a ward row that isn't an object or is misaligned."""
+        candidates = self.office["candidate"]
+        if not candidates:
+            return True
+
+        def fields(entry: dict) -> dict:
+            return {k: v for k, v in entry.items() if k != "votesReceived"}
+
+        first = [fields(entry) for entry in candidates[0]["ward"]]
+        return all([fields(entry) for entry in c["ward"]] == first for c in candidates[1:])
 
 
 def _add(votes: dict[str, int], name, n: int) -> None:
