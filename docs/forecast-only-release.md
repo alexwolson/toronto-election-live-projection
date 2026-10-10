@@ -16,7 +16,7 @@ The Dress runs this procedure once as a no-op, on the current tag (#55).
 
 - Note the frozen state, to roll back to: the production Vercel deployment URL, the Backend tag
   it pins (`/data/source-manifest.json` on the site), and the Night apps' image tag and digest
-  (the freeze's `deploy` run summary).
+  (the Deploy Freeze's `deploy` run summary).
 - The release is a new Backend tag from the same Results release. A forecast built from a
   different Results release fails step 3.
 
@@ -38,7 +38,8 @@ The same Frontend commit as production, with only `BACKEND_RELEASE_TAG` changed 
 2. On Alex's go, set the Production tag, then deploy:
 
    ```bash
-   vercel env add BACKEND_RELEASE_TAG production --value <tag> --sensitive --force --yes
+   vercel env add BACKEND_RELEASE_TAG production \
+     --value <tag> --sensitive --force --yes
    npm run deploy:production -- <tag>
    ```
 
@@ -47,7 +48,7 @@ The same Frontend commit as production, with only `BACKEND_RELEASE_TAG` changed 
 
 ## 3. Image rebuild, draws only
 
-On a branch from the frozen image's commit (its tag):
+On a branch from the commit the frozen image was built from (its image tag is that SHA):
 
 ```bash
 uv run election-night name-inputs --forecast-only --backend-release <tag>
@@ -69,8 +70,8 @@ jq '[.races[] | select(.id == "mayor") | .candidates[] | select(.candidate_id) |
 ```
 
 It should list two names: the new forecast's leader and challenger. Fewer means the variant is
-off, and the mayor will show no Estimated Range all night. Decide before going on: carry on with the variant off,
-or stop and keep the frozen state.
+off, and the mayor will show no Estimated Range all night. Decide before going on: carry on with
+the variant off, or stop and keep the frozen state.
 
 The diff touches only `data/night-bundle/inputs/mayoral_forecast.json`, its draws,
 `sources.json` and `night-bundle.json`. Anything else: stop.
@@ -83,6 +84,10 @@ summary.
 ## 4. Short accelerated Rehearsal
 
 On the Rehearsal apps and store, with the new digest:
+
+First reset the Rehearsal store and resume `count-decrease`, as in
+[rehearsal-checklist.md](rehearsal-checklist.md) § Before every Rehearsal. Without it the store
+rejects every Mock Feed pair as older than the last Rehearsal's.
 
 1. **mock-feed** workflow: the new tag and digest, `start` a few minutes from now, `speed` 10,
    `faults` off.

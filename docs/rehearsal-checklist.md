@@ -95,11 +95,11 @@ action from the phone only. The fault times and payload details are in
 Run by an agent from a laptop; Alex watches from the phone. Leave a few minutes between faults
 and keep them clear of the feed-fault windows above, for example in the tail after 23:40.
 
-- [ ] **Kill the Fly pipeline:** `flyctl machine stop <id> -a toronto-election-rehearsal-fly`.
+- [ ] **Stop the Fly pipeline:** `flyctl machine stop <id> -a toronto-election-rehearsal-fly`.
   **Expect:** the page keeps updating from DigitalOcean; night status shows `fly` stale and `do`
   fresh; the `pipeline-fly` badge within 5 minutes; no banner. Restore with
   `flyctl machine start <id> -a toronto-election-rehearsal-fly`: `fly` fresh again.
-- [ ] **Kill both:** the **teardown** workflow. **Expect:** the banner on the page about 5
+- [ ] **Stop both:** the **teardown** workflow. **Expect:** the banner on the page about 5
   minutes after the last heartbeat; `reader-path` sounds; both `pipeline-*` badges.
 - [ ] **Restore both:** the **deploy** workflow with the same inputs. **Expect:** heartbeats fresh,
   the banner drops, the count resumes and never goes backwards. (A decrease across a restart is
@@ -113,11 +113,12 @@ Times are suggestions in the tail, clear of the faults.
 
 - [ ] **Page pause** (20:30–20:40, during the zeros): **switch** → `rehearsal`, `page`, `off`,
   then `on`. **Expect:** "Live results are paused. See the City of Toronto's results: [link]"
-  within 90 s, and live results back within 90 s of `on`.
+  within 90 s, and the Live Tallies back within 90 s of `on`.
 - [ ] **Every switch by workflow, each way** (about 23:40–00:05): `mayor`, `council`, `trustee`,
   `mayor_variant`, `projections`, `page`, each `off` then `on`, one at a time. **Expect:** each
   run green; each change on the page within 90 s, worded as docs/store.md § Switches:
-  - `mayor` off: the mayor card shows the count, "Projection paused for the mayor's race".
+  - `mayor` off: the mayor card shows the count and the Possible Range, "Projection paused
+    for the mayor's race".
   - `council` off: "Projection paused for council races"; tiles "Count only".
   - `trustee` off: "Projection paused for school board trustee races".
   - `mayor_variant` off: no Estimated Range, the Possible Range, the paused wording.
@@ -148,7 +149,7 @@ Times are suggestions in the tail, clear of the faults.
   **Expect:** every flip timed from the run going green to the page changing, all under 90 s.
 - [ ] **Each alert reaches the phone within 5 minutes.** **Expect:** every Pushover alert timed
   from its fault's start, all under 5 minutes: `count-decrease`, `reader-path`, `pipeline-fly`
-  and both `pipeline-*` at the kill.
+  and both `pipeline-*` when both stop.
 - [ ] **Tick time and memory.** **Expect:** each tick's log line (`logs/<pipeline>/` in the
   archive, or `flyctl logs`) lands within a few seconds of its slot (Fly on the minute,
   DigitalOcean at :30), even in the 20:00–20:30 burst; Fly's and DigitalOcean's memory graphs
@@ -165,7 +166,7 @@ digest and Frontend commit intended for the night.
   fast-forward to.
 - [ ] **A clean count.** **Expect:** before 20:00 "Results from 8 p.m."; the count runs to
   "All voting areas in" everywhere; no Withdrawals; no alerts.
-- [ ] **One pipeline kill:** stop the Fly Machine, then start it, as in the Full night.
+- [ ] **One pipeline stopped:** stop the Fly Machine, then start it, as in the Full night.
   **Expect:** DigitalOcean carries the page; the `pipeline-fly` badge within 5 minutes; `fly`
   fresh again after the start.
 - [ ] **One flip of each switch,** off then on, by workflow. **Expect:** each change on the phone
@@ -176,7 +177,7 @@ digest and Frontend commit intended for the night.
   well under 60 s. **Expect:** as in the Full night.
 - [ ] **The no-op forecast-only release** on the current tag, timed from start to end
   ([forecast-only-release.md](forecast-only-release.md)). The Night apps don't exist before the
-  freeze, and production stays on the pre-freeze build, so:
+  Deploy Freeze, and production stays on the build before it, so:
   - step 1 is skipped (the current tag);
   - step 2 stops at the preview with the current tag;
   - step 3's `git diff --stat` is empty, and the check lists the same two names; build the
@@ -190,7 +191,7 @@ digest and Frontend commit intended for the night.
 
 ## Deploy Freeze (#56, Fri Oct 23 18:00 EDT)
 
-- [ ] **`main` fast-forwards to the Dress commit** (Frontend, S8). Alex previews the freeze build.
+- [ ] **`main` fast-forwards to the Dress commit** (Frontend, S8). Alex previews that build.
   **Expect:** the preview at the Dress commit.
 - [ ] **Seed the Night store** before the production build (Frontend `docs/v2-release.md` § The
   live results route), with `REDIS_URL` the Night store's. **Expect:** `payload`, `payload:seq`,

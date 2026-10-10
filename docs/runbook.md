@@ -71,8 +71,8 @@ decreases** in night status for anything after the first.
 
 ### `pipeline-fly` or `pipeline-do` (badge, no sound)
 
-**Means:** that pipeline hasn't completed a tick for 3 minutes. Its platform restarts it (the
-watchdog exits a stuck process), and the other pipeline carries on.
+**Means:** that pipeline hasn't completed a tick within its check's grace period. Its platform
+restarts it (the watchdog exits a stuck process), and the other pipeline carries on.
 
 **Do:** run **night status**. If the other heartbeat is fresh, nothing more. If both are stale,
 `reader-path` will sound: follow it. Don't redeploy.
@@ -116,14 +116,15 @@ is no per-race switch, and every switch turns back on (docs/store.md § Switches
 **Which switch for which symptom:**
 
 - **Mayor's Estimated Range looks wrong** (outside what's possible, jumping wildly, or out of
-  line with the count): `mayor_variant` off. The mayor card keeps the count and the Possible
-  Range, worded "Projection paused for the mayor's race".
-- **The mayor card's ranges look wrong, the Possible Range too:** `mayor` off. The card shows
-  the count only.
+  line with the count): `mayor` off. The mayor card keeps the count and the Possible Range,
+  worded "Projection paused for the mayor's race". (`mayor_variant` off does the same tonight:
+  the payload carries no count-only band to fall back to.)
+- **A Possible Range looks wrong:** no switch removes it, since it is arithmetic on the count,
+  not a projection (docs/payload.md). If it misleads, pause the page.
 - **Council ranges look wrong across races:** `council` off. Tiles read "Count only".
 - **TDSB or TCDSB ranges look wrong:** `trustee` off.
 - **More than one level looks wrong, or you can't tell which:** `projections` off. Every level
-  shows the count only.
+  shows its Live Tally only.
 - **The tallies themselves are wrong, or the page is broken:** the page pause, below.
 
 One race with an odd range is not a reason to flip a level: the checks withdraw single races by
