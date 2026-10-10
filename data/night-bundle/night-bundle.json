@@ -5844,26 +5844,26 @@
  "gates": {
   "council": {
    "pass": true,
-   "model_version": "0b812b0bf91c4e27a0979468bc4111d6cf7a1be4f413a9ad4a953cdea6d880b0",
-   "run": 2,
+   "model_version": "1e51d5e37d82ba8f41ea1f47351440bbb8b3d2afc56480a7872f165918c5e70f",
+   "run": 3,
    "approved": false
   },
   "mayor-count-only": {
    "pass": false,
-   "model_version": "0b812b0bf91c4e27a0979468bc4111d6cf7a1be4f413a9ad4a953cdea6d880b0",
-   "run": 2,
+   "model_version": "1e51d5e37d82ba8f41ea1f47351440bbb8b3d2afc56480a7872f165918c5e70f",
+   "run": 3,
    "approved": false
   },
   "mayor-forecast-weighted": {
    "pass": false,
-   "model_version": "0b812b0bf91c4e27a0979468bc4111d6cf7a1be4f413a9ad4a953cdea6d880b0",
-   "run": 2,
+   "model_version": "1e51d5e37d82ba8f41ea1f47351440bbb8b3d2afc56480a7872f165918c5e70f",
+   "run": 3,
    "approved": true
   },
   "trustee": {
    "pass": true,
-   "model_version": "0b812b0bf91c4e27a0979468bc4111d6cf7a1be4f413a9ad4a953cdea6d880b0",
-   "run": 2,
+   "model_version": "1e51d5e37d82ba8f41ea1f47351440bbb8b3d2afc56480a7872f165918c5e70f",
+   "run": 3,
    "approved": false
   }
  },
