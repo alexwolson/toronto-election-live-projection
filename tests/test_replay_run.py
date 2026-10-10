@@ -288,3 +288,20 @@ def test_below_the_ess_floor_the_variant_scores_the_tally_when_count_only_failed
     assert result["reported"]["count_only"]["pass"] is False
     assert total["margin_crps"] == pytest.approx(total["baseline_margin_error"])
     assert total["brier"] == pytest.approx(total["baseline_brier"])
+
+
+def test_orders_replayed_by_parallel_workers_give_the_same_gate_result():
+    # #44: the orders fan out over a process pool and come back in their own order.
+    nights = {2018: tiny_night(2018), 2022: tiny_night(2022)}
+    orders = {
+        y: [
+            ("interleaved", 0, _order(n)),
+            ("early", 0, arrival_order(n, PREREG, "early", 0)),
+            ("ward_clustered", 0, arrival_order(n, PREREG, "ward_clustered", 0)),
+        ]
+        for y, n in nights.items()
+    }
+    serial = replay_level("council", PREREG, nights, orders, [], "v")
+    parallel = replay_level("council", PREREG, nights, orders, [], "v", workers=2)
+
+    assert json.dumps(parallel, sort_keys=True) == json.dumps(serial, sort_keys=True)
