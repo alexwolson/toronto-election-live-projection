@@ -9,6 +9,9 @@ only if it passes pre-registered historical replays. Race calls are out of scope
 - Planning tickets are GitHub issues in this repo; see the [tracker conventions](docs/agents/issue-tracker.md).
 - Research findings: [docs/research/](docs/research/).
 - Vocabulary: [CONTEXT.md](CONTEXT.md).
+- Operating documents (#52): the [on-night runbook](docs/runbook.md), the
+  [forecast-only release](docs/forecast-only-release.md) and the
+  [Rehearsal checklist](docs/rehearsal-checklist.md).
 
 ## Development
 
