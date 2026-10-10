@@ -29,7 +29,7 @@ from election_night.feed import check_status
 from election_night.freeze_gate import FRONTEND_REPO, check_archives
 from election_night.gates import HOLDOUT_FORECASTS, load_preregistration, s3_record
 from election_night.goldens import write_goldens
-from election_night.mockfeed.feed import FAULTS, MockFeed
+from election_night.mockfeed.feed import SCRIPTS, MockFeed
 from election_night.mockfeed.scenario import load_scenario
 from election_night.mockfeed.server import serve
 from election_night.name_inputs import fetch_name_inputs, load_name_inputs, refresh_forecast
@@ -175,11 +175,13 @@ def cmd_mock_feed(args) -> None:
     start = datetime.fromisoformat(args.start)
     if start.tzinfo is None:
         sys.exit("--start needs a UTC offset, e.g. 2026-10-15T19:00:00-04:00")
+    faults, tail = SCRIPTS[args.faults]
     feed = MockFeed(
         load_scenario(args.seed),
         start_ms=int(start.timestamp() * 1000),
         speed=args.speed,
-        faults=FAULTS if args.faults else (),
+        faults=faults,
+        tail=tail,
     )
     serve(feed, args.port)
 
@@ -367,11 +369,11 @@ def main(argv: list[str] | None = None) -> None:
     )
     mock.add_argument("--seed", type=int, default=0, help="the scenario's arrival order")
     mock.add_argument(
-        "--no-faults",
-        dest="faults",
-        action="store_false",
-        default=os.environ.get("MOCK_FEED_FAULTS", "on") != "off",
-        help="serve no HTTP faults (env MOCK_FEED_FAULTS=off)",
+        "--faults",
+        choices=sorted(SCRIPTS),
+        default=os.environ.get("MOCK_FEED_FAULTS", "on"),
+        help="the fault script: on (Plumbing's HTTP faults), full-night (#48's, with the tail; "
+        "docs/full-night-faults.md) or off (env MOCK_FEED_FAULTS, default on)",
     )
     mock.add_argument("--port", type=int, default=os.environ.get("PORT", "8080"))
     mock.set_defaults(run=cmd_mock_feed)

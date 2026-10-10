@@ -124,7 +124,7 @@ class Scenario:
         all_office = json.loads(self.all_office)
         for office in all_office["office"]:
             for row in office["ward"]:
-                _fill(row, count.races[race_id(office["id"], row["num"])])
+                fill_row(row, count.races[race_id(office["id"], row["num"])])
         ward_by_ward = json.loads(self.ward_by_ward)
         office = ward_by_ward["office"]
         mayor = count.races[race_id(MAYOR_OFFICE_ID, "0")]
@@ -147,7 +147,7 @@ def _by_votes(candidates: list[dict]) -> list[dict]:
     return sorted(candidates, key=lambda c: -int(c["votesReceived"]))
 
 
-def _fill(row: dict, tally: Tally) -> None:
+def fill_row(row: dict, tally: Tally) -> None:
     total = sum(tally.votes.values())
     row["pollsReceived"] = str(tally.polls_received)
     row["votesReceived"] = str(total)

@@ -19,9 +19,9 @@ on:
         description: Night minutes per wall minute (about 10 for Plumbing, 1 for the Full night, 4 for the Dress)
         default: "10"
       faults:
-        description: Serve the scheduled HTTP faults
+        description: "Fault script: on (Plumbing HTTP faults), full-night (docs/full-night-faults.md), off"
         type: choice
-        options: ["on", "off"]
+        options: ["on", "full-night", "off"]
         default: "on"
 
 permissions:
