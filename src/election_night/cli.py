@@ -40,7 +40,7 @@ from election_night.replay.gate_result import write_gate_result
 from election_night.replay.run import LEVELS, PREREGISTRATION, run_replay
 from election_night.status import read_status, render_status
 from election_night.store import PIPELINES, Store
-from election_night.switches import SWITCHES, VALUES, flip, switch_key
+from election_night.switches import STATES, SWITCHES, flip, switch_key
 
 CITY_FEED = "https://mediaresults.toronto.ca/results"
 # Defaults resolve against the repo root, wherever the command is run from.
@@ -102,6 +102,10 @@ def _env(name: str) -> str:
     return value
 
 
+def _redis(url: str) -> redis.Redis:
+    return redis.Redis.from_url(url, socket_timeout=10, socket_connect_timeout=10)
+
+
 def cmd_pipeline(args) -> None:
     # URLs, buckets and credentials come from the environment (docs/store.md). The archive's
     # endpoint and keys are boto3's own: AWS_ENDPOINT_URL_S3, AWS_ACCESS_KEY_ID and so on.
@@ -116,7 +120,7 @@ def cmd_pipeline(args) -> None:
         "s3", config=Config(connect_timeout=10, read_timeout=20, retries={"max_attempts": 3})
     )
     archive = ArchiveWriter(Archive(s3, _env("ARCHIVE_BUCKET"), _env("ARCHIVE_PREFIX")))
-    client = redis.Redis.from_url(redis_url, socket_timeout=10, socket_connect_timeout=10)
+    client = _redis(redis_url)
     pipeline = Pipeline(
         args.name,
         base_url,
@@ -129,12 +133,12 @@ def cmd_pipeline(args) -> None:
 
 
 def cmd_status(args) -> None:
-    client = redis.Redis.from_url(_env("REDIS_URL"), socket_timeout=10, socket_connect_timeout=10)
+    client = _redis(_env("REDIS_URL"))
     sys.stdout.write(render_status(read_status(client), now_ms()))
 
 
 def cmd_switch(args) -> None:
-    client = redis.Redis.from_url(_env("REDIS_URL"), socket_timeout=10, socket_connect_timeout=10)
+    client = _redis(_env("REDIS_URL"))
     state = flip(client, args.switch, args.state)
     print(f"`{switch_key(args.switch)}` set to `{args.state}`; read back: **{state}**.")
     if state != args.state:
@@ -291,7 +295,7 @@ def main(argv: list[str] | None = None) -> None:
         "switch", help="flip one switch in the store at REDIS_URL and read it back (#49)"
     )
     switch.add_argument("switch", choices=SWITCHES)
-    switch.add_argument("state", choices=VALUES)
+    switch.add_argument("state", choices=STATES)
     switch.set_defaults(run=cmd_switch)
 
     bundle = commands.add_parser(

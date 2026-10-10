@@ -1,9 +1,9 @@
 """`night status` (#50): a read-only summary of the store, for the job summary on the phone.
 
-It prints both heartbeats, the stored `seq` pair, the current Withdrawals with their machine
-reasons, the switches, and the count decreases the pipelines recorded (#17 § On the night). It reads with one
-MGET and one LRANGE and never writes. A malformed key spoils only its own section or row. It also shows each switch
-as the route reads it (#49).
+It prints both heartbeats, the stored `seq` pair, each switch as the route reads it (#49), the
+current Withdrawals with their machine reasons, and the count decreases the pipelines recorded
+(#17 § On the night). It reads with one MGET and one LRANGE and never writes. A malformed key
+spoils only its own section or row.
 """
 
 import json
@@ -95,9 +95,11 @@ def _switches(values: dict, now_ms: int) -> list[str]:
     for name in SWITCHES:
         raw = values.get(switch_key(name))
         state = switch_state(raw)
-        rows.append(
-            [name, "on (not set)" if raw is None else state if state == "on" else f"**{state}**"]
-        )
+        if raw is None:
+            state = "on (not set)"
+        elif state != "on":
+            state = f"**{state}**"
+        rows.append([name, state])
     return _table(["Switch", "State"], rows)
 
 

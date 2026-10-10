@@ -6,7 +6,7 @@ so a typo in the Upstash console fails closed, and `night status` names it (docs
 """
 
 SWITCHES = ("mayor", "council", "trustee", "mayor_variant", "projections", "page")
-VALUES = ("on", "off")
+STATES = ("on", "off")
 
 
 def switch_key(name: str) -> str:
@@ -22,9 +22,9 @@ def switch_state(raw: bytes | None) -> str:
     return f"off (unrecognized value {raw.decode(errors='replace')!r})"
 
 
-def flip(client, name: str, value: str) -> str:
+def flip(client, name: str, state: str) -> str:
     """Set one switch and return its state read back from the store."""
-    if name not in SWITCHES or value not in VALUES:
-        raise ValueError(f"no switch {name!r} with value {value!r}")
-    client.set(switch_key(name), value)
+    if name not in SWITCHES or state not in STATES:
+        raise ValueError(f"no switch {name!r} with state {state!r}")
+    client.set(switch_key(name), state)
     return switch_state(client.get(switch_key(name)))
