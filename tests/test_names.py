@@ -207,7 +207,7 @@ def test_the_bundle_records_the_name_sources_and_the_files_it_read():
     assert source["registry"]["mayorCandidates_2026.json"]["seq"] == int(vendored["seq"])
     assert len(source["registry"]["mayorCandidates_2026.json"]["sha256"]) == 64
     assert source["results"]["release"] == "results-2026-10-07.1"
-    assert source["forecast"]["release"] == "backend-2026-10-07.2"
+    assert source["forecast"]["release"] == "backend-2026-10-09.2"
     assert sorted(source["vendored_sha256"]) == [
         "canonical-2026.csv",
         "mayoral_forecast.json",

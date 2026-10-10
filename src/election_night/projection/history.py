@@ -13,7 +13,8 @@ votes per mayoral vote in that ward, per unit of citywide turnout. 2014's 44 war
 comparable history, so there the turnout ratio is 1 and the office ratio is citywide.
 
 Ward Aggregates (S5): advance aggregates are sized from the released advance figure, a ward table
-if one was released, else the citywide figure split by the other nights' ward shares. 2014's 44
+if one was released, else the citywide figure split by the other nights' ward shares, else (no
+figure released) each code is a historical share of the ward's total, as mail is. 2014's 44
 wards have no ward shares in any other night, so there it is split by electors (an assumption, #33), then split across the night's advance codes by their historical shares. Mail
 (97 from 2022) is a historical share of the ward's total. Each code's spread is its share of ward
 votes' pooled coefficient of variation across wards, on the other nights where it meant the same
@@ -30,7 +31,7 @@ import xlrd
 from election_night.feed import race_id
 from election_night.gates import ROOT
 from election_night.projection.fit import fit_level, fit_mayor
-from election_night.replay.historical import Night
+from election_night.replay.historical import Night, Race, Unit
 
 VOTER_STATISTICS = ROOT / "data" / "historical" / "voter_statistics"
 ELECTOR_FILES = {
@@ -48,7 +49,10 @@ CHANNELS = {
     2018: {97: "advance", 98: "advance", 99: "advance"},
     2022: {97: "mail", 98: "advance", 99: "advance"},
     2023: {97: "mail", 98: "advance", 99: "advance"},
+    # Inferred: the 2026 feed can't show its codes (research 01 § 3).
+    2026: {97: "mail", 98: "advance", 99: "advance"},
 }
+AGGREGATE_CODES_2026 = (97, 98, 99)
 LEVEL_OFFICES = {"council": (2,), "trustee": (3, 4)}
 MAYOR = 1
 
@@ -77,7 +81,11 @@ def ward_electors(year: int) -> dict[int, int]:
     raise ValueError(f"{path.name}: no voter turnout sheet")
 
 
-def _released(year: int, prereg: dict) -> tuple[str, int, dict[int, int]]:
+# The released advance figure (S5): its ladder path, the citywide figure and any ward table.
+Released = tuple[str, int | None, dict[int, int]]
+
+
+def _released(year: int, prereg: dict) -> Released:
     """The released advance figure (S5): its path, the citywide figure and any ward table."""
     night = prereg["ward_aggregate_paths"]["nights"][str(year)]
     wards = {}
@@ -166,22 +174,35 @@ def _code_shares(history: list[_Votes], codes: list[int]) -> dict[int, float]:
     return {c: s / total for c, s in shares.items()}
 
 
+def fit_params(nights: list[Night]) -> dict:
+    """Each level's parameters, fitted on `nights`."""
+    params = {
+        level: vars(fit_level(nights, offices))
+        for level, offices in LEVEL_OFFICES.items()
+        if any(r.office_id in offices for n in nights for r in n.races)
+    }
+    params["mayor"] = vars(fit_mayor(nights))
+    return params
+
+
 def fold_projection(target: Night, nights: dict[int, Night], prereg: dict) -> dict:
     """The target night's projection inputs, from the other nights and its pre-night facts."""
     others = [n for y, n in sorted(nights.items()) if y != target.year]
+    races = race_inputs(target, others, ward_electors(target.year), _released(target.year, prereg))
+    return {"params": fit_params(others), "races": races}
+
+
+def race_inputs(
+    target: Night, others: list[Night], electors: dict[int, int], released: Released
+) -> dict:
+    """Each projected race's expected-total inputs for `target`, whose structure alone is read,
+    from the history nights `others`, its pre-night electors by City ward and its released
+    advance figure, by race id."""
     history = [_Votes(n) for n in others]
     comparable = [h for h in history if len(h.wards) == len(target.wards)]
     # Ward-level history needs the same 25-ward map (2018 on); 2014's 44 wards have none.
     ward_level = len(target.wards) == 25 and bool(comparable)
-    electors = ward_electors(target.year)
     city_electors = sum(electors[w] for w, _ in target.wards)
-
-    params = {
-        level: vars(fit_level(others, offices))
-        for level, offices in LEVEL_OFFICES.items()
-        if any(r.office_id in offices for n in others for r in n.races)
-    }
-    params["mayor"] = vars(fit_mayor(others))
 
     def turnout_ratio(ward: int) -> float:
         if not ward_level:
@@ -204,7 +225,7 @@ def fold_projection(target: Night, nights: dict[int, Night], prereg: dict) -> di
             1.0,
         )
 
-    path, citywide, table = _released(target.year, prereg)
+    path, citywide, table = released
     advance_share = {}
     for ward, _ in target.wards:
         if ward_level:
@@ -217,24 +238,25 @@ def fold_projection(target: Night, nights: dict[int, Night], prereg: dict) -> di
             )
         else:
             advance_share[ward] = electors[ward] / city_electors
-    advance_voters = {
-        ward: table[ward] if path == "ward_table" else citywide * advance_share[ward]
-        for ward, _ in target.wards
-    }
+
+    def advance_voters(ward: int) -> float | None:
+        if path == "ward_table":
+            return table[ward]
+        if path == "citywide":
+            return citywide * advance_share[ward]
+        return None  # no figure released: each code is a historical share of the ward's total
+
     channels = CHANNELS[target.year]
     advance_codes = sorted(c for c, kind in channels.items() if kind == "advance")
     code_share = _code_shares(history, advance_codes)
-    mail_history = [h for h in history if h.channel("mail")]
-    mail_comparable = [h for h in mail_history if len(h.wards) == len(target.wards)]
 
-    def mail_share(ward: int) -> float:
-        if ward_level and mail_comparable:
-            return float(
-                np.mean([h.channel("mail")[ward] / h.mayor[ward] for h in mail_comparable])
-            )
-        return _mean(
-            [sum(h.channel("mail").values()) / sum(h.mayor.values()) for h in mail_history], 0.0
-        )
+    def channel_share(kind: str, ward: int) -> float:
+        """The channel's historical share of the ward's mayoral votes."""
+        seen = [h for h in history if h.channel(kind)]
+        seen_comparable = [h for h in seen if len(h.wards) == len(target.wards)]
+        if ward_level and seen_comparable:
+            return float(np.mean([h.channel(kind)[ward] / h.mayor[ward] for h in seen_comparable]))
+        return _mean([sum(h.channel(kind).values()) / sum(h.mayor.values()) for h in seen], 0.0)
 
     aggregate = {u.key: u.ward_aggregate for u in target.units}
     races = {}
@@ -248,13 +270,17 @@ def fold_projection(target: Night, nights: dict[int, Night], prereg: dict) -> di
             aggregates = []
             for code in codes:
                 kind = channels[code]
+                voters = advance_voters(ward) if kind == "advance" else None
+                share = None
+                if voters is None:
+                    share = channel_share(kind, ward) * (
+                        code_share[code] if kind == "advance" else 1.0
+                    )
                 aggregates.append(
                     {
                         "code": code,
-                        "votes": advance_voters[ward] * ratio * code_share[code]
-                        if kind == "advance"
-                        else None,
-                        "share": mail_share(ward) if kind == "mail" else None,
+                        "votes": None if voters is None else voters * ratio * code_share[code],
+                        "share": share,
                         "spread": _spread(history, code, kind),
                     }
                 )
@@ -267,7 +293,62 @@ def fold_projection(target: Night, nights: dict[int, Night], prereg: dict) -> di
                 }
             )
         races[race_id(race.office_id, race.num)] = {"wards": wards}
-    return {"params": params, "races": races}
+    return races
+
+
+def structure_2026(races: list[dict]) -> Night:
+    """The 2026 night's structure from its Night Bundle races, with no votes: each City ward's
+    `polls` as its election-day units plus one Ward Aggregate per 2026 code, each council race
+    its ward's units and each trustee area its City wards' units (research 03 § 4)."""
+    mayor = next(r for r in races if r["office_id"] == MAYOR)
+    if any(w["polls"] <= len(AGGREGATE_CODES_2026) for w in mayor["wards"]):
+        raise ValueError("a City ward's polls don't cover its Ward Aggregates")
+    units = [
+        Unit(int(w["num"]), code, code in AGGREGATE_CODES_2026)
+        for w in mayor["wards"]
+        for code in (
+            *range(1, w["polls"] - len(AGGREGATE_CODES_2026) + 1),
+            *AGGREGATE_CODES_2026,
+        )
+    ]
+    by_ward: dict[int, list[tuple[int, int]]] = {}
+    for unit in units:
+        by_ward.setdefault(unit.ward, []).append(unit.key)
+
+    def race(spec: dict, wards: list[int]) -> Race:
+        keys = tuple(key for ward in wards for key in by_ward[ward])
+        n = len(spec["candidates"])
+        return Race(
+            spec["office_id"],
+            spec["num"],
+            spec["name"],
+            tuple(c["key"] for c in spec["candidates"]),
+            keys,
+            np.zeros((len(keys), n)),
+            np.zeros(n),
+        )
+
+    offices = {o for level in LEVEL_OFFICES.values() for o in level}
+    return Night(
+        year=2026,
+        opening_time="",
+        election_desc="",
+        units=tuple(units),
+        wards=tuple((int(w["num"]), w["name"]) for w in mayor["wards"]),
+        races=(
+            race(mayor, sorted(by_ward)),
+            *(
+                race(
+                    r,
+                    [int(r["num"])]
+                    if r["office_id"] in LEVEL_OFFICES["council"]
+                    else [int(w) for w in r["city_wards"]],
+                )
+                for r in races
+                if r["office_id"] in offices
+            ),
+        ),
+    )
 
 
 def replay_bundle(target: Night, nights: dict[int, Night], prereg: dict) -> dict:

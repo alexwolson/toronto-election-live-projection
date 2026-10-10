@@ -1,8 +1,9 @@
 """The vendored inputs the Night Bundle names its 2026 candidates from (#16).
 
 `fetch_name_inputs` writes them to `data/night-bundle/inputs/`: the City registry, trimmed to its
-name fields; the forecast's `mayoral_forecast.json` from the pinned Backend release; and the 2026
-candidacies from the Results release that forecast was built from. `sources.json` records where
+name fields; the forecast's `mayoral_forecast.json` and its draws, `mayoral_forecast_draws.npz`
+(S1), from the pinned Backend release; and the 2026 candidacies from the Results release that
+forecast was built from. `sources.json` records where
 each came from. `load_name_inputs` reads them back for the bundle build and records the sha256 of
 each file it read.
 """
@@ -32,6 +33,7 @@ REGISTRY_FILES = (
 RELEASE_URL = "https://github.com/{repo}/releases/download/{tag}/{asset}"
 BACKEND_REPO = "alexwolson/toronto-election-poll-tracker-backend"
 FORECAST = "mayoral_forecast.json"
+DRAWS = "mayoral_forecast_draws.npz"
 CANONICAL_ASSET = "election_results.csv"
 CANONICAL = "canonical-2026.csv"
 SOURCES = "sources.json"
@@ -73,6 +75,7 @@ def load_name_inputs(directory: Path) -> NameInputs:
         canonical=canonical_races(list(csv.DictReader(io.StringIO(canonical_body.decode())))),
         forecast_ids=forecast_ids(json.loads(forecast_body)),
         source={**source, "vendored_sha256": read},
+        directory=directory,
     )
 
 
@@ -101,25 +104,37 @@ def _backend_asset(release: str, asset: str) -> bytes:
 
 
 def _fetch_forecast(backend_release: str, results_release: str | None = None) -> tuple:
-    """The release's forecast, checked against its manifest, and the manifest.
+    """The release's forecast and its draws, each checked against its manifest, and the
+    manifest.
 
     With `results_release`, also fails unless the forecast was built from that Results release.
     Nothing is written, so a rejected forecast never replaces the vendored one.
     """
     manifest = json.loads(_backend_asset(backend_release, "release_manifest.json"))
     forecast = _backend_asset(backend_release, FORECAST)
+    draws = _backend_asset(backend_release, DRAWS)
     published = {a["filename"]: a["sha256"] for a in manifest["assets"]}
-    if published.get(FORECAST) != _sha256(forecast):
-        raise ValueError(f"{FORECAST} does not match {backend_release}'s manifest")
+    for asset, body in ((FORECAST, forecast), (DRAWS, draws)):
+        if published.get(asset) != _sha256(body):
+            raise ValueError(f"{asset} does not match {backend_release}'s manifest")
     built_from = manifest["dependencies"]["results"]["release"]
     if results_release is not None and built_from != results_release:
         raise ValueError(f"{backend_release} was built from {built_from}, not {results_release}")
-    return forecast, manifest
+    return forecast, draws, manifest
 
 
-def _forecast_source(backend_release: str, forecast: bytes) -> dict:
+def _forecast_source(backend_release: str, forecast: bytes, draws: bytes) -> dict:
     record = {"repository": BACKEND_REPO, "release": backend_release, "asset": FORECAST}
-    return {**record, "sha256": _sha256(forecast)}
+    return {
+        **record,
+        "sha256": _sha256(forecast),
+        "draws": {"asset": DRAWS, "sha256": _sha256(draws)},
+    }
+
+
+def _write_forecast(out: Path, forecast: bytes, draws: bytes) -> None:
+    (out / FORECAST).write_bytes(forecast)
+    (out / DRAWS).write_bytes(draws)
 
 
 def _write_sources(out: Path, source: dict) -> None:
@@ -136,8 +151,8 @@ def fetch_name_inputs(backend_release: str, out: Path) -> dict:
         seq = int(json.loads(body)["seq"])
         registry[name] = {"url": REGISTRY_URL.format(name), "seq": seq, "sha256": _sha256(body)}
 
-    forecast, manifest = _fetch_forecast(backend_release)
-    (out / FORECAST).write_bytes(forecast)
+    forecast, draws, manifest = _fetch_forecast(backend_release)
+    _write_forecast(out, forecast, draws)
     results = manifest["dependencies"]["results"]
     canonical = _get(
         RELEASE_URL.format(
@@ -164,7 +179,7 @@ def fetch_name_inputs(backend_release: str, out: Path) -> dict:
             "asset": CANONICAL_ASSET,
             "sha256": _sha256(canonical),
         },
-        "forecast": _forecast_source(backend_release, forecast),
+        "forecast": _forecast_source(backend_release, forecast, draws),
     }
     _write_sources(out, source)
     return source
@@ -177,8 +192,8 @@ def refresh_forecast(backend_release: str, out: Path) -> dict:
     candidacies, since its ids could then mean other candidacies.
     """
     source = json.loads((out / SOURCES).read_text(encoding="utf-8"))
-    forecast, _ = _fetch_forecast(backend_release, source["results"]["release"])
-    (out / FORECAST).write_bytes(forecast)
-    source = {**source, "forecast": _forecast_source(backend_release, forecast)}
+    forecast, draws, _ = _fetch_forecast(backend_release, source["results"]["release"])
+    _write_forecast(out, forecast, draws)
+    source = {**source, "forecast": _forecast_source(backend_release, forecast, draws)}
     _write_sources(out, source)
     return source

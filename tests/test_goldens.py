@@ -48,6 +48,8 @@ def test_the_committed_night_bundle_is_built_from_the_city_test_files():
         OPENING_2026,
         ROOT / "data" / "mock-feed" / "trustee_wards_2026.csv",
         ROOT / "gates",
+        NAME_INPUTS / "advance_turnout_2026.json",
+        bundle_dir=BUNDLE.parent,
     )
 
     assert load_bundle(BUNDLE) == built, "rebuild with `uv run election-night bundle`"

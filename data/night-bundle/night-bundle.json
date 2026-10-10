@@ -1,7 +1,7 @@
 {
  "bundle_version": 1,
- "model_version": "stub-v0",
- "forecast_release_tag": null,
+ "model_version": "1e51d5e37d82ba8f41ea1f47351440bbb8b3d2afc56480a7872f165918c5e70f",
+ "forecast_release_tag": "backend-2026-10-09.2",
  "opening_time": "2026-10-26T20:00:00-04:00",
  "electors": {
   "1": 78411,
@@ -66,16 +66,20 @@
    },
    "forecast": {
     "repository": "alexwolson/toronto-election-poll-tracker-backend",
-    "release": "backend-2026-10-07.2",
+    "release": "backend-2026-10-09.2",
     "asset": "mayoral_forecast.json",
-    "sha256": "690f921768e06625cdd5c2252de465e4756c34692c709da8e95d4266b2893bf2"
+    "sha256": "f22eef7111ffd5d84f08e30e830fbcc37ca2c670e6fc0a74e2e4eb468716a6db",
+    "draws": {
+     "asset": "mayoral_forecast_draws.npz",
+     "sha256": "cf1db2f272149d8918e252990fdec0a35928b9c562402aa7e1feaddf84e1449e"
+    }
    },
    "vendored_sha256": {
     "registry/mayorCandidates_2026.json": "9ce217acb0cb6762217ac4932ac3e5be7f2edb9c23448fbcf57fdd21379a955a",
     "registry/councilorCandidates_2026.json": "7494f895ac1617a31c4634802533172c630186606d871afa359a8a6d92bc85ba",
     "registry/trusteeCandidates_2026.json": "365cee21aaec7c1e69e069187b8b05392467ce4979c8e06e2169e3cae1c4a62f",
     "canonical-2026.csv": "2be487c79d979d65b5d22e540221d0483e18305c8df37d3e605a7917d13b0c63",
-    "mayoral_forecast.json": "690f921768e06625cdd5c2252de465e4756c34692c709da8e95d4266b2893bf2"
+    "mayoral_forecast.json": "f22eef7111ffd5d84f08e30e830fbcc37ca2c670e6fc0a74e2e4eb468716a6db"
    }
   }
  },
@@ -534,7 +538,636 @@
      "name": "Scarborough-Rouge Park",
      "polls": 40
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "1",
+      "base": 60284.95155910236,
+      "election_day_units": 43,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02178974219325648,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08403665051330216,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0939396128238381,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "2",
+      "base": 102863.05696661875,
+      "election_day_units": 64,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.0338103886392929,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09609188165517388,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10741544436938556,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "3",
+      "base": 124048.37316329883,
+      "election_day_units": 79,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.035220367024967184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08259177357063796,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09232447014807807,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "4",
+      "base": 109545.02021260052,
+      "election_day_units": 64,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04014874985732722,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08500974047881675,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09502737267676957,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "5",
+      "base": 73569.84659482035,
+      "election_day_units": 59,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02573656948903521,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0771809440223021,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08627602307502397,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "6",
+      "base": 68465.33992893696,
+      "election_day_units": 47,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.027778308297129184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07761372776252255,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08675980648076936,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "7",
+      "base": 53220.87465930632,
+      "election_day_units": 42,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02097125102769061,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.06313636545829061,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.07057641743250283,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "8",
+      "base": 97373.99721872085,
+      "election_day_units": 58,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.038787383824373814,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08646734885589384,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09665674707181082,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "9",
+      "base": 89203.06215995975,
+      "election_day_units": 50,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.03469856710767037,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07773452828116498,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08689484225243416,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "10",
+      "base": 108859.43995011011,
+      "election_day_units": 77,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.051604120939638475,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0726771022472292,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0812414441147023,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "11",
+      "base": 100203.56075356845,
+      "election_day_units": 69,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.05071058086264823,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07491769567822743,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0837460712996029,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "12",
+      "base": 114273.12910364248,
+      "election_day_units": 55,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.054830794462624136,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09205815368086434,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10290637788674009,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "13",
+      "base": 104985.74395342064,
+      "election_day_units": 75,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04931593031873365,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08931552879645821,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09984055936364993,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "14",
+      "base": 104811.6115182507,
+      "election_day_units": 45,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04358070351512716,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09258258187271155,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10349260521725745,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "15",
+      "base": 88911.9874004289,
+      "election_day_units": 46,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04344527819751229,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0756771068210581,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08459497220528965,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "16",
+      "base": 68700.1987266902,
+      "election_day_units": 59,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.03251967073439896,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0754864854871624,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08438188786419859,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "17",
+      "base": 74889.75855842105,
+      "election_day_units": 57,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.034552114067145825,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09015501027845844,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10077896617675108,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "18",
+      "base": 78390.57775726126,
+      "election_day_units": 53,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.0382783108768649,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09556036693205422,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10682129542371659,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "19",
+      "base": 104051.24363856166,
+      "election_day_units": 50,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.042442647787941795,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07998354482338237,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08940888513634071,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "20",
+      "base": 84590.96775500981,
+      "election_day_units": 58,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02897648564149463,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0871021801881455,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09736638755838307,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "21",
+      "base": 69630.55855837677,
+      "election_day_units": 46,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.026036598515928728,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0875310729693296,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09784582149061716,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "22",
+      "base": 67342.51504450962,
+      "election_day_units": 44,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04175706057752203,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0966144943954461,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10799964231371234,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "23",
+      "base": 54509.92421496803,
+      "election_day_units": 34,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.031118610960944114,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.10502531302010329,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.11740160015360453,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "24",
+      "base": 63794.60314988364,
+      "election_day_units": 45,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02542719798423184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08750692975668449,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09781883321782961,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "25",
+      "base": 73807.77710637996,
+      "election_day_units": 37,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.024458435240092884,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09703135276636346,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10846562368882857,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-1",
@@ -605,7 +1238,36 @@
      "candidacy_id": "can_592ac14a3fc8533381be7f9092e85458",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "1",
+      "base": 60854.876831476686,
+      "election_day_units": 43,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02178974219325648,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08403665051330216,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0939396128238381,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-2",
@@ -634,7 +1296,36 @@
      "candidacy_id": "can_47bbbdf2085553daba34e5d65c24be5b",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "2",
+      "base": 100683.95527859854,
+      "election_day_units": 64,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.0338103886392929,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09609188165517388,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10741544436938556,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-3",
@@ -669,7 +1360,36 @@
      "candidacy_id": "can_1d1d36f627f25c7ba7fe126df38dce9f",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "3",
+      "base": 122849.61816946763,
+      "election_day_units": 79,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.035220367024967184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08259177357063796,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09232447014807807,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-4",
@@ -740,7 +1460,36 @@
      "candidacy_id": "can_0c6dd0ca274a594d87ab96e63783ddcf",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "4",
+      "base": 108308.60810054082,
+      "election_day_units": 64,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04014874985732722,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08500974047881675,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09502737267676957,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-5",
@@ -805,7 +1554,36 @@
      "candidacy_id": "can_a120469102205813ae3b3f17bc67ff63",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "5",
+      "base": 74011.30730152893,
+      "election_day_units": 59,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02573656948903521,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0771809440223021,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08627602307502397,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-6",
@@ -834,7 +1612,36 @@
      "candidacy_id": "can_0aee4bd40f7c5ca99c87bf0689ba951b",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "6",
+      "base": 68174.75612234948,
+      "election_day_units": 47,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.027778308297129184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07761372776252255,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08675980648076936,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-7",
@@ -863,7 +1670,36 @@
      "candidacy_id": "can_8164ef2b771950ebbe2913e7c4b5e8fd",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "7",
+      "base": 54431.839912208154,
+      "election_day_units": 42,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02097125102769061,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.06313636545829061,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.07057641743250283,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-8",
@@ -910,7 +1746,36 @@
      "candidacy_id": "can_e8102ec23639574ba62dde7fb96743dc",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "8",
+      "base": 96203.60721421658,
+      "election_day_units": 58,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.038787383824373814,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08646734885589384,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09665674707181082,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-9",
@@ -945,7 +1810,36 @@
      "candidacy_id": "can_6955360935e55c00ac749810e83c6e99",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "9",
+      "base": 88551.15708951949,
+      "election_day_units": 50,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.03469856710767037,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07773452828116498,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08689484225243416,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-10",
@@ -1004,7 +1898,36 @@
      "candidacy_id": "can_4e6442d48d075767a5dd46d160b57f83",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "10",
+      "base": 104039.41459472285,
+      "election_day_units": 77,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.051604120939638475,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0726771022472292,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0812414441147023,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-11",
@@ -1069,7 +1992,36 @@
      "candidacy_id": "can_877c97222034572c803bd91174e15c38",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "11",
+      "base": 95667.04802826974,
+      "election_day_units": 69,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.05071058086264823,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07491769567822743,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0837460712996029,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-12",
@@ -1116,7 +2068,36 @@
      "candidacy_id": "can_5fcf90938f7555c18b92382fdce69086",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "12",
+      "base": 111458.56449233042,
+      "election_day_units": 55,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.054830794462624136,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09205815368086434,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10290637788674009,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-13",
@@ -1193,7 +2174,36 @@
      "candidacy_id": "can_8541696c67bf5545a1fd79c43cd0180c",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "13",
+      "base": 101486.53213508749,
+      "election_day_units": 75,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04931593031873365,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08931552879645821,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09984055936364993,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-14",
@@ -1312,7 +2322,36 @@
      "candidacy_id": "can_d33ac7f9e10651b1907656bb2bf3d9d1",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "14",
+      "base": 104230.5619185365,
+      "election_day_units": 45,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04358070351512716,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09258258187271155,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10349260521725745,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-15",
@@ -1341,7 +2380,36 @@
      "candidacy_id": "can_37fc02e34ff951abb0a89a803e12a48c",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "15",
+      "base": 87210.73891554229,
+      "election_day_units": 46,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04344527819751229,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0756771068210581,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08459497220528965,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-16",
@@ -1376,7 +2444,36 @@
      "candidacy_id": "can_a0fa4026af4c5b789b9c4a06d3839a91",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "16",
+      "base": 67865.79496623194,
+      "election_day_units": 59,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.03251967073439896,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0754864854871624,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08438188786419859,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-17",
@@ -1429,7 +2526,36 @@
      "candidacy_id": "can_20a5587ffa6b53858a5bf2709b0a09dc",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "17",
+      "base": 73982.91662191284,
+      "election_day_units": 57,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.034552114067145825,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09015501027845844,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10077896617675108,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-18",
@@ -1476,7 +2602,36 @@
      "candidacy_id": "can_450e3113e42453509be01c717ba16606",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "18",
+      "base": 79156.76562586508,
+      "election_day_units": 53,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.0382783108768649,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09556036693205422,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10682129542371659,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-19",
@@ -1565,7 +2720,36 @@
      "candidacy_id": "can_80fa6017461554dfb309cf79180488ea",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "19",
+      "base": 102955.32200311942,
+      "election_day_units": 50,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.042442647787941795,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07998354482338237,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08940888513634071,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-20",
@@ -1624,7 +2808,36 @@
      "candidacy_id": "can_ff612ea57f085ce083280ce61577dada",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "20",
+      "base": 84061.04732544498,
+      "election_day_units": 58,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02897648564149463,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0871021801881455,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09736638755838307,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-21",
@@ -1701,7 +2914,36 @@
      "candidacy_id": "can_a62cbdb903f75afe8bf55d16a086c071",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "21",
+      "base": 68284.07724568415,
+      "election_day_units": 46,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.026036598515928728,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0875310729693296,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09784582149061716,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-22",
@@ -1772,7 +3014,36 @@
      "candidacy_id": "can_b832501e18df5cdf90279c128257f0f5",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "22",
+      "base": 68886.58352661962,
+      "election_day_units": 44,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04175706057752203,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0966144943954461,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10799964231371234,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-23",
@@ -1831,7 +3102,36 @@
      "candidacy_id": "can_9499cbccd5485fcb9d85843d8a681a5e",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "23",
+      "base": 46421.33260386798,
+      "election_day_units": 34,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.031118610960944114,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.10502531302010329,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.11740160015360453,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-24",
@@ -1878,7 +3178,36 @@
      "candidacy_id": "can_7549a4a4392d5389a19be8b561281769",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "24",
+      "base": 62644.232389368226,
+      "election_day_units": 45,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02542719798423184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08750692975668449,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09781883321782961,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "councillor-25",
@@ -1949,7 +3278,36 @@
      "candidacy_id": "can_e1478c1326175e0d9d01ce8159cc2f1f",
      "candidate_id": null
     }
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "25",
+      "base": 73373.96443944825,
+      "election_day_units": 37,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.024458435240092884,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09703135276636346,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10846562368882857,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-1",
@@ -2000,7 +3358,61 @@
    "city_wards": [
     "1",
     "7"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "1",
+      "base": 42051.707593843916,
+      "election_day_units": 43,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02178974219325648,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08403665051330216,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0939396128238381,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "7",
+      "base": 31868.805877134466,
+      "election_day_units": 42,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02097125102769061,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.06313636545829061,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.07057641743250283,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-2",
@@ -2033,7 +3445,61 @@
    "city_wards": [
     "2",
     "3"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "2",
+      "base": 56503.64223048532,
+      "election_day_units": 64,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.0338103886392929,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09609188165517388,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10741544436938556,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "3",
+      "base": 83173.4633534164,
+      "election_day_units": 79,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.035220367024967184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08259177357063796,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09232447014807807,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-3",
@@ -2096,7 +3562,61 @@
    "city_wards": [
     "4",
     "9"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "4",
+      "base": 78773.13838149594,
+      "election_day_units": 64,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04014874985732722,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08500974047881675,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09502737267676957,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "9",
+      "base": 59455.92498686521,
+      "election_day_units": 50,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.03469856710767037,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07773452828116498,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08689484225243416,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-4",
@@ -2135,7 +3655,61 @@
    "city_wards": [
     "6",
     "18"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "6",
+      "base": 44807.62130334475,
+      "election_day_units": 47,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.027778308297129184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07761372776252255,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08675980648076936,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "18",
+      "base": 58671.00066920994,
+      "election_day_units": 53,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.0382783108768649,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09556036693205422,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10682129542371659,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-5",
@@ -2204,7 +3778,61 @@
    "city_wards": [
     "10",
     "14"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "10",
+      "base": 73493.528080736,
+      "election_day_units": 77,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.051604120939638475,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0726771022472292,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0812414441147023,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "14",
+      "base": 86496.52163112228,
+      "election_day_units": 45,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04358070351512716,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09258258187271155,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10349260521725745,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-6",
@@ -2243,7 +3871,61 @@
    "city_wards": [
     "5",
     "8"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "5",
+      "base": 44722.86002353597,
+      "election_day_units": 59,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02573656948903521,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0771809440223021,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08627602307502397,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "8",
+      "base": 65744.01652058696,
+      "election_day_units": 58,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.038787383824373814,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08646734885589384,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09665674707181082,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-7",
@@ -2307,7 +3989,86 @@
     "11",
     "12",
     "13"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "11",
+      "base": 67241.50749751637,
+      "election_day_units": 69,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.05071058086264823,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07491769567822743,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0837460712996029,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "12",
+      "base": 81306.06503506316,
+      "election_day_units": 55,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.054830794462624136,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09205815368086434,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10290637788674009,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "13",
+      "base": 76990.06108817777,
+      "election_day_units": 75,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04931593031873365,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08931552879645821,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09984055936364993,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-8",
@@ -2364,7 +4125,61 @@
    "city_wards": [
     "15",
     "16"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "15",
+      "base": 67490.4793841567,
+      "election_day_units": 46,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04344527819751229,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0756771068210581,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08459497220528965,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "16",
+      "base": 51141.66198974841,
+      "election_day_units": 59,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.03251967073439896,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0754864854871624,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08438188786419859,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-9",
@@ -2403,7 +4218,61 @@
    "city_wards": [
     "17",
     "22"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "17",
+      "base": 58124.083944501224,
+      "election_day_units": 57,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.034552114067145825,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09015501027845844,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10077896617675108,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "22",
+      "base": 51929.61050010232,
+      "election_day_units": 44,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04175706057752203,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0966144943954461,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10799964231371234,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-10",
@@ -2472,7 +4341,61 @@
    "city_wards": [
     "19",
     "20"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "19",
+      "base": 78857.27951160232,
+      "election_day_units": 50,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.042442647787941795,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07998354482338237,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08940888513634071,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "20",
+      "base": 65009.12352106926,
+      "election_day_units": 58,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02897648564149463,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0871021801881455,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09736638755838307,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-11",
@@ -2523,7 +4446,61 @@
    "city_wards": [
     "21",
     "23"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "21",
+      "base": 52235.495524919825,
+      "election_day_units": 46,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.026036598515928728,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0875310729693296,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09784582149061716,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "23",
+      "base": 42091.22237794847,
+      "election_day_units": 34,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.031118610960944114,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.10502531302010329,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.11740160015360453,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tdsb-12",
@@ -2592,7 +4569,61 @@
    "city_wards": [
     "24",
     "25"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "24",
+      "base": 47199.139428214854,
+      "election_day_units": 45,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02542719798423184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08750692975668449,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09781883321782961,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "25",
+      "base": 54046.60827779192,
+      "election_day_units": 37,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.024458435240092884,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09703135276636346,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10846562368882857,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-1",
@@ -2624,7 +4655,36 @@
    ],
    "city_wards": [
     "1"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "1",
+      "base": 15558.618209315533,
+      "election_day_units": 43,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02178974219325648,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08403665051330216,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0939396128238381,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-2",
@@ -2650,7 +4710,36 @@
    ],
    "city_wards": [
     "2"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "2",
+      "base": 36742.26776568333,
+      "election_day_units": 64,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.0338103886392929,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09609188165517388,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10741544436938556,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-3",
@@ -2676,7 +4765,36 @@
    ],
    "city_wards": [
     "7"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "7",
+      "base": 19898.129060653002,
+      "election_day_units": 42,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02097125102769061,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.06313636545829061,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.07057641743250283,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-4",
@@ -2709,7 +4827,61 @@
    "city_wards": [
     "3",
     "4"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "3",
+      "base": 26470.530588913953,
+      "election_day_units": 79,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.035220367024967184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08259177357063796,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09232447014807807,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "4",
+      "base": 13602.367943403991,
+      "election_day_units": 64,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04014874985732722,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08500974047881675,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09502737267676957,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-5",
@@ -2737,7 +4909,86 @@
     "6",
     "8",
     "18"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "6",
+      "base": 18682.290749113447,
+      "election_day_units": 47,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.027778308297129184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07761372776252255,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08675980648076936,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "8",
+      "base": 15651.931045284819,
+      "election_day_units": 58,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.038787383824373814,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08646734885589384,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09665674707181082,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "18",
+      "base": 10646.172622760741,
+      "election_day_units": 53,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.0382783108768649,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09556036693205422,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10682129542371659,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-6",
@@ -2757,7 +5008,36 @@
    ],
    "city_wards": [
     "9"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "9",
+      "base": 15699.631691338083,
+      "election_day_units": 50,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.03469856710767037,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07773452828116498,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08689484225243416,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-7",
@@ -2790,7 +5070,61 @@
    "city_wards": [
     "21",
     "22"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "21",
+      "base": 13934.38175882539,
+      "election_day_units": 46,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.026036598515928728,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0875310729693296,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09784582149061716,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "22",
+      "base": 11536.55896366051,
+      "election_day_units": 44,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04175706057752203,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0966144943954461,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10799964231371234,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-8",
@@ -2823,7 +5157,61 @@
    "city_wards": [
     "23",
     "25"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "23",
+      "base": 9789.545981497058,
+      "election_day_units": 34,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.031118610960944114,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.10502531302010329,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.11740160015360453,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "25",
+      "base": 15518.043619500386,
+      "election_day_units": 37,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.024458435240092884,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09703135276636346,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10846562368882857,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-9",
@@ -2864,7 +5252,111 @@
     "11",
     "12",
     "13"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "10",
+      "base": 7011.31261789365,
+      "election_day_units": 77,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.051604120939638475,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0726771022472292,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0812414441147023,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "11",
+      "base": 6583.8195426668735,
+      "election_day_units": 69,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.05071058086264823,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07491769567822743,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.0837460712996029,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "12",
+      "base": 8722.243761951748,
+      "election_day_units": 55,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.054830794462624136,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09205815368086434,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10290637788674009,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "13",
+      "base": 7336.0239801744,
+      "election_day_units": 75,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04931593031873365,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08931552879645821,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09984055936364993,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-10",
@@ -2908,7 +5400,36 @@
    ],
    "city_wards": [
     "5"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "5",
+      "base": 24862.180191389165,
+      "election_day_units": 59,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02573656948903521,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0771809440223021,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08627602307502397,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-11",
@@ -2938,7 +5459,136 @@
     "16",
     "17",
     "19"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "14",
+      "base": 7172.19874313169,
+      "election_day_units": 45,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04358070351512716,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09258258187271155,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10349260521725745,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "15",
+      "base": 6605.471908347525,
+      "election_day_units": 46,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.04344527819751229,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0756771068210581,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08459497220528965,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "16",
+      "base": 9535.570644087573,
+      "election_day_units": 59,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.03251967073439896,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0754864854871624,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08438188786419859,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "17",
+      "base": 9917.279682514196,
+      "election_day_units": 57,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.034552114067145825,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.09015501027845844,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.10077896617675108,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "19",
+      "base": 11019.01574277075,
+      "election_day_units": 50,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.042442647787941795,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.07998354482338237,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.08940888513634071,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "tcdsb-12",
@@ -2959,7 +5609,61 @@
    "city_wards": [
     "20",
     "24"
-   ]
+   ],
+   "expected": {
+    "wards": [
+     {
+      "ward": "20",
+      "base": 14195.94618745425,
+      "election_day_units": 58,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02897648564149463,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.0871021801881455,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09736638755838307,
+        "spread": 0.3112538499963655
+       }
+      ]
+     },
+     {
+      "ward": "24",
+      "base": 11500.278954439464,
+      "election_day_units": 45,
+      "aggregates": [
+       {
+        "code": 97,
+        "votes": null,
+        "share": 0.02542719798423184,
+        "spread": 0.27141076002669584
+       },
+       {
+        "code": 98,
+        "votes": null,
+        "share": 0.08750692975668449,
+        "spread": 0.2670665317720379
+       },
+       {
+        "code": 99,
+        "votes": null,
+        "share": 0.09781883321782961,
+        "spread": 0.3112538499963655
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "viamonde-2",
@@ -3162,5 +5866,47 @@
    "run": 2,
    "approved": false
   }
+ },
+ "projection": {
+  "params": {
+   "council": {
+    "kappa": 17.52765965335573,
+    "omega": 103.13813731622217,
+    "size_cv": 0.6875879806653203
+   },
+   "mayor": {
+    "kappa": 30.162788837440175,
+    "omega_city": 15.581326056765608,
+    "omega_city_nu": 2.9943596466877977,
+    "omega_ward": 289.87699454848234,
+    "size_cv": 0.664629375644292,
+    "tau": 21.835813149615227
+   },
+   "trustee": {
+    "kappa": 23.19412316913061,
+    "omega": 112.40527253310326,
+    "size_cv": 0.7859598367117714
+   }
+  }
+ },
+ "ward_aggregates": {
+  "path": "historical_shares",
+  "advance_voters": null,
+  "source": {
+   "election_year": 2026,
+   "advance_voters": null,
+   "wards": null,
+   "published_date": null,
+   "publisher": null,
+   "source_title": null,
+   "source_url": null,
+   "note": "The City promises its 2026 advance-vote figure (citywide) on Tue Oct 13. Until it is recorded here, the S5 ladder's fallback is used: each Ward Aggregate is a historical share of its ward's total.",
+   "sha256": "22d5bb5a3b3677fc1dc527e499bd0474eabd7144eba728571f52ff42490e2b3e"
+  }
+ },
+ "forecast": {
+  "release_tag": "backend-2026-10-09.2",
+  "npz": "inputs/mayoral_forecast_draws.npz",
+  "npz_sha256": "cf1db2f272149d8918e252990fdec0a35928b9c562402aa7e1feaddf84e1449e"
  }
 }
