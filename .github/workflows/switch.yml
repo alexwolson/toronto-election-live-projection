@@ -1,0 +1,57 @@
+name: switch
+
+# Flips one switch in the store and reads it back (#49; docs/store.md § Switches). Run it from
+# the GitHub mobile app; the run history is the log of every flip. The route applies the switch,
+# reaching readers in about 75 s. The Upstash console is the fallback.
+run-name: "switch ${{ inputs.switch }} ${{ inputs.state }} (${{ inputs.store }})"
+
+on:
+  workflow_dispatch:
+    inputs:
+      store:
+        description: Which store to write
+        type: choice
+        options: [night, rehearsal]
+        default: night
+      switch:
+        description: "Switch: a level, the mayor's variant, all projections, or the page"
+        type: choice
+        options: [mayor, council, trustee, mayor_variant, projections, page]
+      state:
+        description: "off withdraws it (page off pauses the page); on restores it"
+        type: choice
+        options: ["off", "on"]
+
+permissions:
+  contents: read
+
+# Flips to one store run one at a time, in the order they were started.
+concurrency:
+  group: switch-${{ inputs.store }}
+  cancel-in-progress: false
+
+jobs:
+  switch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+          python-version: "3.14"
+      - run: uv sync --locked
+      - name: Switch ${{ inputs.switch }} ${{ inputs.state }} (${{ inputs.store }})
+        env:
+          # Chooses the secret's name, not its value: an empty secret fails the run rather than
+          # falling through to the other store.
+          REDIS_URL: ${{ secrets[inputs.store == 'night' && 'NIGHT_REDIS_URL' || 'REHEARSAL_REDIS_URL'] }}
+          SWITCH: ${{ inputs.switch }}
+          STATE: ${{ inputs.state }}
+        run: |
+          {
+            echo "_Store: ${{ inputs.store }}_"
+            echo
+            uv run election-night switch "$SWITCH" "$STATE"
+            echo
+            uv run election-night status
+          } >> "$GITHUB_STEP_SUMMARY"

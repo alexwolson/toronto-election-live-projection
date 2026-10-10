@@ -37,6 +37,7 @@ the variant is live on Alex's approval rather than a pass (ADR 0002).
 | `stub` | the bundle has no fitted parameters for it | deterministic stub bands, not a projection |
 | `ungated` | the bundle carries no Gate Results at all: the Replays and the historical goldens | every band, ungated |
 | `none` | never projected (the French-language boards) | the tally only |
+| `switched_off` | **written only by the Frontend route, never by a pipeline:** the level's switch, or all projections, is off (#49, docs/store.md § Switches). On the mayor, `variant` alone may read it while count-only shows. | the tally only |
 
 The bundle's `gates` (`election_night.replay.gate_result.gate_records`) holds each level's latest
 Gate Result as `{"pass", "model_version", "run", "approved"}`. The mayor is `live` if either

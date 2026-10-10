@@ -1,13 +1,15 @@
 # The store
 
 One Redis database per environment (Rehearsal and Night, both Upstash `us-east-1`), so keys carry
-no prefix. The pipelines write it; the Frontend route `/live/results.json` reads it with one `MGET`.
+no prefix. The pipelines write it; the Frontend route `/live/results.json` reads the payload, both heartbeats
+and the switches with one `MGET`.
 
 | Key | Value | Written by |
 |---|---|---|
 | `payload` | The payload bytes ([payload.md](payload.md)). | The newest-pair script |
 | `payload:seq` | The stored payload's seq pair, `"<all_office seq>,<ward_by_ward seq>"`. | The newest-pair script |
 | `heartbeat:fly`, `heartbeat:do` | Epoch milliseconds of that pipeline's last valid, current read of both files: a 200 that passes the snapshot checks, or a 304. | Each pipeline, every tick with a readable pair |
+| `switch:<name>` | `on` or `off`, one key per switch (below). Missing is on. | The `switch` workflow, or the Upstash console |
 | `count_decreases` | A list, one JSON entry per count decrease: `{"pipeline", "seq", "ms", "scope", "race", "ward"?, "before", "after"}`. `scope` is `citywide` (the mayor race), `ward` (a councillor race or a mayoral ward) or `area` (a trustee race). Read by `night status` (#50). | Each pipeline, on a decrease |
 
 **The newest-pair script** (`NEWEST_PAIR_LUA` in `src/election_night/store.py`) stores a payload
@@ -85,13 +87,59 @@ healthchecks.io checks, delivered through Pushover (#17 § On the night):
 The probe, the pings and the log line run on a thread after each tick, so a slow route or
 healthchecks.io never pushes a tick past its slot.
 
+## Switches
+
+Store flags the Frontend route applies before it serves (#49; #17 § Switches). The pipelines
+never read them. There is no per-race switch, and every switch turns back on.
+
+| Key | `off` means |
+|---|---|
+| `switch:mayor` | No mayoral projection: the mayor card shows the count, "Projection paused for the mayor's race". |
+| `switch:council` | No council projections: "Projection paused for council races"; tiles read "Count only". |
+| `switch:trustee` | No TDSB or TCDSB projections: "Projection paused for school board trustee races". The French-language boards are never projected. |
+| `switch:mayor_variant` | The forecast-weighted variant alone is dropped: the mayor shows the count-only band if the payload carries one, else no Estimated Range and the paused wording. |
+| `switch:projections` | Every projection, as all three level switches together. |
+| `switch:page` | The page pause: live results are replaced with "Live results are paused. See the City of Toronto's results: [link]". |
+
+**The variant switch's known gap.** A gated payload carries only the band shown, so while the
+forecast-weighted band shows, the count-only band isn't there to fall back to, even if
+count-only passed its gate. With today's Gate Results (mayor count-only failed, run 3) it makes
+no difference. Publishing a live count-only band beside the variant would change `payload.py`,
+and with it the model version, so it waits for the next Gate Result run that changes it anyway.
+
+The value is `on` or `off`, lower case. A missing key is on. **Any other value is off**, so a
+typo fails closed; `night status` shows it as `off (unrecognized value ...)`. A level whose gate
+already keeps it off (`gate_failed`, `version_mismatch`, `gate_missing`) keeps its own status and
+wording when switched off. Switched-off levels are served with the route-only status
+`switched_off` ([payload.md](payload.md)). The page pause still needs a payload that passes the
+schema: the route throws on a bad one, and ISR keeps the last good copy, pause or not.
+
+A flip reaches readers in about 75 s: ISR's 15 s, then the browser's 60 s poll, which accepts an
+equal `seq` pair.
+
+**From the phone.** Actions → switch → Run workflow: the store (`night` or `rehearsal`), the
+switch, and `off` or `on`. It sets the key, reads it back (the run fails if the read-back
+differs), and writes the read-back and the full night status to the job summary. The run history
+is the log of every flip. Locally: `REDIS_URL=... uv run election-night switch <name> <on|off>`.
+
+**Fallback: the Upstash console.** Open the database (Night or Rehearsal), then the CLI tab, and
+type, for example:
+
+```
+SET switch:council off
+SET switch:council on
+GET switch:council
+```
+
+The key names and values are exactly those in the table above.
+
 ## Night status
 
 `uv run election-night status` prints a Markdown summary of the store at `REDIS_URL`: both
-heartbeats (stale over 5 minutes), the stored `seq` pair and the City count time, current
-Withdrawals with their machine reasons, and every entry in `count_decreases`, newest first
-(`src/election_night/status.py`). It reads with one `MGET` and one `LRANGE`, and never writes.
-Switch states join it with the switches (#49).
+heartbeats (stale over 5 minutes), the stored `seq` pair and the City count time, each
+switch as the route reads it, current Withdrawals with their machine reasons, and every entry in
+`count_decreases`, newest first (`src/election_night/status.py`). It reads with one `MGET` and
+one `LRANGE`, and never writes.
 
 On the night it runs as the `night status` workflow (`.github/workflows/night-status.yml`), from
 the GitHub mobile app: Actions → night status → Run workflow, choosing `night` or `rehearsal`. It
