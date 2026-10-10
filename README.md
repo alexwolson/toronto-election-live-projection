@@ -48,7 +48,7 @@ heartbeat to the store. The store's keys and the newest-pair rule are in [docs/s
 ### Image and deploys (#32)
 
 The `Dockerfile` bakes this repo's code and the Night Bundle into one image, so a single digest pins
-everything and a restart fetches nothing from GitHub. Three manual (`workflow_dispatch`) workflows:
+everything and a restart fetches nothing from GitHub. Four manual (`workflow_dispatch`) workflows:
 
 - **`image`** builds `linux/amd64`, pushes it to GHCR, copies it by digest to
   `registry.fly.io/toronto-election-night-image` and DOCR `<DOCR_REGISTRY>/pipeline` (the Actions variable, `toronto-election-night`), and
@@ -58,7 +58,10 @@ everything and a restart fetches nothing from GitHub. Three manual (`workflow_di
   Platform worker (`deploy/do.<env>.yaml`, `nyc`), then fails unless each provider runs the input
   digest. The environments differ only in the store, the healthchecks.io ping key, the archive
   prefix and the URLs; the secrets come from the Actions secrets.
-- **`teardown`** destroys the Rehearsal apps on both providers. It cannot touch the Night apps.
+- **`teardown`** destroys the Rehearsal apps on both providers (`deploy/shutdown.sh rehearsal`). It
+  cannot touch the Night apps.
+- **`night close`** declares or clears Night Close in one environment's store, and on close destroys
+  that environment's apps with `deploy/shutdown.sh` ([docs/store.md](docs/store.md#night-close)).
 
 Tests that need Redis use the server at `REDIS_URL` and are skipped when it is unset. To run them
 locally:

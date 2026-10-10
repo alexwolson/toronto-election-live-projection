@@ -33,6 +33,8 @@ from election_night.mockfeed.feed import SCRIPTS, MockFeed
 from election_night.mockfeed.scenario import load_scenario
 from election_night.mockfeed.server import serve
 from election_night.name_inputs import fetch_name_inputs, load_name_inputs, refresh_forecast
+from election_night.night_close import KEY as NIGHT_CLOSE_KEY
+from election_night.night_close import clear, close
 from election_night.payload import build_payload
 from election_night.pipeline import FILES, Pipeline, Watchdog, now_ms, run
 from election_night.projection.forecast_weighted import resolve_forecast
@@ -143,6 +145,15 @@ def cmd_switch(args) -> None:
     print(f"`{switch_key(args.switch)}` set to `{args.state}`; read back: **{state}**.")
     if state != args.state:
         sys.exit(f"{switch_key(args.switch)} reads back {state!r}, not {args.state!r}")
+
+
+def cmd_night_close(args) -> None:
+    client = _redis(_env("REDIS_URL"))
+    expected = "closed" if args.action == "close" else "open"
+    state = (close if args.action == "close" else clear)(client)
+    print(f"Night Close {args.action}: `{NIGHT_CLOSE_KEY}` reads back **{state}**.")
+    if state != expected:
+        sys.exit(f"{NIGHT_CLOSE_KEY} reads back {state!r}, not {expected!r}")
 
 
 def cmd_bundle(args) -> None:
@@ -297,6 +308,13 @@ def main(argv: list[str] | None = None) -> None:
     switch.add_argument("switch", choices=SWITCHES)
     switch.add_argument("state", choices=STATES)
     switch.set_defaults(run=cmd_switch)
+
+    night_close = commands.add_parser(
+        "night-close",
+        help="declare or clear Night Close in the store at REDIS_URL and read it back (#51)",
+    )
+    night_close.add_argument("action", choices=("close", "clear"))
+    night_close.set_defaults(run=cmd_night_close)
 
     bundle = commands.add_parser(
         "bundle", help="build the Night Bundle from the City test files and the name inputs"

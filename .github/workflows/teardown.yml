@@ -1,7 +1,7 @@
 name: teardown
 
 # Destroys the Rehearsal apps on both providers between Rehearsals (#17 § Rehearsal plan, #32).
-# Night apps are left alone until Night Close, so this job cannot touch them.
+# Night apps are left alone until Night Close (night-close.yml), so this job cannot touch them.
 on:
   workflow_dispatch:
 
@@ -20,29 +20,12 @@ jobs:
   teardown:
     runs-on: ubuntu-24.04
     env:
-      FLY_APP: toronto-election-rehearsal-fly
-      DO_APP: toronto-election-rehearsal-do
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
+      - uses: actions/checkout@v7
       - uses: superfly/flyctl-actions/setup-flyctl@1.5
       - uses: digitalocean/action-doctl@v2.5.2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Destroy the Fly app
-        # Each list is captured first: a failed call stops the step instead of reading as no app.
-        run: |
-          apps=$(flyctl apps list --json)
-          if jq -e --arg app "$FLY_APP" 'any(.[]; .Name == $app)' <<< "$apps" > /dev/null; then
-            flyctl apps destroy "$FLY_APP" --yes
-          fi
-          apps=$(flyctl apps list --json)
-          jq -e --arg app "$FLY_APP" 'all(.[]; .Name != $app)' <<< "$apps"
-      - name: Delete the DigitalOcean app
-        run: |
-          apps=$(doctl apps list -o json)
-          for id in $(jq -r --arg app "$DO_APP" '.[]? | select(.spec.name == $app) | .id' <<< "$apps"); do
-            doctl apps delete "$id" --force
-          done
-          apps=$(doctl apps list -o json)
-          jq -e --arg app "$DO_APP" '[.[]? | select(.spec.name == $app)] | length == 0' <<< "$apps"
-      - run: echo "Rehearsal apps torn down on Fly and DigitalOcean." >> "$GITHUB_STEP_SUMMARY"
+      - name: Destroy the Rehearsal apps
+        run: deploy/shutdown.sh rehearsal >> "$GITHUB_STEP_SUMMARY"
