@@ -2,6 +2,8 @@
 
 import json
 
+import pytest
+
 from election_night.status import read_status, render_status
 from election_night.store import Store
 from election_night.switches import SWITCHES
@@ -34,6 +36,7 @@ def stored(**overrides) -> dict:
         "heartbeat:do": str(NOW - 30_000).encode(),
         "count_decreases": [],
         **{f"switch:{name}": None for name in SWITCHES},
+        "night_close": None,
     }
     values.update(overrides)
     return values
@@ -167,3 +170,22 @@ def test_read_status_reads_the_switches(redis_client):
     values = read_status(redis_client)
     assert values["switch:projections"] == b"off"
     assert values["switch:page"] is None
+
+
+@pytest.mark.parametrize(
+    ("raw", "line"),
+    [
+        (None, "Open."),
+        (b"closed", "**Closed.** The page shows the final unofficial count."),
+        (b"Closed", "Open (unrecognized value 'Closed')."),
+    ],
+)
+def test_night_close_shows_as_the_route_reads_it(raw, line):
+    text = render_status(stored(night_close=raw), NOW)
+    assert f"## Night Close\n\n{line}" in text
+
+
+def test_read_status_reads_night_close(redis_client):
+    redis_client.flushdb()
+    redis_client.set("night_close", "closed")
+    assert read_status(redis_client)["night_close"] == b"closed"

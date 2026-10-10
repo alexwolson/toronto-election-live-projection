@@ -1,8 +1,8 @@
 # The store
 
 One Redis database per environment (Rehearsal and Night, both Upstash `us-east-1`), so keys carry
-no prefix. The pipelines write it; the Frontend route `/live/results.json` reads the payload, both heartbeats
-and the switches with one `MGET`.
+no prefix. The pipelines write it; the Frontend route `/live/results.json` reads the payload, both heartbeats,
+the switches and Night Close with one `MGET`.
 
 | Key | Value | Written by |
 |---|---|---|
@@ -10,6 +10,7 @@ and the switches with one `MGET`.
 | `payload:seq` | The stored payload's seq pair, `"<all_office seq>,<ward_by_ward seq>"`. | The newest-pair script |
 | `heartbeat:fly`, `heartbeat:do` | Epoch milliseconds of that pipeline's last valid, current read of both files: a 200 that passes the snapshot checks, or a 304. | Each pipeline, every tick with a readable pair |
 | `switch:<name>` | `on` or `off`, one key per switch (below). Missing is on. | The `switch` workflow, or the Upstash console |
+| `night_close` | `closed` once Night Close is declared (below). Missing is open. | The `night close` workflow, or the Upstash console |
 | `count_decreases` | A list, one JSON entry per count decrease: `{"pipeline", "seq", "ms", "scope", "race", "ward"?, "before", "after"}`. `scope` is `citywide` (the mayor race), `ward` (a councillor race or a mayoral ward) or `area` (a trustee race). Read by `night status` (#50). | Each pipeline, on a decrease |
 
 **The newest-pair script** (`NEWEST_PAIR_LUA` in `src/election_night/store.py`) stores a payload
@@ -132,6 +133,44 @@ GET switch:council
 ```
 
 The key names and values are exactly those in the table above.
+
+## Night Close
+
+The declared end of the night (#51; #17 § Night Close), never inferred from a quiet feed. Declare
+it by hand once neither file has changed for 2 hours; `night status` shows the `seq` pair's age.
+The pipelines never read the flag; the Frontend route passes it. Once it is declared:
+
+- each race with every voting area in labels its leader "Elected (unofficial)" (never on a tie
+  at the top, and never in a race still counting);
+- the page says "Final unofficial count as of …", the older `seq`'s time;
+- "Refreshes every minute" and the staleness banner drop, since the apps are shut down;
+- the mayor card's final pre-election forecast stays hidden.
+
+The value is exactly `closed`. A missing key is open, and **any other value is open**: the
+opposite of the switches, so a typo never puts up "Elected (unofficial)". `night status` shows
+it as `Open (unrecognized value ...)`. Clearing deletes the key. Like a switch, it reaches readers
+in about 75 s.
+
+**From the phone.** Actions → night close → Run workflow: the store (`night` or `rehearsal`) and
+`close` or `clear`. It sets or deletes the key, reads it back (the run fails if the read-back
+differs), and writes the read-back and the full night status to the job summary. On `close`, and
+only after the read-back, a second job runs `deploy/shutdown.sh <store>`, which destroys that
+environment's Fly and DigitalOcean apps and checks both are gone. The app names are built from
+the store's name alone, so a run never touches the other environment's apps, nor the Mock Feed.
+The archive is already in the buckets; the platforms' own logs go with the apps. `clear` restarts
+nothing: the `deploy` workflow recreates the apps. Locally:
+`REDIS_URL=... uv run election-night night-close <close|clear>`.
+
+**Fallback: the Upstash console.** In the database's CLI tab:
+
+```
+SET night_close closed
+DEL night_close
+GET night_close
+```
+
+The console sets only the flag; shut the apps down with the `teardown` workflow (Rehearsal) or
+`deploy/shutdown.sh night` with Fly and DigitalOcean credentials.
 
 ## Night status
 

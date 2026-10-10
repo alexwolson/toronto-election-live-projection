@@ -1,7 +1,7 @@
 """`night status` (#50): a read-only summary of the store, for the job summary on the phone.
 
-It prints both heartbeats, the stored `seq` pair, each switch as the route reads it (#49), the
-current Withdrawals with their machine reasons, and the count decreases the pipelines recorded
+It prints both heartbeats, the stored `seq` pair, each switch and Night Close as the route reads
+them (#49, #51), the current Withdrawals with their machine reasons, and the count decreases the pipelines recorded
 (#17 § On the night). It reads with one MGET and one LRANGE and never writes. A malformed key
 spoils only its own section or row.
 """
@@ -11,6 +11,8 @@ from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 from election_night.alerts import FRESH_MS as STALE_MS  # one rule (#17 § Staleness)
+from election_night.night_close import KEY as NIGHT_CLOSE_KEY
+from election_night.night_close import night_close_state
 from election_night.store import DECREASES_KEY, PAYLOAD_KEY, PIPELINES, SEQ_KEY, heartbeat_key
 from election_night.switches import SWITCHES, switch_key, switch_state
 
@@ -20,6 +22,7 @@ KEYS = (
     SEQ_KEY,
     *(heartbeat_key(p) for p in PIPELINES),
     *(switch_key(s) for s in SWITCHES),
+    NIGHT_CLOSE_KEY,
 )
 
 
@@ -103,6 +106,13 @@ def _switches(values: dict, now_ms: int) -> list[str]:
     return _table(["Switch", "State"], rows)
 
 
+def _night_close(values: dict, now_ms: int) -> list[str]:
+    state = night_close_state(values.get(NIGHT_CLOSE_KEY))
+    if state == "closed":
+        return ["**Closed.** The page shows the final unofficial count."]
+    return [state[0].upper() + state[1:] + "."]
+
+
 def _decreases(values: dict, now_ms: int) -> list[str]:
     entries = sorted(
         (json.loads(e) for e in values[DECREASES_KEY]), key=lambda e: e["ms"], reverse=True
@@ -128,6 +138,7 @@ SECTIONS = (
     ("Heartbeats", _heartbeats),
     ("Stored seq pair", _seq),
     ("Switches", _switches),
+    ("Night Close", _night_close),
     ("Withdrawals", _withdrawals),
     ("Count decreases", _decreases),
 )
