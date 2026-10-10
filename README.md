@@ -61,7 +61,7 @@ everything and a restart fetches nothing from GitHub. Four manual (`workflow_dis
   Platform worker (`deploy/do.<env>.yaml`, `nyc`), then fails unless each provider runs the input
   digest. The environments differ only in the store, the healthchecks.io ping key, the archive
   prefix and the URLs; the secrets come from the Actions secrets. A Rehearsal run takes its own
-  archive prefix, `rehearsal/<name>/` (`archive_prefix`, required); a Night run leaves it empty
+  archive prefix, `rehearsal/<name>/` (`archive_prefix`, required for a Rehearsal); a Night run leaves it empty
   and archives under `night/` ([docs/store.md](docs/store.md#the-archive)).
 - **`teardown`** destroys the Rehearsal apps on both providers (`deploy/shutdown.sh rehearsal`). It
   cannot touch the Night apps.

@@ -93,7 +93,8 @@ rejects every Mock Feed pair as older than the last Rehearsal's.
    `faults` off.
 2. **deploy** workflow: `rehearsal`, the new tag and digest, feed
    `https://toronto-election-mock-feed.fly.dev/results`, the preview's `/live/results.json` as
-   the reader path.
+   the reader path, and the archive prefix `rehearsal/release-<YYYY-MM-DD>/` (today's date), so
+   the check's payloads stay out of every Rehearsal's archive, the Dress's included.
 3. Let it run past the burst (about 15 minutes at 10×).
 4. Check:
    - **night status** → `rehearsal`: both heartbeats fresh, no unexpected Withdrawals.

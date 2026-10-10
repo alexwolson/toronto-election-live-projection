@@ -102,9 +102,9 @@ and keep them clear of the feed-fault windows above, for example in the tail aft
   `flyctl machine start <id> -a toronto-election-rehearsal-fly`: `fly` fresh again.
 - [ ] **Stop both:** the **teardown** workflow. **Expect:** the banner on the page about 5
   minutes after the last heartbeat; `reader-path` sounds; both `pipeline-*` badges.
-- [ ] **Restore both:** the **deploy** workflow with the same inputs. **Expect:** heartbeats fresh,
-  the banner drops, the count resumes and never goes backwards. (A decrease across a restart is
-  missed by design: docs/store.md § Calm alerts.)
+- [ ] **Restore both:** the **deploy** workflow with the same inputs, the archive prefix
+  included. **Expect:** heartbeats fresh, the banner drops, the count resumes and never goes
+  backwards. (A decrease across a restart is missed by design: docs/store.md § Calm alerts.)
 - [ ] **Preview redeploy mid-count:** `vercel redeploy <preview URL>`. **Expect:** the route
   serves again within a minute of READY; the page's "City count as of" never goes back.
 
