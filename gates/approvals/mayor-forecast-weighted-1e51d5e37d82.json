@@ -1,0 +1,9 @@
+{
+ "level": "mayor-forecast-weighted",
+ "model_version": "1e51d5e37d82ba8f41ea1f47351440bbb8b3d2afc56480a7872f165918c5e70f",
+ "gate_result": "gates/results/mayor-forecast-weighted-run-003.json",
+ "decision": "Approved again for the #46 model version, on Alex's condition that run 3's values are unchanged from run 2 within simulation noise. The band was fixed before run 3 started: pooled scores within 0.005 of run 2 or better, the Bailão checks within 0.015 or better, night counts not lower, and no criterion that passed in run 2 failing. Every value was within it.",
+ "adr": "docs/adr/0002-mayor-approved-on-the-evidence.md",
+ "approved_by": "Alex Olson",
+ "date": "2026-10-10"
+}
