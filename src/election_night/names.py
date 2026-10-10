@@ -10,6 +10,7 @@ import json
 import unicodedata
 from collections import Counter
 from dataclasses import dataclass
+from pathlib import Path
 from typing import NamedTuple
 
 from election_night.feed import COUNCILLOR_OFFICE_ID, MAYOR_OFFICE_ID, race_id
@@ -49,6 +50,7 @@ class NameInputs:
     canonical: dict[str, dict[str, Candidacy]]  # race id -> Ballot Name -> its candidacy
     forecast_ids: list[str]  # the forecast's named mayoral candidate_ids
     source: dict  # provenance, recorded in the bundle
+    directory: Path | None = None  # where they were vendored, beside the forecast's draws
 
 
 def _add_once(races: dict, race: str, name: str, value) -> None:
@@ -122,12 +124,13 @@ def _mismatches(races: list[dict], label: str, source: dict[str, dict]) -> list[
     return problems
 
 
-def name_races(races: list[dict], names: NameInputs) -> list[dict]:
+def name_races(races: list[dict], names: NameInputs, forecast_only: bool = False) -> list[dict]:
     """The bundle's races with each candidate's `candidacy_id`, short label and forecast id.
 
     Fails unless the test file, registry and canonical name the same candidates in every race,
     and unless each forecast-named mayoral candidate sits on exactly one mayoral row, matched by
-    `person_id` or `candidacy_id`.
+    `person_id` or `candidacy_id`. On a forecast-only rebuild an unmatched forecast id is left
+    off instead, so the mayor's variant is off for the night (#16, #46).
     """
     problems = _mismatches(races, "registry", names.registry)
     problems += _mismatches(races, "canonical", names.canonical)
@@ -138,6 +141,8 @@ def name_races(races: list[dict], names: NameInputs) -> list[dict]:
     for forecast_id in names.forecast_ids:
         rows = [name for name, ids in names.canonical["mayor"].items() if forecast_id in ids]
         if len(rows) != 1:
+            if forecast_only:
+                continue
             raise ForecastUnmatched(f"{forecast_id} matches {len(rows)} mayoral rows: {rows}")
         candidate_ids[rows[0]] = forecast_id
 

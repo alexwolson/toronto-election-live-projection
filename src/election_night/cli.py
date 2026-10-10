@@ -19,8 +19,10 @@ from election_night.alerts import Alerts
 from election_night.archive import Archive, ArchiveWriter
 from election_night.bundle import (
     OPENING_2026,
+    PARAMS,
     build_night_bundle,
     load_bundle,
+    night_params,
     write_bundle,
 )
 from election_night.feed import check_status
@@ -47,6 +49,7 @@ BUNDLE = ROOT / "data" / "night-bundle" / "night-bundle.json"
 BACKEND_REPO = "alexwolson/toronto-election-poll-tracker-backend"
 OUTCOMES_PATH = "data/raw/elections/mayoral_outcomes.csv"
 NAME_INPUTS = ROOT / "data" / "night-bundle" / "inputs"
+ADVANCE = "advance_turnout_2026.json"  # the City's 2026 advance figure, beside the name inputs
 # Each 2026 trustee area's City wards, from the City's school-board ward reference chart.
 TRUSTEE_WARDS = ROOT / "data" / "mock-feed" / "trustee_wards_2026.csv"
 
@@ -136,9 +139,20 @@ def cmd_bundle(args) -> None:
         args.opening_time,
         TRUSTEE_WARDS,
         ROOT / "gates",
+        args.names / ADVANCE,
+        bundle_dir=args.out.parent,
+        forecast_only=args.forecast_only,
     )
     write_bundle(bundle, args.out)
     print(args.out)
+
+
+def cmd_params(args) -> None:
+    path = ROOT / "gates" / PARAMS
+    path.parent.mkdir(parents=True, exist_ok=True)
+    body = json.dumps(night_params(ROOT / "gates"), indent=1, sort_keys=True)
+    path.write_text(body + "\n", encoding="utf-8")
+    print(path)
 
 
 def cmd_goldens(args) -> None:
@@ -267,7 +281,17 @@ def main(argv: list[str] | None = None) -> None:
     bundle.add_argument("--names", type=Path, default=NAME_INPUTS)
     bundle.add_argument("--opening-time", default=OPENING_2026)
     bundle.add_argument("--out", type=Path, default=BUNDLE)
+    bundle.add_argument(
+        "--forecast-only",
+        action="store_true",
+        help="the forecast-only rebuild: an unmatched forecast turns the variant off",
+    )
     bundle.set_defaults(run=cmd_bundle)
+
+    params = commands.add_parser(
+        "params", help="fit the night's parameters on every historical night, into gates/params"
+    )
+    params.set_defaults(run=cmd_params)
 
     golden = commands.add_parser("goldens", help="write the golden payloads")
     golden.add_argument("--fixtures", type=Path, default=FIXTURES)
