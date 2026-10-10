@@ -147,10 +147,13 @@ def cmd_switch(args) -> None:
         sys.exit(f"{switch_key(args.switch)} reads back {state!r}, not {args.state!r}")
 
 
+NIGHT_CLOSE_ACTIONS = {"close": (close, "closed"), "clear": (clear, "open")}
+
+
 def cmd_night_close(args) -> None:
     client = _redis(_env("REDIS_URL"))
-    expected = "closed" if args.action == "close" else "open"
-    state = (close if args.action == "close" else clear)(client)
+    action, expected = NIGHT_CLOSE_ACTIONS[args.action]
+    state = action(client)
     print(f"Night Close {args.action}: `{NIGHT_CLOSE_KEY}` reads back **{state}**.")
     if state != expected:
         sys.exit(f"{NIGHT_CLOSE_KEY} reads back {state!r}, not {expected!r}")
@@ -313,7 +316,7 @@ def main(argv: list[str] | None = None) -> None:
         "night-close",
         help="declare or clear Night Close in the store at REDIS_URL and read it back (#51)",
     )
-    night_close.add_argument("action", choices=("close", "clear"))
+    night_close.add_argument("action", choices=NIGHT_CLOSE_ACTIONS)
     night_close.set_defaults(run=cmd_night_close)
 
     bundle = commands.add_parser(
