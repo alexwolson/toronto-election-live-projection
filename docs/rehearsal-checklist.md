@@ -30,8 +30,9 @@ This applies to Plumbing (#42) and the 48-hour real-feed poll (#47) as well.
   304s on repeat requests (#83).
 - [ ] **Rehearsal apps.** The **deploy** run: `rehearsal`, the same tag and digest, feed
   `https://toronto-election-mock-feed.fly.dev/results`, the preview's `/live/results.json` as the
-  reader path, and this Rehearsal's own archive prefix once #73 lands. **Expect:** both digest
-  checks green.
+  reader path, and this Rehearsal's own archive prefix as recorded on its issue
+  (`rehearsal/plumbing/`, `rehearsal/real-feed-poll/`, `rehearsal/full-night/` or
+  `rehearsal/dress/`). **Expect:** both digest checks green; the run's summary names that prefix.
 - [ ] **Preview.** The Frontend preview reading the Rehearsal store, and its commit.
   **Expect:** `/results/` shows the "Rehearsal: not real results" bar and "Results from 8 p.m."
 - [ ] **Phone.** Logged in to GitHub, Upstash (2FA) and Pushover; the preview open on cellular,

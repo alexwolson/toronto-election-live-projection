@@ -60,7 +60,9 @@ everything and a restart fetches nothing from GitHub. Four manual (`workflow_dis
   and the reader-path URL. It deploys the Fly Machine (`deploy/fly.<env>.toml`, `yyz`) and the App
   Platform worker (`deploy/do.<env>.yaml`, `nyc`), then fails unless each provider runs the input
   digest. The environments differ only in the store, the healthchecks.io ping key, the archive
-  prefix and the URLs; the secrets come from the Actions secrets.
+  prefix and the URLs; the secrets come from the Actions secrets. A Rehearsal run takes its own
+  archive prefix, `rehearsal/<name>/` (`archive_prefix`, required); a Night run leaves it empty
+  and archives under `night/` ([docs/store.md](docs/store.md#the-archive)).
 - **`teardown`** destroys the Rehearsal apps on both providers (`deploy/shutdown.sh rehearsal`). It
   cannot touch the Night apps.
 - **`night close`** declares or clears Night Close in one environment's store, and on close destroys
@@ -84,13 +86,13 @@ instead of skipping them.
 At the Deploy Freeze, the payloads archived from the Dress are checked against the exact
 production Frontend build (#17 § Schema skew). First copy the Dress's payloads from both archive
 buckets (docs/store.md § The archive), each with its own provider's endpoint and keys. The Dress
-shares the `rehearsal/` prefix with earlier Rehearsals and payload keys carry no time, so delete
-the local copies last modified before the Dress began, or the gate checks those too:
+archives under its own prefix, `rehearsal/dress/` (recorded on #55), so the copy holds the Dress's
+payloads and nothing else:
 
 ```bash
-aws s3 sync s3://toronto-election-night-archive/rehearsal/payloads/ dress/fly/payloads/ \
+aws s3 sync s3://toronto-election-night-archive/rehearsal/dress/payloads/ dress/fly/payloads/ \
   --endpoint-url https://fly.storage.tigris.dev
-aws s3 sync s3://toronto-election-night-archive/rehearsal/payloads/ dress/do/payloads/ \
+aws s3 sync s3://toronto-election-night-archive/rehearsal/dress/payloads/ dress/do/payloads/ \
   --endpoint-url https://nyc3.digitaloceanspaces.com
 uv run election-night freeze-gate --archive dress/fly --archive dress/do \
   --frontend-commit <production build's full SHA> \

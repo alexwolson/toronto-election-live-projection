@@ -1,6 +1,6 @@
 # The Fly pipeline on the Rehearsal store (#32). Deployed by digest from deploy.yml, never built
-# here. The workflow stages the secrets (REDIS_URL, PING_URL_*, AWS keys) and passes FEED_BASE_URL
-# and READER_PATH_URL with --env. No services: the process has no port, and its watchdog exits for a restart.
+# here. The workflow stages the secrets (REDIS_URL, PING_URL_*, AWS keys) and passes FEED_BASE_URL,
+# READER_PATH_URL and ARCHIVE_PREFIX with --env. No services: the process has no port, and its watchdog exits for a restart.
 app = "toronto-election-rehearsal-fly"
 primary_region = "yyz"
 
@@ -9,7 +9,6 @@ primary_region = "yyz"
 
 [env]
   ARCHIVE_BUCKET = "toronto-election-night-archive"
-  ARCHIVE_PREFIX = "rehearsal/"
   AWS_ENDPOINT_URL_S3 = "https://fly.storage.tigris.dev"
   AWS_REGION = "auto"
 

@@ -21,7 +21,7 @@ workers:
       - key: ARCHIVE_BUCKET
         value: toronto-election-night-archive
       - key: ARCHIVE_PREFIX
-        value: rehearsal/
+        value: "${ARCHIVE_PREFIX}"
       - key: AWS_ENDPOINT_URL_S3
         value: https://nyc3.digitaloceanspaces.com
       - key: AWS_REGION

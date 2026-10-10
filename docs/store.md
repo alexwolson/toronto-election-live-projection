@@ -27,7 +27,7 @@ written.
 ```bash
 FEED_BASE_URL=https://mediaresults.toronto.ca/results \
 REDIS_URL=redis://localhost:6379/0 \
-ARCHIVE_BUCKET=toronto-election-night-archive ARCHIVE_PREFIX=rehearsal/ \
+ARCHIVE_BUCKET=toronto-election-night-archive ARCHIVE_PREFIX=rehearsal/plumbing/ \
 AWS_ENDPOINT_URL_S3=https://fly.storage.tigris.dev AWS_REGION=auto \
 AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... \
 PING_URL_PIPELINE=https://hc-ping.com/<ping key>/pipeline-fly \
@@ -54,7 +54,13 @@ the content's SHA-256, written once (a HEAD before each PUT: Spaces doesn't docu
 `If-None-Match: *`), so the two buckets merge by key after the night.
 
 Rehearsal and Night share each provider's bucket, `toronto-election-night-archive`, so every key
-below starts with `ARCHIVE_PREFIX` (`rehearsal/` or `night/`, set in `deploy/`).
+below starts with `ARCHIVE_PREFIX`, set by the **deploy** workflow (#73). The Night apps always use
+`night/`. Each Rehearsal gets its own prefix, `rehearsal/<name>/` (`rehearsal/plumbing/`,
+`rehearsal/real-feed-poll/`, `rehearsal/full-night/`, `rehearsal/dress/`), given as the run's `archive_prefix` input and
+recorded on the Rehearsal's issue, so a Rehearsal's archive is everything under its prefix.
+Payload keys carry no time, so a shared prefix would mix Rehearsals. The workflow refuses a
+missing prefix, one outside `rehearsal/`, and the names `files`, `payloads` and `logs`, which
+the archive kept directly under `rehearsal/` before #73.
 
 | Key | Object |
 |---|---|
