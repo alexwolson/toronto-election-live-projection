@@ -13,21 +13,31 @@ is not edited.
 
 The mayor card shows each candidate:
 
-- **Estimated Range:** the forecast-weighted variant's central 90% final-share range. Below the
-  ESS floor (1,000 of 10,000 draws), that refresh shows count-only's range instead, and with the
-  forecast off, count-only's all night (#41).
+- **Estimated Range:** the forecast-weighted variant's central 90% final-share range, and only
+  that. Below the ESS floor (1,000 of 10,000 draws), or with the forecast off for the night, that
+  refresh shows **no Estimated Range**: the count and the Possible Range only (Alex, 2026-10-09).
+  Count-only failed its own gate and is not covered by this approval, so its range is never shown.
 - **Possible Range:** the final share that is still mathematically possible, from none of the
   outstanding votes going to the candidate up to all of them. The outstanding votes are bounded by
-  **every remaining elector** (Alex, 2026-10-09): in each City ward not fully reported, the
-  ward-by-ward file's electors (`totalVoters`) less its votes counted, floored at 0; 0 in a ward
-  fully reported. With R that bound summed over the wards, V the votes counted and v a candidate's
-  votes, the range is v / (V + R) to (v + R) / (V + R). It is strictly possible but wide early in
-  the night, by design.
+  **every remaining elector** (Alex, 2026-10-09): in each City ward not fully reported, its
+  electors less its votes counted, floored at 0; 0 in a ward fully reported. With R that bound
+  summed over the wards, V the votes counted and v a candidate's votes, the range is v / (V + R)
+  to (v + R) / (V + R). It is strictly possible but wide early in the night, by design.
 - **No win probability**, ever, and no chance-to-win or race-call wording (#17).
 - **A plain statement** that the model did worse than expected on the 2023 by-election and very
   well on the regular elections it was tested on (2014, 2018, 2022).
 
-Council and trustee are unaffected: both passed their Gate Results and go live as pre-registered.
+Council and trustee passed their Gate Results and go live as pre-registered, with their Estimated
+Ranges. **They get a Possible Range too** (Alex, 2026-10-09), bounded the same way: a council
+race by its ward's electors, a trustee area by the electors of the City wards it covers (each City
+ward lies in exactly one area on each board), less the race's votes counted. The French-language
+boards show the count only, as before.
+
+**The electors** are each City ward's registered electors, the ward-by-ward file's `totalVoters`,
+recorded in the Night Bundle from the City's test file. The school-board rows' own `totalVoters`
+are never used (#17). In 2018 the feed's figure equals the City's voter statistics in every ward,
+and in 2023 it is within 2%; the highest ward turnout on either night was about 50% of it, so the
+floor at 0 is a guard, not a case expected to arise (`tests/test_possible_range.py`).
 
 ## The evidence
 
@@ -71,19 +81,22 @@ forecast weights never fell below the ESS floor, so the card would never have sw
 - **Not a pass, and not a gate change.** No criterion, threshold or night is altered after the
   run. Anything that cites these Gate Results must say that both mayoral versions failed and that
   the mayor is live by Alex's approval.
-- **Not a model change.** The approval holds for model version `13021e79805d` only, the version
-  scored. A later change to the model needs its own Replays and its own approval. It binds the way
-  a Gate Result does: checked against the running version at pipeline start (#45).
+- **Not a model change.** Each approval holds for the one model version it scored. A later change
+  to the model code needs its own Replays and its own approval. It binds the way a Gate Result
+  does: checked against the running version at pipeline start (#45). One file per approved
+  version sits in `gates/approvals/`.
+
+## Approvals
+
+| Model version | Gate Result | Basis |
+|---|---|---|
+| `13021e79805d` | run 1 | The evidence above (Alex, 2026-10-09). |
+| `0b812b0bf91c` | run 2 | #45 changed the payload code, so the version moved. Alex approved again on condition that run 2 matched run 1 within simulation noise. The band was fixed before run 2's variant result landed, from how much council, trustee and count-only moved between the runs (at most 0.0009 pooled, 0.004 on the Bailão check). It allowed pooled scores within 0.005 of run 1 or better, the Bailão checks within 0.015 or better, night counts not lower, and no criterion that passed in run 1 failing. Run 2 was within it on every value: CRPS 2.031 (2.031), G2 margin 0.845 (0.846), Bailão 0.751 (0.746), stress G1 0.981 (0.979), stress Bailão 0.814 (0.810), still beating count-only on 3 of 4 nights. Council and trustee passed run 2. |
 - **No hidden claim.** The page states that the model did worse than expected on 2023, as above.
   Its wording is drafted with the rest of the on-night wording and approved by Alex (#54).
 
 ## For the implementing tickets
 
-- **What `totalVoters` means.** #45 confirms from the historical files that the ward-by-ward
-  file's `totalVoters` is each City ward's registered electors and is filled for every mayoral
-  ward. Election-day registrations could in principle push a ward's votes past it, but only near
-  100% turnout; Toronto's has run 29.7%-54.7% (2003-2023), so the floor at 0 is a guard, not a
-  case expected to arise.
-- **Payload and page.** The mayor payload already carries both bands and the variant marker (#41,
-  schema 2). The Possible Range, the approval record and the gating that honours it are new: #45
-  takes them.
+- **Payload and page** (#45, schema 3). The approval is `gates/approvals/mayor-forecast-weighted.json`,
+  read into the Night Bundle's `gates` with every Gate Result. The payload publishes only the band
+  it shows, and each counting race's Possible Range.

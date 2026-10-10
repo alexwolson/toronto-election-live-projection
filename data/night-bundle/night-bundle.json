@@ -3,6 +3,33 @@
  "model_version": "stub-v0",
  "forecast_release_tag": null,
  "opening_time": "2026-10-26T20:00:00-04:00",
+ "electors": {
+  "1": 78411,
+  "2": 97554,
+  "3": 116485,
+  "4": 88529,
+  "5": 83515,
+  "6": 79015,
+  "7": 73832,
+  "8": 89581,
+  "9": 84706,
+  "10": 123597,
+  "11": 90868,
+  "12": 95032,
+  "13": 101769,
+  "14": 85786,
+  "15": 76936,
+  "16": 70080,
+  "17": 81623,
+  "18": 84671,
+  "19": 85048,
+  "20": 82427,
+  "21": 80557,
+  "22": 75224,
+  "23": 66760,
+  "24": 72345,
+  "25": 79420
+ },
  "source": {
   "all_office": {
    "seq": 1790647481807,
@@ -1969,6 +1996,10 @@
      "candidacy_id": "can_01a1f4255c465a66ae1e93b82ef01b63",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "1",
+    "7"
    ]
   },
   {
@@ -1998,6 +2029,10 @@
      "candidacy_id": "can_ccf2917813195c81bfabc1dbfeeebfb3",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "2",
+    "3"
    ]
   },
   {
@@ -2057,6 +2092,10 @@
      "candidacy_id": "can_68adaabd04ca53548df0dd7eaf2158c8",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "4",
+    "9"
    ]
   },
   {
@@ -2092,6 +2131,10 @@
      "candidacy_id": "can_907c9762c2315f14a14ef10fa5bc0950",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "6",
+    "18"
    ]
   },
   {
@@ -2157,6 +2200,10 @@
      "candidacy_id": "can_e9e640f8a9925817add41bb96547bd63",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "10",
+    "14"
    ]
   },
   {
@@ -2192,6 +2239,10 @@
      "candidacy_id": "can_b224bbdcb6f75bf9ab2e818f00be2435",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "5",
+    "8"
    ]
   },
   {
@@ -2251,6 +2302,11 @@
      "candidacy_id": "can_eaaf331141da5743a5e9fe87cbfc73e4",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "11",
+    "12",
+    "13"
    ]
   },
   {
@@ -2304,6 +2360,10 @@
      "candidacy_id": "can_cf329ed10ed3594894c05b6766a5436b",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "15",
+    "16"
    ]
   },
   {
@@ -2339,6 +2399,10 @@
      "candidacy_id": "can_b400c405df765e08a0a6a8644aaa701d",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "17",
+    "22"
    ]
   },
   {
@@ -2404,6 +2468,10 @@
      "candidacy_id": "can_5f7f158aef535d02960dc4c058b3359a",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "19",
+    "20"
    ]
   },
   {
@@ -2451,6 +2519,10 @@
      "candidacy_id": "can_4eae390042ec54b1ac198df07635ab16",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "21",
+    "23"
    ]
   },
   {
@@ -2516,6 +2588,10 @@
      "candidacy_id": "can_f06a857d2fc055c8bdcbd1222e6a13ba",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "24",
+    "25"
    ]
   },
   {
@@ -2545,6 +2621,9 @@
      "candidacy_id": "can_fbfd95dc861f59e3a88736d6aeb23bf3",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "1"
    ]
   },
   {
@@ -2568,6 +2647,9 @@
      "candidacy_id": "can_b9b5b55f5f265132afd62fd721c56705",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "2"
    ]
   },
   {
@@ -2591,6 +2673,9 @@
      "candidacy_id": "can_2975279df8ce5342b8cf405d186453ca",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "7"
    ]
   },
   {
@@ -2620,6 +2705,10 @@
      "candidacy_id": "can_e51ffe35a51f5794b51c81ab5ad77cbc",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "3",
+    "4"
    ]
   },
   {
@@ -2643,6 +2732,11 @@
      "candidacy_id": "can_bcfeb2fa3b35551290bbd95e4de965b1",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "6",
+    "8",
+    "18"
    ]
   },
   {
@@ -2660,6 +2754,9 @@
      "candidacy_id": "can_0bec302f9a5656f68d9317faf79bd81c",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "9"
    ]
   },
   {
@@ -2689,6 +2786,10 @@
      "candidacy_id": "can_3c5cf71c069a58b5802a61568489e9b3",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "21",
+    "22"
    ]
   },
   {
@@ -2718,6 +2819,10 @@
      "candidacy_id": "can_16a76ce95d88555e9f4c4fe393854af1",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "23",
+    "25"
    ]
   },
   {
@@ -2753,6 +2858,12 @@
      "candidacy_id": "can_fe42206a6fe95bdeb68178b4e8826d73",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "10",
+    "11",
+    "12",
+    "13"
    ]
   },
   {
@@ -2794,6 +2905,9 @@
      "candidacy_id": "can_578ca769a6ce55f68cce5609ee2d0a36",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "5"
    ]
   },
   {
@@ -2817,6 +2931,13 @@
      "candidacy_id": "can_bb720ba2d1685e488eb701b6d49711a2",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "14",
+    "15",
+    "16",
+    "17",
+    "19"
    ]
   },
   {
@@ -2834,6 +2955,10 @@
      "candidacy_id": "can_2ad9fa52dee954d4a11c8e3bdbbbb5d7",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "20",
+    "24"
    ]
   },
   {
@@ -2851,6 +2976,19 @@
      "candidacy_id": "can_614647480cb456b4acff2b95864b823a",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "6",
+    "15",
+    "16",
+    "17",
+    "18",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25"
    ]
   },
   {
@@ -2874,6 +3012,14 @@
      "candidacy_id": "can_f1195ba08c7e563a8ac820d7773ed670",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "19"
    ]
   },
   {
@@ -2891,6 +3037,16 @@
      "candidacy_id": "can_be841f8d506757cfb0c1b93dd102e85f",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "7",
+    "8",
+    "9"
    ]
   },
   {
@@ -2920,6 +3076,22 @@
      "candidacy_id": "can_633c21ab1fb85a4d8e053f67b033741f",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "18"
    ]
   },
   {
@@ -2949,7 +3121,46 @@
      "candidacy_id": "can_6564e3e01a3c506b880b505fb4c79615",
      "candidate_id": null
     }
+   ],
+   "city_wards": [
+    "14",
+    "15",
+    "16",
+    "17",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25"
    ]
   }
- ]
+ ],
+ "gates": {
+  "council": {
+   "pass": true,
+   "model_version": "0b812b0bf91c4e27a0979468bc4111d6cf7a1be4f413a9ad4a953cdea6d880b0",
+   "run": 2,
+   "approved": false
+  },
+  "mayor-count-only": {
+   "pass": false,
+   "model_version": "0b812b0bf91c4e27a0979468bc4111d6cf7a1be4f413a9ad4a953cdea6d880b0",
+   "run": 2,
+   "approved": false
+  },
+  "mayor-forecast-weighted": {
+   "pass": false,
+   "model_version": "0b812b0bf91c4e27a0979468bc4111d6cf7a1be4f413a9ad4a953cdea6d880b0",
+   "run": 2,
+   "approved": true
+  },
+  "trustee": {
+   "pass": true,
+   "model_version": "0b812b0bf91c4e27a0979468bc4111d6cf7a1be4f413a9ad4a953cdea6d880b0",
+   "run": 2,
+   "approved": false
+  }
+ }
 }

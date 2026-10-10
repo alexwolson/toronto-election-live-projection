@@ -1,6 +1,7 @@
 """Gate Results and the model version (spec #17 § Gate Result; ticket #29)."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -81,3 +82,78 @@ def test_an_existing_gate_result_is_never_overwritten(tmp_path):
     with pytest.raises(FileExistsError):
         write_gate_result({"pass": True}, tmp_path, "council")
     assert json.loads((tmp_path / "council-run-002.json").read_text())["pass"] is False
+
+
+# The bundle's gate records (#45): each level's latest run, with Alex's approval where it names
+# that run's model version (ADR 0002).
+
+
+def write(path: Path, body: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(body))
+
+
+def test_gate_records_take_each_levels_latest_run_and_any_approval_of_its_version(tmp_path):
+    from election_night.replay.gate_result import gate_records
+
+    results, approvals = tmp_path / "results", tmp_path / "approvals"
+    write(results / "council-run-001.json", {"pass": False, "model_version": "v1", "run": 1})
+    write(results / "council-run-002.json", {"pass": True, "model_version": "v2", "run": 2})
+    write(
+        results / "mayor-forecast-weighted-run-001.json",
+        {"pass": False, "model_version": "v2", "run": 1},
+    )
+    write(
+        results / "mayor-count-only-run-001.json",
+        {"pass": False, "model_version": "v2", "run": 1},
+    )
+    write(
+        approvals / "mayor-forecast-weighted.json",
+        {"level": "mayor-forecast-weighted", "model_version": "v2", "adr": "docs/adr/0002"},
+    )
+    write(
+        approvals / "mayor-count-only.json",
+        {"level": "mayor-count-only", "model_version": "v1", "adr": "elsewhere"},
+    )
+
+    records = gate_records(results, approvals)
+
+    assert records == {
+        "council": {"pass": True, "model_version": "v2", "run": 2, "approved": False},
+        "mayor-forecast-weighted": {
+            "pass": False,
+            "model_version": "v2",
+            "run": 1,
+            "approved": True,
+        },
+        # An approval of another version approves nothing.
+        "mayor-count-only": {"pass": False, "model_version": "v2", "run": 1, "approved": False},
+    }
+
+
+def test_the_committed_approval_names_the_scored_version():
+    from election_night.replay.gate_result import gate_records
+
+    root = Path(__file__).parent.parent
+    records = gate_records(root / "gates" / "results", root / "gates" / "approvals")
+
+    assert records["mayor-forecast-weighted"]["approved"] is True
+    assert records["mayor-count-only"]["approved"] is False
+    assert records["council"]["pass"] and records["trustee"]["pass"]
+
+
+def test_each_approval_of_a_level_counts_for_the_version_it_names(tmp_path):
+    from election_night.replay.gate_result import gate_records
+
+    results, approvals = tmp_path / "results", tmp_path / "approvals"
+    write(
+        results / "mayor-forecast-weighted-run-002.json",
+        {"pass": False, "model_version": "v2", "run": 2},
+    )
+    for version in ("v1", "v2", "v0"):  # v2's approval is neither the first nor the last read
+        write(
+            approvals / f"mayor-forecast-weighted-{version}.json",
+            {"level": "mayor-forecast-weighted", "model_version": version},
+        )
+
+    assert gate_records(results, approvals)["mayor-forecast-weighted"]["approved"] is True

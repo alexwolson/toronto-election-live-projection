@@ -8,6 +8,8 @@ accept every one (#17 § Schema skew).
 import json
 from pathlib import Path
 
+import numpy as np
+
 from election_night.bundle import OPENING_2026, build_bundle
 from election_night.gates import ROOT, load_preregistration
 from election_night.names import NameInputs
@@ -87,6 +89,41 @@ def _replay_midpoint(year: int) -> tuple[bytes, bytes, dict]:
     return snap.all_office, snap.ward_by_ward, replay_bundle(night, history, prereg)
 
 
+def _gate(passed: bool = False, *, approved: bool = False, other_version: bool = False) -> dict:
+    """A gate record for `_gated_2022`, for the bundle's model version unless `other_version`."""
+    return {"pass": passed, "approved": approved, "other_version": other_version}
+
+
+def _gated_2022(records: dict, dead_heat: bool = False) -> tuple[bytes, bytes, dict]:
+    """The 2022 Replay midpoint on a gated night (#45): the night's held-out forecast, the
+    voter statistics' electors for the Possible Range, and the given gate records. With
+    `dead_heat`, the forecast is instead a constructed tight dead heat between its pair, which
+    the count (Tory far ahead) puts below the ESS floor."""
+    from election_night.projection.history import ward_electors
+    from election_night.replay.run import with_holdout_forecast
+
+    all_office, ward_by_ward, bundle = _replay_midpoint(2022)
+    bundle = with_holdout_forecast(bundle, 2022)
+    if dead_heat:
+        from election_night.projection.forecast_weighted import ForecastDensity
+
+        pair = bundle["forecast_density"]
+        margins = np.random.default_rng(0).normal(0.0, 0.1, 16_000)
+        bundle["forecast_density"] = ForecastDensity(pair.leader, pair.challenger, margins, 0.05)
+    bundle["electors"] = {str(ward): n for ward, n in ward_electors(2022).items()}
+    version = bundle["model_version"]
+    bundle["gates"] = {
+        level: {
+            "pass": gate["pass"],
+            "model_version": "another-version" if gate["other_version"] else version,
+            "run": 1,
+            "approved": gate["approved"],
+        }
+        for level, gate in records.items()
+    }
+    return all_office, ward_by_ward, bundle
+
+
 def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
     """Golden payload bytes by name, built from the feed fixtures directory.
 
@@ -144,6 +181,39 @@ def goldens(fixtures: Path, names: NameInputs) -> dict[str, bytes]:
         # A Replay of 2022 halfway through: every level counting, the mayor in all 25 wards, and
         # council and trustee with the count-extension projection fitted without 2022 (#33).
         "replay-counting-2022": _replay_midpoint(2022),
+        # The same on a gated night (#45, ADR 0002): council and trustee live, and the mayor live
+        # on Alex's approval of its failed forecast-weighted Gate Result, with every Possible
+        # Range.
+        "gated-live-2022": _gated_2022(
+            {
+                "council": _gate(True),
+                "trustee": _gate(True),
+                "mayor-count-only": _gate(),
+                "mayor-forecast-weighted": _gate(approved=True),
+            }
+        ),
+        # The same refresh under a constructed forecast whose weights fall below the ESS floor:
+        # the approved mayor shows no Estimated Range, only the Possible Range (ADR 0002). No
+        # real night came near the floor (#44).
+        "gated-low-ess-2022": _gated_2022(
+            {
+                "council": _gate(True),
+                "trustee": _gate(True),
+                "mayor-count-only": _gate(),
+                "mayor-forecast-weighted": _gate(approved=True),
+            },
+            dead_heat=True,
+        ),
+        # And with nothing live: council's gate failed, trustee's names another model version,
+        # and both mayoral versions failed. Every race shows the tally and its Possible Range.
+        "gated-off-2022": _gated_2022(
+            {
+                "council": _gate(),
+                "trustee": _gate(True, other_version=True),
+                "mayor-count-only": _gate(),
+                "mayor-forecast-weighted": _gate(),
+            }
+        ),
         # 2018's final pair: every race with all units in.
         "all-units-in-2018": (
             ao_2018,
