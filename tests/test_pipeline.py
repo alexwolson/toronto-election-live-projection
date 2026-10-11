@@ -1,5 +1,6 @@
 """The pipeline shell: heartbeats, archive, alerts, the 60 s slot clock and the watchdog."""
 
+import dataclasses
 import json
 import time
 from itertools import pairwise
@@ -41,8 +42,10 @@ class FakeFeed:
         self.status = {AO: None, WB: None}  # None answers 200, or 304 on a matching ETag
         self.requests = []
         self.reader = (200, b"", None, None)  # the public /live/results.json
+        self.headers = []  # (url, headers) for every request
 
-    def get(self, url: str, etag: str | None):
+    def get(self, url: str, etag: str | None, headers: dict | None = None):
+        self.headers.append((url, headers or {}))
         if url == READER:
             if isinstance(self.reader, Exception):
                 raise self.reader
@@ -220,6 +223,27 @@ def test_the_probe_pings_reader_path_only_on_a_fresh_200(feed, store, reader, pi
     assert (ALERTS.reader_path in pings) is pinged
     assert ALERTS.pipeline in pings
     assert record["reader_path"] is pinged
+
+
+BYPASS = "x-vercel-protection-bypass"
+
+
+def test_the_probe_sends_the_protection_bypass_and_the_feed_reads_never_do(feed, store):
+    alerts = dataclasses.replace(ALERTS, reader_path_bypass="s3cret")
+    pipeline = make_pipeline(feed, store, alerts=alerts, ping=Pings())
+    record = pipeline.tick()
+    pipeline.complete(record)
+    sent = {url: headers for url, headers in feed.headers}
+    assert sent[READER] == {BYPASS: "s3cret"}
+    assert all(BYPASS not in h for url, h in feed.headers if url != READER)
+    assert "s3cret" not in json.dumps(record)
+
+
+def test_without_a_bypass_the_probe_sends_no_header(feed, store):
+    pipeline = make_pipeline(feed, store, alerts=ALERTS, ping=Pings())
+    pipeline.complete(pipeline.tick())
+    assert all(BYPASS not in h for _, h in feed.headers)
+    assert READER in [url for url, _ in feed.headers]
 
 
 def counting_2023(feed):

@@ -83,7 +83,10 @@ healthchecks.io checks, delivered through Pushover (#17 § On the night):
   failed store write, the pipeline pings its own check. It shows the process is alive and ticking;
   whether readers get fresh results is `reader-path`'s job.
 - **`reader-path`.** Every tick, the pipeline GETs the public `/live/results.json` and pings only on
-  a 200 whose `heartbeat` is under 5 minutes old.
+  a 200 whose `heartbeat` is under 5 minutes old. A Rehearsal preview has Deployment Protection,
+  so with `READER_PATH_BYPASS` set the probe, and only the probe, sends it as
+  `x-vercel-protection-bypass` (#92). The **deploy** workflow sets it for Rehearsals from the
+  `REHEARSAL_READER_PATH_BYPASS` Actions secret; the Night's public domain needs none.
 - **`count-decrease`.** The pipeline compares each payload it builds with its own previous one
   (since the process started). A drop in the mayor race's summed candidate votes pings
   `<url>/fail`, the explicit fail signal. Ward- and area-level decreases send nothing. Every

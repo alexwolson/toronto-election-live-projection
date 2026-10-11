@@ -74,9 +74,13 @@ class _IPv4HTTPSHandler(urllib.request.HTTPSHandler):
 _opener = urllib.request.build_opener(_IPv4HTTPHandler, _IPv4HTTPSHandler)
 
 
-def http_get(url: str, etag: str | None) -> tuple[int, bytes, str | None, str | None]:
+def http_get(
+    url: str, etag: str | None, headers: dict[str, str] | None = None
+) -> tuple[int, bytes, str | None, str | None]:
     """One conditional GET over IPv4: (status, body, ETag, Last-Modified)."""
-    request = urllib.request.Request(url, headers={"Accept-Encoding": "identity"})
+    request = urllib.request.Request(
+        url, headers={"Accept-Encoding": "identity", **(headers or {})}
+    )
     if etag:
         request.add_header("If-None-Match", etag)
     try:
@@ -103,7 +107,7 @@ class Pipeline:
         base_url: str,
         bundle: dict,
         store: Store,
-        get: Callable[[str, str | None], tuple[int, bytes, str | None, str | None]] = http_get,
+        get: Callable[..., tuple[int, bytes, str | None, str | None]] = http_get,
         now_ms: Callable[[], int] = now_ms,
         archive: ArchiveWriter | None = None,
         alerts: Alerts | None = None,
@@ -201,7 +205,9 @@ class Pipeline:
     def _probe(self) -> bool:
         """Read the public route as a reader would; True on a 200 with a fresh heartbeat."""
         try:
-            status, body, *_ = self.get(self.alerts.reader_path_url, None)
+            bypass = self.alerts.reader_path_bypass
+            headers = {"x-vercel-protection-bypass": bypass} if bypass else {}
+            status, body, *_ = self.get(self.alerts.reader_path_url, None, headers)
         except Exception:  # noqa: BLE001 - an unreachable route is just not fresh
             return False
         return reader_path_fresh(status, body, self.now_ms())

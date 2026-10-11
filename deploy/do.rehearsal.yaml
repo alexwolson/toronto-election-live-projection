@@ -44,3 +44,6 @@ workers:
       - key: PING_URL_COUNT_DECREASE
         type: SECRET
         value: "https://hc-ping.com/${HC_PING_KEY}/count-decrease"
+      - key: READER_PATH_BYPASS
+        type: SECRET
+        value: "${READER_PATH_BYPASS}"

@@ -47,6 +47,9 @@ env:
   # through to the other store.
   REDIS_URL: ${{ secrets[inputs.environment == 'night' && 'NIGHT_REDIS_URL' || 'REHEARSAL_REDIS_URL'] }}
   HC_PING_KEY: ${{ secrets[inputs.environment == 'night' && 'HC_NIGHT_PING_KEY' || 'HC_REHEARSAL_PING_KEY'] }}
+  # Rehearsal previews have Deployment Protection, so the reader-path probe sends Vercel's
+  # Protection Bypass for Automation (#92). The Night's reader path is public: none.
+  READER_PATH_BYPASS: ${{ inputs.environment == 'rehearsal' && secrets.REHEARSAL_READER_PATH_BYPASS || '' }}
 
 # `bash -eo pipefail`, so a failed CLI call in a pipe fails the step instead of reading as empty.
 defaults:
@@ -61,6 +64,9 @@ jobs:
           [[ "$TAG" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::tag must be the image's full commit sha"; exit 1; }
           [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "::error::digest must be sha256:<64 hex>"; exit 1; }
           [ -n "$REDIS_URL" ] && [ -n "$HC_PING_KEY" ] || { echo "::error::store secrets missing"; exit 1; }
+          if [ "${{ inputs.environment }}" = rehearsal ] && [ -z "$READER_PATH_BYPASS" ]; then
+            echo "::error::REHEARSAL_READER_PATH_BYPASS is missing: the reader-path probe can't read a protected preview"; exit 1
+          fi
           # A Rehearsal's prefix sits under rehearsal/ (never night/), one name deep, and not a name
           # the older flat rehearsal/ layout already uses for its keys.
           if [ "${{ inputs.environment }}" = night ]; then
@@ -88,13 +94,16 @@ jobs:
         run: |
           flyctl apps list --json | jq -e --arg app "$APP" 'any(.[]; .Name == $app)' \
             || flyctl apps create "$APP" --org personal
+          bypass=()
+          if [ -n "$READER_PATH_BYPASS" ]; then bypass=(READER_PATH_BYPASS="$READER_PATH_BYPASS"); fi
           flyctl secrets set --stage -a "$APP" \
             REDIS_URL="$REDIS_URL" \
             AWS_ACCESS_KEY_ID="$TIGRIS_ACCESS_KEY_ID" \
             AWS_SECRET_ACCESS_KEY="$TIGRIS_SECRET_ACCESS_KEY" \
             PING_URL_PIPELINE="https://hc-ping.com/$HC_PING_KEY/pipeline-fly" \
             PING_URL_READER_PATH="https://hc-ping.com/$HC_PING_KEY/reader-path" \
-            PING_URL_COUNT_DECREASE="https://hc-ping.com/$HC_PING_KEY/count-decrease"
+            PING_URL_COUNT_DECREASE="https://hc-ping.com/$HC_PING_KEY/count-decrease" \
+            "${bypass[@]}"
       - name: Deploy by digest
         run: |
           flyctl deploy --config "deploy/fly.${{ inputs.environment }}.toml" --image "$IMAGE" \
@@ -128,7 +137,7 @@ jobs:
         run: |
           # shellcheck disable=SC2016 # envsubst takes the variable names, unexpanded
           envsubst '${DIGEST} ${FEED_BASE_URL} ${READER_PATH_URL} ${ARCHIVE_PREFIX} ${REDIS_URL}
-            ${SPACES_ACCESS_KEY_ID} ${SPACES_SECRET_ACCESS_KEY} ${HC_PING_KEY}' \
+            ${SPACES_ACCESS_KEY_ID} ${SPACES_SECRET_ACCESS_KEY} ${HC_PING_KEY} ${READER_PATH_BYPASS}' \
             < "deploy/do.${{ inputs.environment }}.yaml" > "$RUNNER_TEMP/spec.yaml"
           doctl apps spec validate "$RUNNER_TEMP/spec.yaml" > /dev/null
           doctl apps create --spec "$RUNNER_TEMP/spec.yaml" --upsert --wait > /dev/null
