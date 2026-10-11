@@ -81,6 +81,22 @@ CI (`.github/workflows/ci.yml`) runs the lint, format and test checks on pushes 
 pull requests, with a Redis service container. In CI a missing `REDIS_URL` fails the Redis tests
 instead of skipping them.
 
+### Rehearsal archive checks (#42)
+
+Two items on every Rehearsal's pass checklist (docs/rehearsal-checklist.md): **exact tallies**
+(every archived Live Tally equals what the Mock Feed served under its `seq` pair) and
+**byte-identical archives** (every `seq` pair in both buckets has one hash, except the Full
+night's stalled `seq`). Copy the Rehearsal's payloads from both buckets as for the freeze gate
+below, under its own prefix, then give the **mock-feed** run's start, speed and faults:
+
+```bash
+uv run election-night archive-checks --start 2026-10-15T14:00:00-04:00 --speed 10 --faults on \
+  --archive plumbing/fly --archive plumbing/do
+```
+
+It prints one `FAIL` line per failure, then the counts compared, and exits nonzero on any
+failure, on a `seq` pair the Mock Feed never served, or on an archive with no payloads.
+
 ### Freeze gate (#40)
 
 At the Deploy Freeze, the payloads archived from the Dress are checked against the exact

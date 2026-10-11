@@ -38,6 +38,7 @@ from election_night.night_close import clear, close
 from election_night.payload import build_payload
 from election_night.pipeline import FILES, Pipeline, Watchdog, now_ms, run
 from election_night.projection.forecast_weighted import resolve_forecast
+from election_night.rehearsal_checks import check_archives as check_rehearsal_archives
 from election_night.replay.gate_result import write_gate_result
 from election_night.replay.run import LEVELS, PREREGISTRATION, run_replay
 from election_night.status import read_status, render_status
@@ -198,21 +199,36 @@ def cmd_name_inputs(args) -> None:
     print(json.dumps(source, indent=1))
 
 
-def cmd_mock_feed(args) -> None:
+def _mock_feed(args) -> MockFeed:
     start = datetime.fromisoformat(args.start)
     if start.tzinfo is None:
         sys.exit("--start needs a UTC offset, e.g. 2026-10-15T19:00:00-04:00")
     if args.faults not in SCRIPTS:  # an env default skips argparse's choices
         sys.exit(f"MOCK_FEED_FAULTS must be one of {', '.join(sorted(SCRIPTS))}")
     faults, tail = SCRIPTS[args.faults]
-    feed = MockFeed(
+    return MockFeed(
         load_scenario(args.seed),
         start_ms=int(start.timestamp() * 1000),
-        speed=args.speed,
+        speed=float(args.speed),
         faults=faults,
         tail=tail,
     )
-    serve(feed, args.port)
+
+
+def cmd_mock_feed(args) -> None:
+    serve(_mock_feed(args), args.port)
+
+
+def cmd_archive_checks(args) -> None:
+    report = check_rehearsal_archives(_mock_feed(args), args.archive)
+    for failure in report.failures:
+        print(f"FAIL {failure}")
+    print(
+        f"exact tallies: {report.tallies} Live Tallies compared; "
+        f"byte-identical: {report.shared} seq pairs in every archive"
+    )
+    if report.failures:
+        sys.exit(f"archive checks failed: {len(report.failures)} failures")
 
 
 def cmd_freeze_gate(args) -> None:
@@ -420,6 +436,23 @@ def main(argv: list[str] | None = None) -> None:
     )
     mock.add_argument("--port", type=int, default=os.environ.get("PORT", "8080"))
     mock.set_defaults(run=cmd_mock_feed)
+
+    checks = commands.add_parser(
+        "archive-checks",
+        help="a Rehearsal's exact tallies and byte-identical archives, against the Mock Feed",
+    )
+    checks.add_argument("--start", required=True, help="the mock-feed run's start, with offset")
+    checks.add_argument("--speed", type=float, required=True, help="the mock-feed run's speed")
+    checks.add_argument("--seed", type=int, default=0, help="the scenario's arrival order")
+    checks.add_argument("--faults", choices=sorted(SCRIPTS), required=True)
+    checks.add_argument(
+        "--archive",
+        type=Path,
+        action="append",
+        required=True,
+        help="a local copy of one bucket under the Rehearsal's prefix; repeat for each pipeline's",
+    )
+    checks.set_defaults(run=cmd_archive_checks)
 
     freeze = commands.add_parser(
         "freeze-gate",

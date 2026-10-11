@@ -144,13 +144,12 @@ Times are suggestions in the tail, clear of the faults.
 ### Pass checklist
 
 - [ ] **Every fault produced the reader state #9 decided.** **Expect:** every item above ticked.
-- [ ] **Exact tallies.** Every published Live Tally equals the Mock Feed's true count for its
-  snapshot, exactly, in every race and every snapshot. Check each archived payload against
-  `MockFeed.reference(a_seq, w_seq)`, built with the deployed start, speed, seed and fault script
-  (full-night-faults.md § Exact tallies). **Expect:** zero mismatches.
-- [ ] **Byte-identical archives.** List `payloads/` under this Rehearsal's prefix in both buckets
-  (Tigris and Spaces). **Expect:** every `seq` pair in both buckets has one hash, except the
-  stalled 21:20 pair.
+- [ ] **Exact tallies and byte-identical archives.** Copy `payloads/` under this Rehearsal's
+  prefix from both buckets (Tigris and Spaces), then run `uv run election-night archive-checks`
+  with the deployed start, speed, seed and fault script (README § Rehearsal archive checks).
+  Every published Live Tally must equal the Mock Feed's true count for its snapshot
+  (full-night-faults.md § Exact tallies), and every `seq` pair in both buckets must have one hash,
+  except the stalled 21:20 pair. **Expect:** exit 0, no `FAIL` lines.
 - [ ] **The client never shows an older `seq` pair.** **Expect:** the phone's "City count as of"
   never goes back all night, including across the preview redeploy and the restore.
 - [ ] **Each switch flip reaches a phone on cellular within 90 s** (75 s expected).
