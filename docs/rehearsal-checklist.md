@@ -18,9 +18,10 @@ This applies to Plumbing (#42) and the 48-hour real-feed poll (#47) as well.
 - [ ] **Reset the Rehearsal store's `seq` pair.** The Mock Feed stamps the same `seq`s every
   Rehearsal (the night clock from Oct 26 19:50), so after one Rehearsal the store rejects the
   next one's pairs as older. In the Upstash console, database `election-rehearsal`, CLI tab:
-  `DEL payload:seq`, `DEL count_decreases` and `DEL check_notes`. Keep `payload`: the route needs
-  one.
-  **Expect:** `GET payload:seq` returns nil, and the first pair the pipelines read is stored.
+  `DEL payload:seq`, `DEL count_decreases`, `DEL check_notes` and `DEL history`. Keep `payload`:
+  the route needs one.
+  **Expect:** `GET payload:seq` returns nil, `LLEN history` returns 0, and the first pair the
+  pipelines read is stored.
 - [ ] **Switches on, Night Close open.** **night status** → `rehearsal` (night status, switch and
   night close default to `night`: pick `rehearsal` every time).
   **Expect:** every switch `on (not set)` or `on`; Night Close `Open.`
@@ -285,7 +286,7 @@ digest and Frontend commit intended for the night.
   **Expect:** the preview at the Dress commit.
 - [ ] **Seed the Night store** before the production build (Frontend `docs/v2-release.md` § The
   live results route), with `REDIS_URL` the Night store's. **Expect:** `payload`, `payload:seq`,
-  `heartbeat:fly` and `heartbeat:do` present; the keys posted on #56.
+  `heartbeat:fly` and `heartbeat:do` present, and `LLEN history` 0; the keys posted on #56.
 - [ ] **Production Frontend deploy,** after Alex's go. **Expect:** READY;
   `https://projection.cityhallwatcher.com/live/results.json` answers 200.
 - [ ] **Night apps by digest:** **deploy** → `night`, the Dress's tag and digest, feed

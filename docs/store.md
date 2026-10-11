@@ -2,7 +2,8 @@
 
 One Redis database per environment (Rehearsal and Night, both Upstash `us-east-1`), so keys carry
 no prefix. The pipelines write it; the Frontend route `/live/results.json` reads the payload, both heartbeats,
-the switches and Night Close with one `MGET`.
+the switches and Night Close with one `MGET`, and `/live/history.json` reads `history` with one
+`LRANGE`.
 
 | Key | Value | Written by |
 |---|---|---|
@@ -11,11 +12,14 @@ the switches and Night Close with one `MGET`.
 | `heartbeat:fly`, `heartbeat:do` | Epoch milliseconds of that pipeline's last valid, current read of both files: a 200 that passes the snapshot checks, or a 304. | Each pipeline, every tick with a readable pair |
 | `switch:<name>` | `on` or `off`, one key per switch (below). Missing is on. | The `switch` workflow, or the Upstash console |
 | `night_close` | `closed` once Night Close is declared (below). Missing is open. | The `night close` workflow, or the Upstash console |
+| `history` | A list, one compact JSON entry per stored count once results start: `{"seq", "races": {<id>: {"p": [received, total] or null, "v": {<key>: votes}, "b"?: {<key>: [low, mid, high]}, "s"?: <variant>, "w"?: {<ward>: [received, total] or null}}}}`. `b` is the band the page showed, when it showed one, and `s` its variant (`count_only` or `forecast_weighted`); `w` is the mayor's ward progress. Read by the page's Count and Map views (`src/election_night/history.py`). | The newest-pair script |
 | `count_decreases` | A list, one JSON entry per count decrease: `{"pipeline", "seq", "ms", "scope", "race", "ward"?, "before", "after"}`. `scope` is `citywide` (the mayor race), `ward` (a councillor race or a mayoral ward) or `area` (a trustee race). Read by `night status` (#50). | Each pipeline, on a decrease |
 
 **The newest-pair script** (`NEWEST_PAIR_LUA` in `src/election_night/store.py`) stores a payload
 only if its seq pair is newer than `payload:seq`: neither `seq` is older and at least one is newer
-(#17, S7). Equal and mixed pairs are rejected. There is no leader or lease.
+(#17, S7). Equal and mixed pairs are rejected. There is no leader or lease. In the same script, a
+stored pair appends its `history` entry, so each stored count has exactly one entry whichever
+pipeline stored it. Before results a payload has no entry.
 
 A heartbeat follows the read, not the store's verdict: a pipeline whose readable pair the store
 rejects (because the other pipeline already stored it, or a newer one) still refreshes its
@@ -194,7 +198,7 @@ one `MGET`, one `LRANGE` and one `HGETALL`, and never writes.
 through: a vote-sum mismatch, or a Reporting Progress fault. Each field is `<race>|<reason>`,
 written once (`HSETNX`) with the pipeline, `seq` pair and time that first saw it, so a fault
 present all night costs one field. They make no sound: the page keeps working. Clear them with the
-other Rehearsal keys (`DEL check_notes`).
+other Rehearsal keys (`DEL check_notes`, `DEL history`).
 
 On the night it runs as the `night status` workflow (`.github/workflows/night-status.yml`), from
 the GitHub mobile app: Actions → night status → Run workflow, choosing `night` or `rehearsal`. It

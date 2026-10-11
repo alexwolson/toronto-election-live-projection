@@ -363,3 +363,20 @@ def test_a_contained_fault_is_published_and_noted_for_the_operator(feed, store, 
     ]
     note = json.loads(redis_client.hget("check_notes", "mayor|votes_received_mismatch"))
     assert note["pipeline"] == "fly" and note["seq"] == record["seq"]
+
+
+def test_a_stored_count_appends_its_history_entry_once(feed, store, redis_client):
+    pipeline = make_pipeline(feed, store)
+    pipeline.bundle = counting_2023(feed)
+    first = pipeline.tick()
+    pipeline.tick()  # the same pair again: not stored, no second entry
+    entries = [json.loads(e) for e in redis_client.lrange("history", 0, -1)]
+    assert first["stored"] is True
+    assert [e["seq"] for e in entries] == [first["seq"]]
+    mayor = json.loads(redis_client.get("payload"))["races"][0]
+    assert entries[0]["races"]["mayor"]["v"] == {c["key"]: c["votes"] for c in mayor["candidates"]}
+
+
+def test_before_results_nothing_is_appended_to_the_history(pipeline, redis_client):
+    assert pipeline.tick()["stored"] is True
+    assert redis_client.lrange("history", 0, -1) == []
