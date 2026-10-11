@@ -63,7 +63,7 @@ def bundle():
 
 
 @pytest.fixture(scope="module")
-def night_bundle(bundle):
+def bundle_with_forecast(bundle):
     """The bundle as the pipeline starts with it: its pinned forecast resolved."""
     resolved = resolve_forecast(bundle, ROOT / "data" / "night-bundle")
     assert "forecast_density" in resolved
@@ -137,7 +137,7 @@ def test_an_unknown_name_shows_the_feed_name_and_count_only_continues(feed, bund
     assert r["projection"] is not None
 
 
-def test_a_bundle_name_missing_from_the_feed_shows_the_rest_and_count_only_continues(
+def test_a_ballot_name_missing_from_the_feed_shows_the_rest_and_count_only_continues(
     feed, clean, bundle
 ):
     fault = the("name-missing")
@@ -152,12 +152,12 @@ def test_a_bundle_name_missing_from_the_feed_shows_the_rest_and_count_only_conti
     assert r["projection"] is not None and "count_only" in r["projection"]["bands"]
 
 
-def test_an_unknown_mayoral_name_turns_the_variant_off(feed, night_bundle):
+def test_an_unknown_mayoral_name_turns_the_variant_off(feed, bundle_with_forecast):
     fault = the("mayor-unknown-name")
     assert fault.race == "mayor"
-    before = race(payload(feed, minute(fault.start) - 1, night_bundle), "mayor")
+    before = race(payload(feed, minute(fault.start) - 1, bundle_with_forecast), "mayor")
     assert before["projection"]["variant"]["in_effect"] == "forecast_weighted"
-    r = race(payload(feed, mid(fault), night_bundle), "mayor")
+    r = race(payload(feed, mid(fault), bundle_with_forecast), "mayor")
     assert "Rehearsal Unknown" in [c["key"] for c in r["candidates"]]
     assert r["withdrawal"] is None and r["state"] == "counting"
     assert r["projection"]["variant"] == {
@@ -167,16 +167,8 @@ def test_an_unknown_mayoral_name_turns_the_variant_off(feed, night_bundle):
     }
     assert r["projection"]["shown"] is None  # no Estimated Range (ADR 0002)
     assert r["possible"] is not None  # the Possible Range is arithmetic, no gate
-    after = race(payload(feed, minute(fault.start + fault.minutes), night_bundle), "mayor")
+    after = race(payload(feed, minute(fault.start + fault.minutes), bundle_with_forecast), "mayor")
     assert after["projection"]["variant"]["in_effect"] == "forecast_weighted"
-
-
-def test_the_mayoral_name_fault_has_its_own_window():
-    fault = the("mayor-unknown-name")
-    others = [f for f in FULL_NIGHT if f is not fault]
-    assert all(
-        fault.start + fault.minutes < f.start or f.start + f.minutes < fault.start for f in others
-    )
 
 
 def test_a_race_not_in_the_bundle_is_ignored(feed, bundle):
@@ -209,7 +201,7 @@ def test_a_count_decrease_is_mirrored_and_recorded(feed, clean, bundle):
 
 
 def test_the_per_race_faults_hit_distinct_races_in_one_window():
-    per_race = [f for f in FULL_NIGHT if f.race and f.kind not in ("all-in", "mayor-unknown-name")]
+    per_race = [f for f in FULL_NIGHT if f.start == the("row-unreadable").start]
     assert len({f.race for f in per_race}) == len(per_race) == 12
     assert len({(f.start, f.minutes) for f in per_race}) == 1
 
@@ -245,8 +237,9 @@ def test_the_http_faults_all_run(feed):
 
 
 def test_file_level_faults_never_overlap():
-    whole = [f for f in FULL_NIGHT if f.race is None or f.kind == "mayor-unknown-name"]
-    batch = [f for f in FULL_NIGHT if f.race and f.kind != "all-in"][:1]
+    batch_start = the("row-unreadable").start
+    whole = [f for f in FULL_NIGHT if f.start != batch_start]
+    batch = [f for f in FULL_NIGHT if f.start == batch_start][:1]
     windows = sorted((f.start, f.start + f.minutes) for f in whole + batch)
     assert all(a[1] < b[0] for a, b in pairwise(windows))  # clean minutes between
 
@@ -278,15 +271,22 @@ def test_a_race_at_100_percent_while_its_votes_still_rise(feed, bundle, scenario
 
 
 def test_the_reference_is_what_was_served_faults_included(feed):
-    kinds = ("row-unreadable", "above-expected", "count-decrease", "zeros", "name-missing")
-    for kind in (*kinds, "mayor-unknown-name"):
+    kinds = (
+        "row-unreadable",
+        "above-expected",
+        "count-decrease",
+        "zeros",
+        "name-missing",
+        "mayor-unknown-name",
+    )
+    for kind in kinds:
         fault = the(kind)
         a_body, w_body = bodies(feed, mid(fault))
         a, w = (json.loads(b) for b in (a_body, w_body))
         (ref,) = feed.reference(int(a["seq"]), int(w["seq"]))
         mayor = {c["name"]: int(c["votesReceived"]) for c in w["office"]["candidate"]}
         assert ref["mayor"] == mayor
-        if kind == "mayor-unknown-name":
+        if fault.race == "mayor":
             assert "Rehearsal Unknown" in ref["mayor"]
         elif fault.race:
             prefix, num = fault.race.split("-")
