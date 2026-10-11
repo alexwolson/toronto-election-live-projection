@@ -91,6 +91,10 @@ _Avoid_: Confidence interval, margin of error, prediction
 A candidate's final shares still mathematically possible, from none of the outstanding votes going to them up to all of them, with the outstanding votes bounded by every remaining elector. It assumes nothing about how they will split, needs no gate, and is shown for mayor, council and trustee races beside any Estimated Range (ADR 0002).
 _Avoid_: Worst case, best case, scenario
 
+**Mathematically Eliminated**:
+A counting candidate who cannot win even with every outstanding vote: their Possible Range's high is below another candidate's low. Read from the Possible Range on the page, and shown as a badge only where the range is (ADR 0003).
+_Avoid_: Out, lost, defeated
+
 **Night Close**:
 The declared end of election night, after which the City's count is treated as no longer changing and the page shows its final unofficial state. The City's feed has no completion signal, so it is declared, never inferred.
 _Avoid_: Freeze, end of count, count complete
