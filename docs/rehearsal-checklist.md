@@ -1,6 +1,6 @@
 # Rehearsal checklist
 
-For the Full-night Rehearsal (#53, Mon Oct 19) and the Dress (#55, Wed Oct 21), then the Deploy
+For Plumbing (#42, Thu Oct 15), the Full-night Rehearsal (#53, Mon Oct 19) and the Dress (#55, Wed Oct 21), then the Deploy
 Freeze (#56). It covers every item in #17's fault script and pass checklist, each with its
 expected observation (#17 § Rehearsal plan).
 
@@ -20,7 +20,8 @@ This applies to Plumbing (#42) and the 48-hour real-feed poll (#47) as well.
   next one's pairs as older. In the Upstash console, database `election-rehearsal`, CLI tab:
   `DEL payload:seq` and `DEL count_decreases`. Keep `payload`: the route needs one.
   **Expect:** `GET payload:seq` returns nil, and the first pair the pipelines read is stored.
-- [ ] **Switches on, Night Close open.** **night status** → `rehearsal`.
+- [ ] **Switches on, Night Close open.** **night status** → `rehearsal` (night status, switch and
+  night close default to `night`: pick `rehearsal` every time).
   **Expect:** every switch `on (not set)` or `on`; Night Close `Open.`
 - [ ] **Resume `count-decrease`** in healthchecks.io (Rehearsal set): it stays down after a
   Rehearsal's first citywide decrease. **Expect:** all four Rehearsal checks up.
@@ -37,6 +38,75 @@ This applies to Plumbing (#42) and the 48-hour real-feed poll (#47) as well.
   **Expect:** `/results/` shows the "Rehearsal: not real results" bar and "Results from 8 p.m."
 - [ ] **Phone.** Logged in to GitHub, Upstash (2FA) and Pushover; the preview open on cellular,
   wifi off.
+
+## Plumbing (#42)
+
+Mock Feed: a start T0 about 15 minutes after the **mock-feed** run, speed 10, faults `on`.
+Record T0 on #42: the exact-tallies check needs it. At 10× one night minute is 6 wall seconds,
+so the feed part takes about 25 wall minutes, and each HTTP fault lasts 2 wall minutes.
+
+Use the preview's **deployment** URL (`…-<hash>-alexwolsons-projects.vercel.app`), not the
+branch alias, for the reader path and the collapse check, and don't push to `election-night`
+during the Rehearsal: a new build moves the alias and resets the route's cache. Previews have
+Deployment Protection on, so the reader-path probe needs the bypass (#92).
+
+### Feed
+
+- [ ] **Before T0.** **Expect:** the pipelines log `304` on repeat reads; the first read after the
+  store reset logs `stored: true`; the page shows the Rehearsal bar and "Results from 8 p.m."
+- [ ] **Newest-pair rule on Upstash.** **Expect:** a pipeline that reads a pair already stored
+  logs `stored: false` and still writes its heartbeat (during the stall, T0+3 to T0+6 wall
+  minutes, and after T0+24); night status's `seq` pair only moves forward.
+- [ ] **HTTP faults** (`stall`, `5xx`, `throttle`, `timeout`, `truncated`, `renamed`,
+  `one-file`; README § The `mock-feed` command). **Expect:** in each window the logs show the status, the
+  rejection or the error; the page holds the last count, then resumes. Each fault is shorter
+  than the 5-minute staleness, so **no banner and no `reader-path` alert** at 10×.
+
+### Alerts
+
+The `on` script can't trigger `count-decrease`, and its faults are too short for `reader-path`,
+so Plumbing tests the alerts with the system faults, after the feed part (after T0+25):
+
+- [ ] **Stop the Fly pipeline**, then start it, as in the Full night. **Expect:** the
+  `pipeline-fly` badge within 5 minutes; no banner; `fly` fresh again after the start.
+- [ ] **Stop both:** the **teardown** workflow. **Expect:** both `pipeline-*` badges and
+  `reader-path` within 5 minutes; the banner about 5 minutes after the last heartbeat.
+
+### Collapse check
+
+- [ ] **About 20 req/s for 3 minutes** during the count (say T0+2 to T0+5), with the Protection
+  Bypass for Automation secret (Vercel → Project → Settings → Deployment Protection) in
+  `VERCEL_AUTOMATION_BYPASS_SECRET`. Never echo it.
+
+  ```bash
+  scripts/collapse_check.py https://<preview deployment>/live/results.json --rate 20 --duration 180
+  ```
+
+  Warm the route first: the first hit after a build can be PRERENDER or MISS. **Expect:**
+  `RESULT: PASS`: every response a 200 with `x-vercel-cache` HIT or STALE, never BYPASS. Then,
+  in Vercel → Observability → Vercel Functions, filtered to `/live/results.json` and the
+  deployment, for the run's window: about 4 invocations a minute, in `iad1` only
+  (`vercel.json`'s one region).
+
+### Pass checklist
+
+- [ ] **Exact tallies,** as in the Full night, with T0, speed 10, seed 0 and faults `on`.
+  **Expect:** zero mismatches.
+- [ ] **Byte-identical archives,** as in the Full night. **Expect:** every shared `seq` pair has
+  one hash. At 10× the feed regenerates every 6 s and the pipelines tick 30 s apart, so expect
+  only a few shared pairs (the zeroed pre-start pair, the stall, the final count).
+- [ ] **The client never shows an older `seq` pair.** **Expect:** as in the Full night.
+- [ ] **Each alert within 5 minutes,** from the stops above.
+- [ ] **Tick time.** **Expect:** each tick's `read_ms` within a few seconds of its slot (Fly on
+  the minute, DigitalOcean at :30).
+- [ ] **The archive is kept** under `rehearsal/plumbing/`.
+
+### After
+
+- [ ] **Reset the store again** for #47 (§ Before every Rehearsal), then **deploy** for #47 with
+  the default City feed and `rehearsal/real-feed-poll/`.
+- [ ] **The Mock Feed app stays up:** teardown and Night Close only remove the Rehearsal apps.
+  Leave it running for #83.
 
 ## Full night (#53)
 
