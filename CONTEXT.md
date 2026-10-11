@@ -83,6 +83,10 @@ _Avoid_: Freeze (alone; Night Close is not a freeze), code freeze
 An Election-Night Projection withheld from a race or an office level during the night by an integrity check or a switch, leaving the Live Tally. Unlike a level that failed its gate, it is temporary and can lift.
 _Avoid_: Kill, outage, count only
 
+**Check Note**:
+A fault in a race's row that the projection carries on through: a vote-sum mismatch, or Reporting Progress that fails its check (then hidden, its units in unknown to the model). Recorded once for the operator in night status; never shown to readers (ADR 0004).
+_Avoid_: Warning, soft withdrawal
+
 **Estimated Range**:
 A candidate's central 90% final-share range from the Election-Night Projection: where their final share lands in 9 of 10 simulated finishes. For the mayor it comes only from the forecast-weighted variant; at a refresh where the variant isn't in effect, the mayor shows none (ADR 0002).
 _Avoid_: Confidence interval, margin of error, prediction

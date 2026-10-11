@@ -13,7 +13,14 @@ from zoneinfo import ZoneInfo
 from election_night.alerts import FRESH_MS as STALE_MS  # one rule (#17 § Staleness)
 from election_night.night_close import KEY as NIGHT_CLOSE_KEY
 from election_night.night_close import night_close_state
-from election_night.store import DECREASES_KEY, PAYLOAD_KEY, PIPELINES, SEQ_KEY, heartbeat_key
+from election_night.store import (
+    CHECK_NOTES_KEY,
+    DECREASES_KEY,
+    PAYLOAD_KEY,
+    PIPELINES,
+    SEQ_KEY,
+    heartbeat_key,
+)
 from election_night.switches import SWITCHES, switch_key, switch_state
 
 TORONTO = ZoneInfo("America/Toronto")
@@ -30,6 +37,7 @@ def read_status(client) -> dict:
     """The store's raw values by key: one MGET, then the count decreases list."""
     values = dict(zip(KEYS, client.mget(KEYS), strict=True))
     values[DECREASES_KEY] = client.lrange(DECREASES_KEY, 0, -1)
+    values[CHECK_NOTES_KEY] = client.hgetall(CHECK_NOTES_KEY)
     return values
 
 
@@ -134,12 +142,26 @@ def _decreases(values: dict, now_ms: int) -> list[str]:
     return _table(["Seen", "Pipeline", "Scope", "Race", "Ward", "Before", "After"], rows)
 
 
+def _check_notes(values: dict, now_ms: int) -> list[str]:
+    """Contained faults (#97): the projection carried on, each listed once, newest first."""
+    entries = sorted(
+        (json.loads(e) for e in values[CHECK_NOTES_KEY].values()),
+        key=lambda e: e["ms"],
+        reverse=True,
+    )
+    if not entries:
+        return ["None."]
+    rows = [[_clock(e["ms"]), e["pipeline"], e["race"], e["reason"]] for e in entries]
+    return _table(["First seen", "Pipeline", "Race", "Reason"], rows)
+
+
 SECTIONS = (
     ("Heartbeats", _heartbeats),
     ("Stored seq pair", _seq),
     ("Switches", _switches),
     ("Night Close", _night_close),
     ("Withdrawals", _withdrawals),
+    ("Check notes", _check_notes),
     ("Count decreases", _decreases),
 )
 

@@ -342,3 +342,24 @@ def test_ticks_run_on_the_staggered_minute_and_never_faster_than_every_60_s():
     assert [s % 60 for s in starts] == [30] * len(durations)
     assert all(b - a >= 60 for a, b in pairwise(starts))
     assert starts[3] - starts[2] == 120  # the overrun skips a slot rather than ticking late
+
+
+def test_a_contained_fault_is_published_and_noted_for_the_operator(feed, store, redis_client):
+    # The ward-by-ward file's own total one vote over its candidates': the payload is stored as
+    # usual, and the mayor's check note lands in the store (#97).
+    pipeline = make_pipeline(feed, store)
+    pipeline.bundle = counting_2023(feed)
+
+    def one_over(data):
+        data["office"]["votesReceived"] = str(int(data["office"]["votesReceived"]) + 1)
+
+    feed.files[WB] = edited(feed.files[WB], one_over)
+    record = pipeline.tick()
+    assert record["stored"] is True
+    # The office total one over its candidates' is also one over its wards'.
+    assert record["check_notes"] == [
+        {"race": "mayor", "reason": "votes_received_mismatch"},
+        {"race": "mayor", "reason": "wards_differ_from_office"},
+    ]
+    note = json.loads(redis_client.hget("check_notes", "mayor|votes_received_mismatch"))
+    assert note["pipeline"] == "fly" and note["seq"] == record["seq"]

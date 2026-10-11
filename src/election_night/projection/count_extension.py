@@ -21,6 +21,7 @@ Each draw then takes a (combination, level) from that posterior and simulates:
 Pure numpy and seeded by the caller: no sampler, nothing read from the clock or the night.
 """
 
+import dataclasses
 import math
 from dataclasses import dataclass
 from itertools import product
@@ -120,6 +121,7 @@ class _Grid:
 
     codes: tuple[int, ...]
     counts: np.ndarray  # (C, codes): how many of each code's aggregates are in
+    log_prior: np.ndarray  # (C,) log number of subsets: the flat prior over which are in
     log_w: np.ndarray  # unnormalised log posterior; -inf where the count rules it out
     k: np.ndarray  # election-day units in
     mu: np.ndarray  # mean election-day unit size
@@ -203,6 +205,7 @@ def _grid(
     return _Grid(
         codes=codes,
         counts=counts,
+        log_prior=prior,
         log_w=log_w,
         k=k,
         mu=mu,
@@ -211,11 +214,52 @@ def _grid(
     )
 
 
+def _unknown_grid(inputs: RaceInputs, params: Params | MayorParams, counted: float) -> _Grid | None:
+    """The grid when the race's units in are unknown: its Reporting Progress failed a check
+    (#97). Every count of units in, 0 to all of them, is a hypothesis under a flat prior, each
+    count's combinations normalised so no count weighs more for having more subsets."""
+    n_ed = sum(w.election_day_units for w in inputs.wards)
+    grids = []
+    for received in range(inputs.units + 1):
+        grid = _grid(inputs, params, received, counted)
+        if grid is None:
+            return None
+        possible = (grid.k[:, 0] >= 0) & (grid.k[:, 0] <= n_ed)
+        if not possible.any():
+            continue
+        norm = np.logaddexp.reduce(grid.log_prior[possible])
+        grids.append(dataclasses.replace(grid, log_w=grid.log_w - norm))
+    if not grids:
+        return None
+
+    def stacked(name):
+        return np.concatenate([getattr(g, name) for g in grids])
+
+    return _Grid(
+        codes=grids[0].codes,
+        counts=stacked("counts"),
+        log_prior=stacked("log_prior"),
+        log_w=stacked("log_w"),
+        k=stacked("k"),
+        mu=stacked("mu"),
+        out_mean=stacked("out_mean"),
+        out_var=stacked("out_var"),
+    )
+
+
+def _race_grid(
+    inputs: RaceInputs, params: Params | MayorParams, received: int | None, counted: float
+) -> _Grid | None:
+    if received is None:
+        return _unknown_grid(inputs, params, counted)
+    return _grid(inputs, params, received, counted)
+
+
 def _hypotheses(
-    inputs: RaceInputs, params: Params, received: int, counted: float
+    inputs: RaceInputs, params: Params, received: int | None, counted: float
 ) -> _Hypotheses | None:
     """The race's grid as one posterior over (combination, turnout level)."""
-    grid = _grid(inputs, params, received, counted)
+    grid = _race_grid(inputs, params, received, counted)
     if grid is None or not np.isfinite(grid.log_w).any():
         return None
     log_w = grid.log_w.ravel()
@@ -258,14 +302,17 @@ def draw_final_shares(
     inputs: RaceInputs,
     params: Params,
     votes: np.ndarray,
-    received: int,
+    received: int | None,
     rng: np.random.Generator,
     draws: int = DRAWS,
 ) -> np.ndarray | None:
     """Draws of every candidate's final share in points, (draws, candidates), or None when the
-    race shows no projection: nothing in, everything in, or no hypothesis fits its count."""
+    race shows no projection: nothing in, everything in, or no hypothesis fits its count.
+    `received` None: the units in are unknown (#97), so every count of them is a hypothesis."""
     votes = np.asarray(votes, dtype=float)
-    if received <= 0 or received >= inputs.units or votes.sum() <= 0:
+    if votes.sum() <= 0:
+        return None
+    if received is not None and (received <= 0 or received >= inputs.units):
         return None
     counted = votes.sum()
     found = _hypotheses(inputs, params, received, counted)
@@ -330,7 +377,8 @@ def mayor_final_votes(
     projection: nothing in, everything in, or no hypothesis fits its count.
 
     `votes` is (wards, candidates) and `received` each ward's Reporting Units in, both in
-    `inputs` order. Each ward is sized as a one-ward race (#33), but the turnout level is
+    `inputs` order; -1 where a ward's units in are unknown (#97), every count of them a
+    hypothesis. Each ward is sized as a one-ward race (#33), but the turnout level is
     citywide: its posterior is the product of every ward's, and each ward's combination is drawn
     given the draw's level. Each draw then takes one early-vote shift per candidate, applied in
     every ward, with ward-level noise around it. A ward with no election-day unit counted in a
@@ -339,11 +387,14 @@ def mayor_final_votes(
     votes = np.asarray(votes, dtype=float)
     received = np.asarray(received)
     units = np.array([w.election_day_units + len(w.aggregates) for w in inputs.wards])
-    if received.sum() <= 0 or (received >= units).all() or votes.sum() <= 0:
+    known = received >= 0
+    if votes.sum() <= 0:
+        return None
+    if known.all() and (received.sum() <= 0 or (received >= units).all()):
         return None
     grids = []
     for w, n, v in zip(inputs.wards, received, votes):
-        grid = _grid(RaceInputs((w,)), params, int(n), float(v.sum()))
+        grid = _race_grid(RaceInputs((w,)), params, int(n) if n >= 0 else None, float(v.sum()))
         if grid is None or not np.isfinite(grid.log_w).any():
             return None
         grids.append(grid)
@@ -365,7 +416,7 @@ def mayor_final_votes(
     city = np.zeros((draws, candidates))
     wards = [] if per_ward else None
     for w, n, v, grid, ward_level in zip(inputs.wards, received, votes, grids, by_level):
-        if n >= w.election_day_units + len(w.aggregates):
+        if n >= w.election_day_units + len(w.aggregates):  # known and complete
             final = np.broadcast_to(v, (draws, candidates))
         else:
             # The ward's combination given each draw's level.

@@ -55,8 +55,8 @@ version is; the forecast-weighted variant comes first, then count-only (the ladd
 | `progress` | object or null | Reporting Progress, `{"received": int, "total": int}` (the feed's `pollsReceived` and `polls`). Null before results, with no figures, or when the row's Reporting Progress fails its check (below). |
 | `candidates` | array | Below. Before results: the bundle's candidates in ballot order, without votes. Otherwise the feed's candidates by votes, descending, ties in ballot order. |
 | `projection` | object or null | `{"stub": bool, "bands": {variant: {key: {"low", "mid", "high"}}}, "shown": variant or null}`, shares in percent: the Estimated Range. Present only while the race is `counting` and its level is projected (`live`, `stub` or `ungated`); null when the level shows the tally. `shown` is the band the page draws, and on a gated night `bands` holds only that one: council and trustee `count_only`; the mayor `forecast_weighted` while it is in effect, else `count_only` only if count-only is itself live, else none (`shown` null, `bands` empty: ADR 0002). Ungated (the Replays) every band stays. Stub mayor bands have `count_only` and `forecast_weighted`. A modelled mayor also has `"variant"` (below). |
-| `possible` | object or null | The Possible Range (ADR 0002): `{key: {"low", "high"}}`, each candidate's final share in percent from none to all of the outstanding votes, bounded by every remaining elector. Mayor: the electors of each City ward not fully reported, less its `votes_counted`; council: its ward's electors; trustee: the electors of the City wards it covers (the bundle's `city_wards`); less the race's votes counted, floored at 0. From the bundle's `electors`, each City ward's `totalVoters` in the City's test file. Present while the race is `counting` at mayor, council or trustee, whatever its gate: it is arithmetic on the count, not a projection. Null otherwise, or without the electors. |
-| `withdrawal` | object or null | A Withdrawal: `{"reason": string}`, the machine reason a per-race check withheld the race's projection while its Live Tally stands (below). Recorded at mayor, council and trustee whatever the level's gate; null for the French-language boards, which are never projected. Readers never see the reason. |
+| `possible` | object or null | The Possible Range (ADR 0002): `{key: {"low", "high"}}`, each candidate's final share in percent from none to all of the outstanding votes, bounded by every remaining elector. Votes counted are always the candidates' sums. Mayor: the electors of each City ward not fully reported, or whose `progress` is hidden (#97), less its counted votes; council: its ward's electors; trustee: the electors of the City wards it covers (the bundle's `city_wards`); less the race's votes counted, floored at 0. From the bundle's `electors`, each City ward's `totalVoters` in the City's test file. A French-language board's electors are a fraction of its wards', so it uses its own row's `totalVoters` on the night (#97), if above zero, at least the votes counted, and no more than its City wards' electors. Present while the race is `counting`, whatever its gate: it is arithmetic on the count, not a projection. Null otherwise, without the electors, or for a French row whose `totalVoters` fails. |
+| `withdrawal` | object or null | A Withdrawal: `{"reason": string}`, the machine reason a per-race check withheld the race's projection while its Live Tally stands (below; contained faults never withdraw). Recorded at mayor, council and trustee whatever the level's gate; null for the French-language boards, which are never projected. Readers never see the reason. |
 | `fault` | object or null | `{"reason": string}`, why a race has no figures: `row_unreadable` or `race_missing`. Readers never see the reason. |
 | `wards` | array | Mayor only: each City ward's mayoral vote from the ward-by-ward file, below. Empty when the mayor race has no figures. |
 
@@ -100,36 +100,40 @@ has `progress` null.
 
 ## Per-race checks and Withdrawals
 
-Bad data fails closed race by race, never level by level (#43; #17 § Per-race checks and
-Withdrawals, #9; `src/election_night/checks.py`). A failed check withdraws only its own race's
-projection, stub bands included, and leaves its Live Tally, with shares always from the
-candidates' votes. The first failing check, in this order, is the `withdrawal.reason`:
+Bad data is handled race by race, never level by level (#43; #17 § Per-race checks and
+Withdrawals, #9; `src/election_night/checks.py`), in three tiers (ADR 0004, #97). Shares are always
+from the candidates' votes.
 
-| Reason | Failure in the race's row | Tally |
-|---|---|---|
-| `polls_zero` | `polls` is 0 | shown, `progress` null |
-| `polls_received_above_polls` | `pollsReceived > polls` | shown, `progress` null |
-| `polls_differ_from_bundle` | `polls` differs from the bundle's | shown, `progress` null |
-| `votes_received_mismatch` | the row's `votesReceived` is not its candidates' sum | shown |
-| `ward_fields_differ` | mayor: a ward's fields differ between the candidates that repeat them | shown |
-| `ward_votes_counted_mismatch` | mayor: a ward's `votesCounted` is not its candidates' sum | shown |
-| `wards_differ_from_office` | mayor: the wards' `polls`, `pollsReceived`, `votesCounted` or a candidate's votes don't sum to the office's | shown |
-| `ward_` + a progress reason | mayor: a ward's Reporting Progress fails (against the bundle's ward `polls`) | shown, that ward's `progress` null |
-| `count_above_expected` | the counted votes exceed the race's expected total at the top of the turnout grid | shown |
-| `projection_numerics` | a band is NaN, out of order or outside 0–100%, or the ESS isn't finite | shown |
+| Reason | Failure in the race's row | Tier | Effect |
+|---|---|---|---|
+| `votes_received_mismatch` | the row's `votesReceived` is not its candidates' sum | 1 | none: the candidates' votes stand; a check note |
+| `ward_votes_counted_mismatch` | mayor: a ward's `votesCounted` is not its candidates' sum | 1 | as above |
+| `wards_differ_from_office` | mayor: the wards' `polls`, `pollsReceived`, `votesCounted` or a candidate's votes don't sum to the office's | 1 | as above |
+| `polls_zero` | `polls` is 0 | 2 | `progress` null; the model treats the race's units in as unknown; a check note |
+| `polls_received_above_polls` | `pollsReceived > polls` | 2 | as above |
+| `polls_differ_from_bundle` | `polls` differs from the bundle's | 2 | as above |
+| `ward_` + a progress reason | mayor: a ward's Reporting Progress fails (against the bundle's ward `polls`) | 2 | that ward's `progress` null and its units in unknown; the rest of the city as before |
+| `ward_fields_differ` | mayor: a ward's fields differ between the candidates that repeat them | 3 | `withdrawal`: the file contradicts itself |
+| `count_above_expected` | the counted votes exceed the race's expected total at the top of the turnout grid | 3 | `withdrawal` |
+| `projection_numerics` | a band is NaN, out of order or outside 0–100%, or the ESS isn't finite | 3 | `withdrawal` |
+
+Tiers 1 and 2 are contained: the projection and the Possible Range carry on (a hidden progress
+widens the band), and each fault becomes a check note for the operator, never shown to readers
+(`project(..., notes=)`; the pipeline keeps them in the store's `check_notes`, docs/store.md). Tier
+3 withdraws its own race's projection, stub bands included, and leaves its Live Tally; the first
+tier-3 failure is the `withdrawal.reason`.
 
 A race whose Reporting Progress fails reads `counting`, or `no_units_in` with nothing received:
-never `all_units_in`. The mayor's checks read only the ward-by-ward file, and any ward-row
-failure withdraws the whole mayoral projection; the Possible Range stays, as arithmetic on the
-count, unless a ward's progress is hidden. A feed name not in the bundle, or a bundle name missing
+never `all_units_in`. The mayor's checks read only the ward-by-ward file; a ward's progress fault
+stays in that ward. A feed name not in the bundle, or a bundle name missing
 from the feed, is no Withdrawal: the name shows as written (`short_label` null) and count-only
 continues, but the mayor's variant is off for that refresh (`off_reason` `forecast_unmatched`).
 An unreadable row or a missing race has no figures (`fault`), and a race in the feed but not in
 the bundle is ignored. 2022's MonAvenir 4 (539 of 0 units, 411 votes and no candidates) keeps
 its tally with `progress` null in the `council-counting-2022` golden. `withdrawals-2022` carries
 one fault each for `polls_zero`, `polls_received_above_polls`, `votes_received_mismatch`,
-`count_above_expected` and the mayor's `ward_votes_counted_mismatch`, and an unknown feed name;
-`tests/test_checks.py` covers every check.
+`count_above_expected` and the mayor's `ward_votes_counted_mismatch`, and an unknown feed name:
+only `count_above_expected` withdraws. `tests/test_checks.py` covers every check.
 
 ## What the function guarantees
 

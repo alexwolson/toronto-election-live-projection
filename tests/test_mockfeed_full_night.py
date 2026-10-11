@@ -98,15 +98,19 @@ def mid(fault) -> int:
     return minute(fault.start + fault.minutes / 2)
 
 
-# Per-race faults: (kind, race, the race's expected state, its Withdrawal or fault reason).
+# Per-race faults that fail closed: (kind, race, the race's expected state, its reason).
 PER_RACE = [
     ("row-unreadable", "councillor-4", "no_figures", "row_unreadable"),
     ("race-missing", "tcdsb-3", "no_figures", "race_missing"),
-    ("received-above-polls", "councillor-6", "counting", "polls_received_above_polls"),
-    ("polls-zero", "tdsb-5", "counting", "polls_zero"),
-    ("polls-differ", "councillor-7", "counting", "polls_differ_from_bundle"),
-    ("votes-mismatch", "councillor-8", "counting", "votes_received_mismatch"),
     ("above-expected", "councillor-10", "counting", "count_above_expected"),
+]
+
+# Per-race faults the projection carries on through (#97): (kind, race, its check note).
+CONTAINED = [
+    ("received-above-polls", "councillor-6", "polls_received_above_polls"),
+    ("polls-zero", "tdsb-5", "polls_zero"),
+    ("polls-differ", "councillor-7", "polls_differ_from_bundle"),
+    ("votes-mismatch", "councillor-8", "votes_received_mismatch"),
 ]
 
 
@@ -122,11 +126,25 @@ def test_each_per_race_fault_fails_its_race_closed(feed, bundle, kind, rid, stat
     else:
         assert r["withdrawal"] == {"reason": reason} and r["projection"] is None
         assert r["candidates"][0]["votes"] > 0  # the tally is still shown
-    if reason.startswith("polls"):
-        assert r["progress"] is None  # Reporting Progress hidden
     # Per race, never per level: a neighbouring race of the same level is untouched.
     others = [x for x in p["races"] if x["level"] == r["level"] and x["id"] != rid]
     assert any(x["withdrawal"] is None and x["state"] == "counting" for x in others)
+
+
+@pytest.mark.parametrize("kind, rid, reason", CONTAINED)
+def test_each_contained_fault_keeps_the_range_and_leaves_a_check_note(
+    feed, bundle, kind, rid, reason
+):
+    fault = the(kind)
+    assert fault.race == rid
+    notes = []
+    p = json.loads(build_payload(*bodies(feed, mid(fault)), bundle, notes))
+    r = race(p, rid)
+    assert r["state"] == "counting" and r["withdrawal"] is None
+    assert r["projection"] is not None and r["possible"] is not None
+    if reason.startswith("polls"):
+        assert r["progress"] is None  # Reporting Progress hidden
+    assert {"race": rid, "reason": reason} in notes
 
 
 def test_an_unknown_name_shows_the_feed_name_and_count_only_continues(feed, bundle):
@@ -179,11 +197,15 @@ def test_a_race_not_in_the_bundle_is_ignored(feed, bundle):
     assert fault.race not in {r["id"] for r in payload(feed, mid(fault), bundle)["races"]}
 
 
-def test_a_mayoral_ward_row_failure_withdraws_the_mayoral_projection(feed, bundle):
+def test_a_mayoral_ward_vote_mismatch_keeps_the_mayoral_projection(feed, bundle):
     fault = the("ward-votes-counted")
-    p = payload(feed, mid(fault), bundle)
-    assert race(p, "mayor")["withdrawal"] == {"reason": "ward_votes_counted_mismatch"}
-    assert votes(race(p, "mayor")) > 0
+    notes = []
+    p = json.loads(build_payload(*bodies(feed, mid(fault)), bundle, notes))
+    mayor = race(p, "mayor")
+    assert mayor["withdrawal"] is None
+    assert mayor["projection"] is not None and mayor["possible"] is not None
+    assert votes(mayor) > 0
+    assert {"race": "mayor", "reason": "ward_votes_counted_mismatch"} in notes
 
 
 def test_a_count_decrease_is_mirrored_and_recorded(feed, clean, bundle):

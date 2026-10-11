@@ -1,9 +1,12 @@
-"""Per-race checks (#43; #17 § Per-race checks and Withdrawals, #9).
+"""Per-race checks (#43; #17 § Per-race checks and Withdrawals, #9; tiers #97).
 
-Each check reads one race's rows and returns the machine reason it failed, or None. A failure
-withdraws that race's projection only, leaving its Live Tally, so bad data fails closed race by
-race, never level by level. The mayor's checks stay inside the ward-by-ward file: the two files
-are separate generations.
+Each check reads one race's rows and returns the machine reason it failed, or None. The mayor's
+checks stay inside the ward-by-ward file: the two files are separate generations.
+
+Failures are tiered (ADR 0004). A vote-sum mismatch and a Reporting Progress fault are
+contained: the candidates' votes stand, a faulty row's progress is hidden and its units in are
+unknown to the model, and the reason becomes a check note for the operator. Any other failure
+withdraws that race's projection, leaving its Live Tally.
 """
 
 import math
@@ -19,6 +22,24 @@ WARD_VOTES_COUNTED_MISMATCH = "ward_votes_counted_mismatch"
 WARDS_DIFFER_FROM_OFFICE = "wards_differ_from_office"
 COUNT_ABOVE_EXPECTED = "count_above_expected"
 PROJECTION_NUMERICS = "projection_numerics"
+
+# Tiers 1 and 2 (#97): faults the projection carries on through. A mayoral ward's progress
+# faults are these with a `ward_` prefix.
+CONTAINED = frozenset(
+    {
+        VOTES_RECEIVED_MISMATCH,
+        WARD_VOTES_COUNTED_MISMATCH,
+        WARDS_DIFFER_FROM_OFFICE,
+        POLLS_ZERO,
+        POLLS_RECEIVED_ABOVE_POLLS,
+        POLLS_DIFFER_FROM_BUNDLE,
+    }
+)
+
+
+def contained(reason: str) -> bool:
+    """Whether a failed check leaves the projection standing (tiers 1 and 2, ADR 0004)."""
+    return reason in CONTAINED or reason.removeprefix("ward_") in CONTAINED
 
 
 def progress(received: int, polls: int, bundle_polls: int) -> str | None:

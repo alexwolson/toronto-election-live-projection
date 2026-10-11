@@ -146,7 +146,8 @@ class Pipeline:
                     pair[name] = cached
                 else:
                     pair[name] = (body, etag)
-            payload = build_payload(pair[FILES[0]][0], pair[FILES[1]][0], self.bundle)
+            notes = []
+            payload = build_payload(pair[FILES[0]][0], pair[FILES[1]][0], self.bundle, notes)
         except UnreadableFile as error:
             record["rejected"] = str(error)
             return record
@@ -155,6 +156,11 @@ class Pipeline:
         parsed = json.loads(payload)
         record["seq"] = parsed["seq"]
         record["stored"] = self.store.publish(payload)
+        if notes:
+            record["check_notes"] = notes
+            self.store.record_check_notes(
+                [{**n, "pipeline": self.name, "seq": parsed["seq"], "ms": read_ms} for n in notes]
+            )
         self.store.heartbeat(self.name, read_ms)
         if self.archive:
             self.archive.submit(lambda: payload_key(payload), payload)

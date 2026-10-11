@@ -35,6 +35,7 @@ def stored(**overrides) -> dict:
         "heartbeat:fly": str(NOW - MIN).encode(),
         "heartbeat:do": str(NOW - 30_000).encode(),
         "count_decreases": [],
+        "check_notes": {},
         **{f"switch:{name}": None for name in SWITCHES},
         "night_close": None,
     }
@@ -119,6 +120,9 @@ class ReadOnlyClient:
     def lrange(self, key, start, end):
         return self.values.get(key, [])
 
+    def hgetall(self, key):
+        return self.values.get(key, {})
+
 
 def test_reading_the_store_uses_only_read_commands():
     values = stored()
@@ -189,3 +193,28 @@ def test_read_status_reads_night_close(redis_client):
     redis_client.flushdb()
     redis_client.set("night_close", "closed")
     assert read_status(redis_client)["night_close"] == b"closed"
+
+
+def test_check_notes_list_each_contained_fault_once_newest_first():
+    notes = {
+        b"mayor|ward_polls_zero": json.dumps(
+            {"race": "mayor", "reason": "ward_polls_zero", "pipeline": "fly", "ms": NOW - 5 * MIN}
+        ).encode(),
+        b"councillor-8|votes_received_mismatch": json.dumps(
+            {
+                "race": "councillor-8",
+                "reason": "votes_received_mismatch",
+                "pipeline": "do",
+                "ms": NOW - MIN,
+            }
+        ).encode(),
+    }
+    text = render_status(stored(check_notes=notes), NOW)
+    assert "## Check notes" in text
+    first = text.index("| 20:09:00 EDT | do | councillor-8 | votes_received_mismatch |")
+    assert first < text.index("| 20:05:00 EDT | fly | mayor | ward_polls_zero |")
+
+
+def test_no_check_notes_say_none():
+    text = render_status(stored(), NOW)
+    assert text.split("## Check notes")[1].strip().startswith("None.")

@@ -186,9 +186,15 @@ The console sets only the flag; shut the apps down with the `teardown` workflow 
 
 `uv run election-night status` prints a Markdown summary of the store at `REDIS_URL`: both
 heartbeats (stale over 5 minutes), the stored `seq` pair and the City count time, each
-switch as the route reads it, current Withdrawals with their machine reasons, and every entry in
-`count_decreases`, newest first (`src/election_night/status.py`). It reads with one `MGET` and
-one `LRANGE`, and never writes.
+switch as the route reads it, current Withdrawals with their machine reasons, every check note,
+and every entry in `count_decreases`, newest first (`src/election_night/status.py`). It reads with
+one `MGET`, one `LRANGE` and one `HGETALL`, and never writes.
+
+**Check notes** (`check_notes`, a hash; #97, ADR 0004) record the faults the projection carried on
+through: a vote-sum mismatch, or a Reporting Progress fault. Each field is `<race>|<reason>`,
+written once (`HSETNX`) with the pipeline, `seq` pair and time that first saw it, so a fault
+present all night costs one field. They make no sound: the page keeps working. Clear them with the
+other Rehearsal keys (`DEL check_notes`).
 
 On the night it runs as the `night status` workflow (`.github/workflows/night-status.yml`), from
 the GitHub mobile app: Actions → night status → Run workflow, choosing `night` or `rehearsal`. It

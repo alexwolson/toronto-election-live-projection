@@ -223,3 +223,34 @@ def test_a_shift_with_no_mass_where_the_centre_has_any_keeps_the_centre():
     assert np.isfinite(shifted).all()
     assert np.allclose(shifted[0], centre[0])
     assert np.allclose(shifted[1], np.array([0.5, 0.6, 0.0]) / 1.1)
+
+
+UNKNOWN = -1  # a ward whose Reporting Progress is hidden (#97)
+
+
+def test_a_ward_with_unknown_progress_keeps_the_citywide_projection_and_widens_it():
+    inputs = RaceInputs(
+        (
+            ward("1", 20_000.0, aggregates=advance(800.0)),
+            ward("2", 30_000.0, aggregates=advance(1_000.0)),
+            ward("3", 25_000.0, aggregates=advance(900.0)),
+        )
+    )
+    votes = np.array([[3_000, 2_000, 400], [2_000, 2_500, 100], [1_500, 1_000, 200]], dtype=float)
+    known, _ = run(inputs, votes, [8, 5, 4])
+    unknown, _ = run(inputs, votes, [8, 5, UNKNOWN])
+    assert unknown is not None
+
+    def width(city):
+        shares = 100 * city[:, 0] / city.sum(axis=1)
+        low, high = np.percentile(shares, [5, 95])
+        return high - low
+
+    assert width(unknown) > width(known)
+    assert (unknown >= votes.sum(axis=0) - 1e-9).all()
+
+
+def test_every_ward_unknown_still_projects():
+    inputs = RaceInputs((ward("1", 20_000.0), ward("2", 30_000.0)))
+    found = run(inputs, [[300, 200], [100, 50]], [UNKNOWN, UNKNOWN])
+    assert found is not None
