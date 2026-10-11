@@ -63,6 +63,9 @@ action from the phone only. The fault times and payload details are in
   - [ ] `councillor-10`, votes above the ward's electors: tally, no range; `count_above_expected`.
   - [ ] `councillor-12`, an unknown name: "Rehearsal Unknown" shown as written; the range
     continues; no Withdrawal.
+  - [ ] `councillor-16`, a Ballot Name missing from the feed (Stacey Moffatt dropped): the
+    other names shown as written; the range continues; no Withdrawal; a `ward` row in night
+    status; no sound.
   - [ ] `councillor-26`, a race not in the bundle: nothing shown.
   - [ ] `mayor`, Ward 5's `votesCounted` off by one: mayor tally, no Estimated Range;
     `ward_votes_counted_mismatch`.
@@ -86,6 +89,10 @@ action from the phone only. The fault times and payload details are in
 - [ ] **Renamed key** (22:35–22:45). **Expect:** as for 5xx.
 - [ ] **One file failing, the other fine** (22:50–23:00). **Expect:** as for 5xx; the good file
   is never paired with an older copy of the other.
+- [ ] **Unknown mayoral name** (23:05–23:20; Mostafa Zandkarimi renamed "Rehearsal Unknown").
+  **Expect:** the mayor's tally shows "Rehearsal Unknown" as written; no Estimated Range, the
+  Possible Range still shown; no Withdrawal; the payload's mayor variant has `off_reason:
+  forecast_unmatched`. The Estimated Range returns at 23:20.
 - [ ] **100% while votes still rise** (`councillor-13`, 23:37–01:37). **Expect:** "All voting
   areas in", no range, no Withdrawal; its votes still rise at 01:07 and 01:37.
 - [ ] **Two-hour near-silent tail** (00:07, 00:37, 01:07, 01:37: one unit each). **Expect:**
