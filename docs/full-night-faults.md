@@ -21,7 +21,7 @@ no figures reads "No figures from the City for this race right now".
 | 19:50–20:00 | Sept 28 repeat (built in) | "Before results" and the REHEARSAL bar, despite live-looking counts | `state: before_results`, `rehearsal: true` |
 | 20:00–20:10 | none | Counting starts | |
 | 20:10–20:25 | the per-race faults below, all at once | each race as listed; every other race is unaffected | |
-| 20:25–20:30 | none | All races are back to normal | Withdrawals lift; `councillor-10` drops back from its inflated count, a second ward-scope entry in `count_decreases` (badge only) |
+| 20:25–20:30 | none | All races are back to normal | Withdrawals lift; `councillor-10` drops back from its inflated count, a further ward-scope entry in `count_decreases` (badge only) |
 | 20:30–20:40 | `zeros`: both files regenerated as the zeroed test files, with current `seq`s | Every race shows zero votes ("no voting areas in") | Citywide decrease: `count-decrease` sounds once; every race and ward is recorded in `count_decreases`. Alex may test the page pause here |
 | 20:40 | none | The counts return, higher than before | |
 | 20:45–21:15 | `stall`: a long 304 run | The count holds; "City count as of 8:45 p.m."; no banner | Heartbeats stay fresh |
@@ -33,6 +33,7 @@ no figures reads "No figures from the City for this race right now".
 | 22:20–22:30 | `truncated`: half the all-office body | As for 5xx: the pair is rejected | |
 | 22:35–22:45 | `renamed`: the ward-by-ward `candidate` key renamed | As for 5xx | |
 | 22:50–23:00 | `one-file`: ward-by-ward 503, all-office fine | As for 5xx: a good file is never paired with an older copy of the other | |
+| 23:05–23:20 | `mayor-unknown-name`: the last-listed mayoral candidate (Mostafa Zandkarimi) renamed "Rehearsal Unknown" in both files | The mayor's tally shows "Rehearsal Unknown" as written; no Estimated Range; the Possible Range stays; no Withdrawal. From 23:20 the Estimated Range returns | mayor `projection.variant`: `in_effect: count_only`, `off_reason: forecast_unmatched`; `projection.shown: null` (ADR 0002). Kept clear of `ward-votes-counted`, whose Withdrawal would hide the variant switching off |
 | 23:37 | none: the main count ends with 4 units held back | | |
 | 23:37–01:37 | `all-in`: `councillor-13` shows `pollsReceived = polls` | "All voting areas in", no range, and the votes still rise at 01:07 and 01:37 | `state: all_units_in`, `projection: null`, no Withdrawal |
 | 00:07, 00:37, 01:07, 01:37 | the near-silent tail: one unit at each (wards 24, 9, 13, 13) | Small changes, with 304s between | Files regenerate only at arrivals |
@@ -50,6 +51,7 @@ no figures reads "No figures from the City for this race right now".
 | `votes-mismatch` | `councillor-8` | `votesReceived` one more than the candidates' sum | tally shown (shares from candidate votes), no range | `withdrawal: votes_received_mismatch` |
 | `above-expected` | `councillor-10` | the leader gains twice the ward's electors | tally shown, no range | `withdrawal: count_above_expected` |
 | `unknown-name` | `councillor-12` | the last-listed candidate is renamed "Rehearsal Unknown" | the feed name as written; the range continues | none |
+| `name-missing` | `councillor-16` | the last-listed candidate (Stacey Moffatt) is dropped, and the row's `votesReceived` lowered by their votes so it still adds up | the remaining names as written; the range continues | none. Their votes leave the race's count: a ward-scope entry in `count_decreases` at 20:10, badge only |
 | `race-not-in-bundle` | `councillor-26` | an extra council row, "Rehearsal Ward" | nothing: the race is ignored | none |
 | `ward-votes-counted` | `mayor` | Ward 5's `votesCounted` is one more than its candidates' sum, in every repeat | mayor tally shown, no Estimated Range | `withdrawal: ward_votes_counted_mismatch` |
 | `count-decrease` | `councillor-14` | the race's count from 10 minutes earlier (zero at 20:10) | the lower count, as served | ward-scope entry in `count_decreases`, badge only, no sound |

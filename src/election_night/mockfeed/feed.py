@@ -78,6 +78,7 @@ FULL_NIGHT = (
     Fault("votes-mismatch", (ALL_OFFICE,), PER_RACE, 15, "councillor-8"),
     Fault("above-expected", (ALL_OFFICE,), PER_RACE, 15, "councillor-10"),
     Fault("unknown-name", (ALL_OFFICE,), PER_RACE, 15, "councillor-12"),
+    Fault("name-missing", (ALL_OFFICE,), PER_RACE, 15, "councillor-16"),
     Fault("race-not-in-bundle", (ALL_OFFICE,), PER_RACE, 15, "councillor-26"),
     Fault("ward-votes-counted", (WARD_BY_WARD,), PER_RACE, 15, "mayor"),
     Fault("count-decrease", (ALL_OFFICE,), PER_RACE, 15, "councillor-14"),
@@ -90,6 +91,8 @@ FULL_NIGHT = (
     Fault("truncated", (ALL_OFFICE,), 150, 10),  # 22:20-22:30
     Fault("renamed", (WARD_BY_WARD,), 165, 10),  # 22:35-22:45
     Fault("one-file", (WARD_BY_WARD,), 180, 10),  # 22:50-23:00
+    # 23:05-23:20: clear of `ward-votes-counted`, whose Withdrawal would hide the variant going off.
+    Fault("mayor-unknown-name", FILES, 195, 15, "mayor"),
     # 23:37-01:37: the council race of the last unit's ward shows 100% through the tail.
     Fault("all-in", (ALL_OFFICE,), COMPLETE_MINUTE, 120),
 )
@@ -286,6 +289,14 @@ class MockFeed:
                     if row["num"] == MAYOR_FAULT_WARD:
                         row["votesCounted"] = str(int(row["votesCounted"]) + 1)
             return
+        if kind == "mayor-unknown-name":  # the last-listed candidate, renamed in both files
+            candidate = w["office"]["candidate"][-1]
+            _, _, row = _row(a, race_id(MAYOR_OFFICE_ID, "0"))
+            for c in row["candidate"]:
+                if c["name"] == candidate["name"]:
+                    c["name"] = UNKNOWN_NAME
+            candidate["name"] = UNKNOWN_NAME
+            return
         if kind == "race-not-in-bundle":  # a copy of the last council row, renumbered
             rows, _, last = _row(a, race_id(COUNCILLOR_OFFICE_ID, "25"))
             extra = copy.deepcopy(last)
@@ -311,6 +322,9 @@ class MockFeed:
             row["votesReceived"] = str(sum(int(c["votesReceived"]) for c in row["candidate"]))
         elif kind == "unknown-name":
             row["candidate"][-1]["name"] = UNKNOWN_NAME
+        elif kind == "name-missing":  # the last-listed candidate dropped, the row still adding up
+            gone = row["candidate"].pop()
+            row["votesReceived"] = str(int(row["votesReceived"]) - int(gone["votesReceived"]))
         elif kind == "count-decrease":
             earlier = self.scenario.true_count(self._step(max(g - DECREASE_MINUTES, 0)))
             fill_row(row, earlier.races[fault.race])
