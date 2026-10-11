@@ -68,14 +68,25 @@ jobs:
           flyctl deploy --config deploy/fly.mockfeed.toml --image "$IMAGE" \
             --env MOCK_FEED_START="$START" --env MOCK_FEED_SPEED="$SPEED" \
             --env MOCK_FEED_FAULTS="$FAULTS" --ha=false --strategy immediate --yes
+      - name: Wait for the Machine to start
+        run: |
+          # The deploy can return while the Machine is still replacing (#99). A Machine stopped after
+          # a Rehearsal (docs/rehearsal-checklist.md) is started here.
+          ids=$(flyctl machine list -a "$APP" --json | jq -r '.[].id')
+          [ "$(wc -w <<< "$ids")" -eq 1 ] || { echo "::error::expected one Machine, found: $ids"; exit 1; }
+          flyctl machine wait "$ids" -a "$APP" --state settled -w 3m
+          if [ "$(flyctl machine list -a "$APP" --json | jq -r '.[0].state')" = stopped ]; then
+            flyctl machine start "$ids" -a "$APP"
+          fi
+          flyctl machine wait "$ids" -a "$APP" --state started -w 3m
       - name: Check the deployed digest
         run: |
           flyctl machine list -a "$APP" --json > machines.json
           jq -r '.[] | "\(.id) \(.region) \(.state) \(.config.image) \(.image_ref.digest)"' machines.json
           jq -e --arg d "$DIGEST" 'length == 1 and all(.[];
-              .image_ref.digest == $d and .region == "ord"
+              .image_ref.digest == $d and .region == "ord" and .state == "started"
               and (.config.image | [scan("@sha256:")] | length) <= 1)' machines.json \
-            || { echo "::error::Fly is not running exactly one ord Machine on $DIGEST"; exit 1; }
+            || { echo "::error::Fly is not running exactly one started ord Machine on $DIGEST"; exit 1; }
           {
             echo "Mock Feed \`$APP\`: \`$(jq -r '.[0].image_ref.digest' machines.json)\`"
             echo "Feed base URL: https://$APP.fly.dev/results (start $START, speed $SPEED, faults $FAULTS)"

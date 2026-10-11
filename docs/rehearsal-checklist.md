@@ -111,8 +111,9 @@ so Plumbing tests the alerts with the system faults, after the feed part (after 
 
 - [ ] **Reset the store again** for #47 (§ Before every Rehearsal), then **deploy** for #47 with
   the default City feed and `rehearsal/real-feed-poll/`.
-- [ ] **The Mock Feed app stays up:** teardown and Night Close only remove the Rehearsal apps.
-  Leave it running for #83.
+- [ ] **Stop the Mock Feed:** `flyctl machine stop <id> -a toronto-election-mock-feed`. Teardown
+  and Night Close only remove the Rehearsal apps (#100). The app stays, and the next **mock-feed**
+  run starts the Machine again. **Expect:** `flyctl machine list` shows it `stopped`.
 
 ## Full night (#53)
 
@@ -272,8 +273,14 @@ digest and Frontend commit intended for the night.
 - [ ] **The fallback ladder,** decided by Alex at the review, per level: switched off for the
   night, or the live page doesn't launch. **Expect:** recorded on #55.
 
+### After
+
+- [ ] **Stop the Mock Feed,** as after Plumbing. Nothing needs it after the Dress.
+
 ## Deploy Freeze (#56, Fri Oct 23 18:00 EDT)
 
+- [ ] **The Mock Feed is stopped.** **Expect:** `flyctl machine list -a toronto-election-mock-feed`
+  shows `stopped` (§ Dress, After).
 - [ ] **`main` fast-forwards to the Dress commit** (Frontend, S8). Alex previews that build.
   **Expect:** the preview at the Dress commit.
 - [ ] **Seed the Night store** before the production build (Frontend `docs/v2-release.md` § The
