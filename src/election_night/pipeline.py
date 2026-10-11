@@ -28,6 +28,7 @@ from election_night.alerts import Alerts, count_decreases, reader_path_fresh
 from election_night.alerts import ping as http_ping
 from election_night.archive import ArchiveWriter, file_key, log_key, payload_key
 from election_night.feed import UnreadableFile, check_status
+from election_night.history import history_entry
 from election_night.payload import build_payload
 from election_night.store import Store
 
@@ -155,7 +156,7 @@ class Pipeline:
         record["read_ms"] = read_ms = self.now_ms()  # both files now held, valid and current
         parsed = json.loads(payload)
         record["seq"] = parsed["seq"]
-        record["stored"] = self.store.publish(payload)
+        record["stored"] = self.store.publish(payload, history_entry(parsed))
         if notes:
             record["check_notes"] = notes
             self.store.record_check_notes(

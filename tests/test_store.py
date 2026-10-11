@@ -58,3 +58,20 @@ def test_a_check_note_is_kept_once_with_when_it_was_first_seen(store, redis_clie
     stored = redis_client.hgetall("check_notes")
     assert list(stored) == [b"mayor|ward_polls_zero"]
     assert json.loads(stored[b"mayor|ward_polls_zero"]) == first
+
+
+def test_a_stored_pair_appends_its_history_entry(store, redis_client):
+    assert store.publish(payload(100, 200), history=b'{"n":1}')
+    assert store.publish(payload(101, 200), history=b'{"n":2}')
+    assert redis_client.lrange("history", 0, -1) == [b'{"n":1}', b'{"n":2}']
+
+
+def test_a_rejected_pair_appends_no_history(store, redis_client):
+    store.publish(payload(100, 200), history=b'{"n":1}')
+    assert not store.publish(payload(100, 200), history=b'{"n":2}')
+    assert redis_client.lrange("history", 0, -1) == [b'{"n":1}']
+
+
+def test_a_payload_without_an_entry_appends_no_history(store, redis_client):
+    assert store.publish(payload(100, 200))
+    assert redis_client.lrange("history", 0, -1) == []
