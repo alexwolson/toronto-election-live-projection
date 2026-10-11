@@ -140,13 +140,13 @@ class _Hypotheses:
     out_var: np.ndarray  # (H,) and their variance
 
 
-def counted_variance(k, n, unit_sd):
+def _counted_variance(k, n, unit_sd):
     """The variance of the sum of k of a race's n election-day unit sizes, whose spread is
     `unit_sd`. The k are drawn without replacement from the race's fixed n, so the variance of k
     independent units shrinks by the finite-population correction (n - k)/(n - 1): to 0 once
     every unit is in (#71)."""
     k = np.clip(k, 0, n)
-    return k * unit_sd**2 * np.where(n > 1, (n - k) / max(n - 1, 1), 0.0)
+    return k * unit_sd**2 * np.where(n > 1, (n - k) / np.maximum(n - 1, 1), 0.0)
 
 
 def _grid(
@@ -201,7 +201,7 @@ def _grid(
     mu = np.broadcast_to(mean_unit[None, :], k.shape)
     mean = k * mu + (i * size_mean[None]).sum(axis=2)
     var = (
-        counted_variance(k, n_ed, params.size_cv * mu)
+        _counted_variance(k, n_ed, params.size_cv * mu)
         + (subset + i * own_var[None]).sum(axis=2)
         + 1.0
     )

@@ -15,10 +15,10 @@ from election_night.projection.count_extension import (
     Params,
     RaceInputs,
     WardInputs,
+    _counted_variance,
     _grid,
     aggregate_posterior,
     bands,
-    counted_variance,
     draw_final_shares,
 )
 from election_night.projection.history import fold_projection, replay_bundle
@@ -234,7 +234,7 @@ def test_the_counted_units_are_drawn_without_replacement(n):
     sizes = np.random.default_rng(n).gamma(10.0, 80.0, size=n)
     for k in range(1, n + 1):
         sums = [sum(c) for c in combinations(sizes, k)]
-        assert counted_variance(k, n, sizes.std()) == pytest.approx(np.var(sums), abs=1e-6)
+        assert _counted_variance(k, n, sizes.std()) == pytest.approx(np.var(sums), abs=1e-6)
 
 
 def test_a_count_of_every_election_day_unit_pins_the_turnout_level():
