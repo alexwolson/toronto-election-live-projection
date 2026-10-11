@@ -118,6 +118,7 @@ def cmd_pipeline(args) -> None:
         reader_path=_env("PING_URL_READER_PATH"),
         count_decrease=_env("PING_URL_COUNT_DECREASE"),
         reader_path_url=_env("READER_PATH_URL"),
+        reader_path_bypass=os.environ.get("READER_PATH_BYPASS") or None,
     )
     s3 = boto3.client(
         "s3", config=Config(connect_timeout=10, read_timeout=20, retries={"max_attempts": 3})

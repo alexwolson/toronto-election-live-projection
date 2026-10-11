@@ -24,6 +24,9 @@ class Alerts:
     reader_path: str
     count_decrease: str
     reader_path_url: str
+    # Vercel's Protection Bypass for Automation: a protected Rehearsal preview answers the probe
+    # only with it (#92). Sent on the probe alone; None for the Night's public domain.
+    reader_path_bypass: str | None = None
 
 
 def ping(url: str) -> None:

@@ -23,6 +23,10 @@ This applies to Plumbing (#42) and the 48-hour real-feed poll (#47) as well.
 - [ ] **Switches on, Night Close open.** **night status** → `rehearsal` (night status, switch and
   night close default to `night`: pick `rehearsal` every time).
   **Expect:** every switch `on (not set)` or `on`; Night Close `Open.`
+- [ ] **Reader-path bypass.** The `REHEARSAL_READER_PATH_BYPASS` Actions secret holds the
+  preview project's Protection Bypass for Automation (Vercel → Project → Settings → Deployment
+  Protection; #92). **Expect:** the **deploy** run's `check-inputs` passes, and `reader-path` goes
+  up once the route serves a fresh heartbeat.
 - [ ] **Resume `count-decrease`** in healthchecks.io (Rehearsal set): it stays down after a
   Rehearsal's first citywide decrease. **Expect:** all four Rehearsal checks up.
 - [ ] **Image.** The **image** run's tag and digest, recorded on the issue.
@@ -48,7 +52,8 @@ so the feed part takes about 25 wall minutes, and each HTTP fault lasts 2 wall m
 Use the preview's **deployment** URL (`…-<hash>-alexwolsons-projects.vercel.app`), not the
 branch alias, for the reader path and the collapse check, and don't push to `election-night`
 during the Rehearsal: a new build moves the alias and resets the route's cache. Previews have
-Deployment Protection on, so the reader-path probe needs the bypass (#92).
+Deployment Protection on, so the reader-path probe sends the bypass (#92; § Before every
+Rehearsal).
 
 ### Feed
 
