@@ -1,0 +1,225 @@
+{
+ "cases": 116395,
+ "criteria": [
+  {
+   "id": 1,
+   "name": "margin CRPS beats the Tally Baseline in total",
+   "pass": true,
+   "threshold": 2.267657429589524,
+   "value": 1.6518496753439924
+  },
+  {
+   "id": 2,
+   "name": "margin CRPS beats the Tally Baseline in a majority of nights",
+   "pass": true,
+   "threshold": 2,
+   "value": 3
+  },
+  {
+   "id": 3,
+   "name": "winner Brier not worse",
+   "pass": true,
+   "threshold": 0.08009405511599509,
+   "value": 0.05759619340064608
+  },
+  {
+   "id": 4,
+   "name": "G1, confident calls",
+   "pass": true,
+   "threshold": 0.95,
+   "value": 0.9964445004574846
+  },
+  {
+   "id": 5,
+   "name": "G2, ranges",
+   "pass": true,
+   "threshold": 0.85,
+   "value": {
+    "margin": 0.8865209954461845,
+    "shares": 0.9241657928284167
+   }
+  }
+ ],
+ "forecast_release_tag": null,
+ "level": "trustee",
+ "model_version": "04a507b4e4a071ca586b31a331a46fcead32b0f2dbad01b7d26d51ff0f61f4e8",
+ "nights": [
+  2014,
+  2018,
+  2022
+ ],
+ "orders_per_night": {
+  "stress": 60,
+  "timing_patterns": 60
+ },
+ "pass": true,
+ "preregistration_sha256": "2d213d533b3c05280bdf9f516ef99a90746b09a2b4cd8f6a41b56cd457862365",
+ "real_captures": [
+  "2022 2022-10-24T21:09 all-office",
+  "2022 2022-10-24T21:46 all-office",
+  "2022 2022-10-24T23:01 all-office",
+  "2022 2022-10-24T23:55 all-office"
+ ],
+ "reported": {
+  "stress_orders": {
+   "cases": 116280,
+   "nights": {
+    "2014": {
+     "baseline_brier": 0.1542311661506708,
+     "baseline_margin_error": 3.756536371873899,
+     "brier": 0.11140346834571724,
+     "cases": 38760,
+     "g1": 0.9827859428891029,
+     "g1_calls": 32183,
+     "g2_margin": 0.6946594427244582,
+     "g2_shares": 0.7502815453666847,
+     "margin_crps": 2.8997565918615944,
+     "races": 34,
+     "retired_cases": 2273,
+     "share_crps": 1.1692016972992887
+    },
+    "2018": {
+     "baseline_brier": 0.1321981424148607,
+     "baseline_margin_error": 3.673743667013885,
+     "brier": 0.10003064680443756,
+     "cases": 38760,
+     "g1": 0.9875658655699782,
+     "g1_calls": 31124,
+     "g2_margin": 0.7467750257997936,
+     "g2_shares": 0.8460696896842407,
+     "margin_crps": 2.819710652076309,
+     "races": 34,
+     "retired_cases": 0,
+     "share_crps": 1.014760482866196
+    },
+    "2022": {
+     "baseline_brier": 0.11320949432404541,
+     "baseline_margin_error": 4.192734183416474,
+     "brier": 0.08348598665841075,
+     "cases": 38760,
+     "g1": 0.9875105079860694,
+     "g1_calls": 33308,
+     "g2_margin": 0.7850361197110423,
+     "g2_shares": 0.8534801157305028,
+     "margin_crps": 3.208688428406365,
+     "races": 34,
+     "retired_cases": 0,
+     "share_crps": 1.221201381371803
+    }
+   },
+   "total": {
+    "baseline_brier": 0.13321293429652564,
+    "baseline_margin_error": 3.8743380741014186,
+    "brier": 0.09830670060285518,
+    "g1": 0.9859541054817168,
+    "g2_margin": 0.7421568627450981,
+    "g2_shares": 0.816610450260476,
+    "margin_crps": 2.9760518907814224,
+    "share_crps": 1.1350545205124292
+   }
+  },
+  "without_2014": {
+   "cases": 77635,
+   "nights": {
+    "2018": {
+     "baseline_brier": 0.08121775025799793,
+     "baseline_margin_error": 2.246771104249998,
+     "brier": 0.060163684240970086,
+     "cases": 38760,
+     "g1": 0.9962131881200513,
+     "g1_calls": 31953,
+     "g2_margin": 0.879437564499484,
+     "g2_shares": 0.9364403349058922,
+     "margin_crps": 1.6489616300005618,
+     "races": 34,
+     "retired_cases": 0,
+     "share_crps": 0.6277369717035856
+    },
+    "2022": {
+     "baseline_brier": 0.08032344501774794,
+     "baseline_margin_error": 2.4875028342489833,
+     "brier": 0.057771792369120896,
+     "cases": 38875,
+     "g1": 0.9941652774470112,
+     "g1_calls": 33592,
+     "g2_margin": 0.9072926045016078,
+     "g2_shares": 0.9402969529934161,
+     "margin_crps": 1.806466387751394,
+     "races": 34,
+     "retired_cases": 0,
+     "share_crps": 0.7289146147784781
+    }
+   },
+   "total": {
+    "baseline_brier": 0.08077059763787293,
+    "baseline_margin_error": 2.367136969249491,
+    "brier": 0.058967738305045495,
+    "g1": 0.9951892327835312,
+    "g2_margin": 0.8933650845005459,
+    "g2_shares": 0.9383686439496541,
+    "margin_crps": 1.727714008875978,
+    "share_crps": 0.6783257932410318
+   }
+  }
+ },
+ "run": 4,
+ "scores": {
+  "cases": 116395,
+  "nights": {
+   "2014": {
+    "baseline_brier": 0.07874097007223942,
+    "baseline_margin_error": 2.068698350269591,
+    "brier": 0.054853103591847266,
+    "cases": 38760,
+    "g1": 0.9989550358053908,
+    "g1_calls": 32537,
+    "g2_margin": 0.8728328173374613,
+    "g2_shares": 0.895760090585942,
+    "margin_crps": 1.5001210082800212,
+    "races": 34,
+    "retired_cases": 1892,
+    "share_crps": 0.627504727548123
+   },
+   "2018": {
+    "baseline_brier": 0.08121775025799793,
+    "baseline_margin_error": 2.246771104249998,
+    "brier": 0.060163684240970086,
+    "cases": 38760,
+    "g1": 0.9962131881200513,
+    "g1_calls": 31953,
+    "g2_margin": 0.879437564499484,
+    "g2_shares": 0.9364403349058922,
+    "margin_crps": 1.6489616300005618,
+    "races": 34,
+    "retired_cases": 0,
+    "share_crps": 0.6277369717035856
+   },
+   "2022": {
+    "baseline_brier": 0.08032344501774794,
+    "baseline_margin_error": 2.4875028342489833,
+    "brier": 0.057771792369120896,
+    "cases": 38875,
+    "g1": 0.9941652774470112,
+    "g1_calls": 33592,
+    "g2_margin": 0.9072926045016078,
+    "g2_shares": 0.9402969529934161,
+    "margin_crps": 1.806466387751394,
+    "races": 34,
+    "retired_cases": 0,
+    "share_crps": 0.7289146147784781
+   }
+  },
+  "total": {
+   "baseline_brier": 0.08009405511599509,
+   "baseline_margin_error": 2.267657429589524,
+   "brier": 0.05759619340064608,
+   "g1": 0.9964445004574846,
+   "g2_margin": 0.8865209954461845,
+   "g2_shares": 0.9241657928284167,
+   "margin_crps": 1.6518496753439924,
+   "share_crps": 0.6613854380100622
+  }
+ },
+ "smoke": false,
+ "variant": "count_only"
+}
