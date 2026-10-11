@@ -83,10 +83,11 @@ def _ranked(spec: dict, votes: dict[str, int]) -> list[str]:
 
 
 def _state(spec: dict, tally: Tally, progress_ok: bool) -> str:
-    """The race's state. Reporting Progress that fails its check can't say all units are in."""
+    """The race's state. Reporting Progress that fails its check can't say all units are in, nor,
+    with votes counted, that none are (#97)."""
     if spec["acclaimed"]:
         return "acclaimed"
-    if tally.polls_received == 0:
+    if tally.polls_received == 0 and (progress_ok or not any(tally.votes.values())):
         return "no_units_in"
     if progress_ok and tally.polls_received == tally.polls:
         return "all_units_in"
@@ -276,6 +277,7 @@ def _mayor_model(
     votes = np.array([[wards[w.ward]["votes"].get(k, 0) for k in keys] for w in inputs.wards])
     if fault := checks.above_expected(votes.sum(), inputs.top_total):
         return fault
+    # -1: the ward's units in are unknown (#97); mayor_final_votes enumerates them.
     received = np.array(
         [
             wards[w.ward]["progress"]["received"] if wards[w.ward]["progress"] is not None else -1
@@ -433,11 +435,11 @@ def _possible(
             return None
         remaining = max(0, sum(electors[ward] for ward in wards) - counted)
     elif race["level"] == "french_trustee":
-        wards = spec.get("city_wards") or []
-        ceiling = sum(electors.get(ward, 0) for ward in wards) if wards else None
-        if not row_electors or row_electors < counted:
-            return None
-        if ceiling is not None and row_electors > ceiling:
+        wards = spec.get("city_wards")
+        if not wards or any(ward not in electors for ward in wards):
+            return None  # no ceiling to check the row's electors against
+        ceiling = sum(electors[ward] for ward in wards)
+        if not row_electors or not counted <= row_electors <= ceiling:
             return None
         remaining = row_electors - counted
     else:

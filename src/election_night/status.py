@@ -34,7 +34,8 @@ KEYS = (
 
 
 def read_status(client) -> dict:
-    """The store's raw values by key: one MGET, then the count decreases list."""
+    """The store's raw values by key: one MGET, then the count decreases list and the check
+    notes."""
     values = dict(zip(KEYS, client.mget(KEYS), strict=True))
     values[DECREASES_KEY] = client.lrange(DECREASES_KEY, 0, -1)
     values[CHECK_NOTES_KEY] = client.hgetall(CHECK_NOTES_KEY)

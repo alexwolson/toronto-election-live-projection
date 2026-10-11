@@ -496,7 +496,10 @@ def test_a_mayoral_wards_progress_fault_stays_in_that_ward(gated_2022):
         lead = r["candidates"][0]["key"]
         return b[lead]["high"] - b[lead]["low"]
 
-    assert width(mayor) >= width(race(clean, "mayor"))
+    # One ward in 25: the citywide band barely moves (the fault-injection replays on #97 put
+    # it at 0.97-1.05x, within Monte Carlo noise); the ward-level widening is
+    # test_mayor_projection's.
+    assert width(mayor) >= 0.9 * width(race(clean, "mayor"))
 
 
 def test_a_council_races_progress_fault_keeps_its_modelled_projection(gated_2022):
@@ -510,6 +513,14 @@ def test_a_council_races_progress_fault_keeps_its_modelled_projection(gated_2022
     assert ward_7["withdrawal"] is None
     assert ward_7["progress"] is None
     assert ward_7["projection"] is not None and "councillor-7" in draws
+
+    def width(r):
+        b = r["projection"]["bands"]["count_only"]
+        lead = r["candidates"][0]["key"]
+        return b[lead]["high"] - b[lead]["low"]
+
+    clean, _ = run_2022(gated_2022)
+    assert width(ward_7) > width(race(clean, "councillor-7"))
 
 
 # --- The French-language boards' Possible Range, from each row's own electors (#97) ---------
@@ -556,3 +567,26 @@ def test_a_french_board_gets_a_possible_range_from_its_rows_electors():
 def test_a_french_rows_implausible_electors_give_no_possible_range(voters):
     # None; fewer than the votes counted; more than every elector of the City wards it covers.
     assert french_2026(voters)["possible"] is None
+
+
+def test_zero_received_from_a_faulty_row_with_votes_is_still_counting():
+    # Progress that fails its check can't say nothing is in either (#97): with votes counted the
+    # race is counting, so it keeps its projection and Possible Range.
+    def zero_received(d):
+        r = row(d, 2, "3")
+        r["polls"] = str(int(r["polls"]) + 1)
+        r["pollsReceived"] = "0"
+
+    ward_3 = race(body_of(*pair_2022(zero_received)), "councillor-3")
+    assert ward_3["state"] == "counting"
+    assert ward_3["projection"] is not None and ward_3["possible"] is not None
+
+
+def test_a_hidden_wards_possible_range_contains_the_known_one(gated_2022):
+    # Never a badge on a candidate who can still win: counting a ward as not fully reported
+    # can only widen every candidate's Possible Range.
+    clean, _ = run_2022(gated_2022)
+    body, _ = run_2022(gated_2022, edit_ward_by_ward=lambda d: mayoral_ward_polls(d, "3", 1))
+    known, hidden = race(clean, "mayor")["possible"], race(body, "mayor")["possible"]
+    for key, rng in known.items():
+        assert hidden[key]["low"] <= rng["low"] and hidden[key]["high"] >= rng["high"]
