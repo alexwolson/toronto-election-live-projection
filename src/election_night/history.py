@@ -3,19 +3,22 @@
 The store appends an entry in the same script that stores its payload, so each stored seq pair
 has exactly one entry whichever pipeline stored it (docs/store.md). An entry keeps what the
 over-the-count charts draw: each race's Reporting Progress, its votes, and the band the page
-showed; for the mayor, each ward's progress. Ward votes stay in the current payload only: they
+showed and which variant it was; for the mayor, each ward's progress. Ward votes stay in the current payload only: they
 are most of a payload's bytes and no chart draws them over time. Outside the model version.
 """
 
 import json
 
 
-def _band(race: dict) -> dict | None:
+def _shown(race: dict) -> str | None:
     projection = race.get("projection")
-    shown = projection.get("shown") if projection else None
-    if not shown:
-        return None
-    return {k: [b["low"], b["mid"], b["high"]] for k, b in projection["bands"][shown].items()}
+    return projection.get("shown") if projection else None
+
+
+def _band(race: dict, shown: str) -> dict:
+    return {
+        k: [b["low"], b["mid"], b["high"]] for k, b in race["projection"]["bands"][shown].items()
+    }
 
 
 def _progress(progress: dict | None) -> list[int] | None:
@@ -32,8 +35,9 @@ def history_entry(payload: dict) -> bytes | None:
             "p": _progress(race["progress"]),
             "v": {c["key"]: c["votes"] for c in race["candidates"] if c["votes"] is not None},
         }
-        if (band := _band(race)) is not None:
-            entry["b"] = band
+        if shown := _shown(race):
+            # The variant too, so the route can drop the band when its switch is off.
+            entry["b"], entry["s"] = _band(race, shown), shown
         if race.get("wards") is not None:
             entry["w"] = {w["num"]: _progress(w["progress"]) for w in race["wards"]}
         races[race["id"]] = entry

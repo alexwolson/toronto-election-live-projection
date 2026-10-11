@@ -47,6 +47,8 @@ def test_only_the_shown_band_is_kept_as_low_mid_high():
     }
     got = entry(payload([race(projection=projection)]))["races"]["councillor-4"]
     assert got["b"] == {"B": [52.0, 57.0, 61.0]}
+    # Which band it was, so the route can drop it when the mayor's variant is switched off.
+    assert got["s"] == "forecast_weighted"
 
 
 def test_no_band_when_none_is_shown_or_the_projection_is_withdrawn():
@@ -57,7 +59,7 @@ def test_no_band_when_none_is_shown_or_the_projection_is_withdrawn():
     }
     withdrawn = race(projection=None, withdrawal={"reason": "progress_regressed"})
     got = entry(payload([race(projection=hidden), {**withdrawn, "id": "tdsb-5"}]))["races"]
-    assert "b" not in got["councillor-4"] and "b" not in got["tdsb-5"]
+    assert not {"b", "s"} & (got["councillor-4"].keys() | got["tdsb-5"].keys())
 
 
 def test_the_mayor_keeps_each_ward_s_progress_but_not_its_votes():
