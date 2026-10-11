@@ -110,14 +110,20 @@ jobs:
             --env FEED_BASE_URL="$FEED_BASE_URL" --env READER_PATH_URL="$READER_PATH_URL" \
             --env ARCHIVE_PREFIX="$ARCHIVE_PREFIX" \
             --ha=false --strategy immediate --yes
+      - name: Wait for the Machine to start
+        run: |
+          # The deploy can return while the Machine is still replacing (#99).
+          ids=$(flyctl machine list -a "$APP" --json | jq -r '.[].id')
+          [ "$(wc -w <<< "$ids")" -eq 1 ] || { echo "::error::expected one Machine, found: $ids"; exit 1; }
+          flyctl machine wait "$ids" -a "$APP" --state started -w 3m
       - name: Check the deployed digest
         run: |
           flyctl machine list -a "$APP" --json > machines.json
           jq -r '.[] | "\(.id) \(.region) \(.state) \(.config.image) \(.image_ref.digest)"' machines.json
           jq -e --arg d "$DIGEST" 'length == 1 and all(.[];
-              .image_ref.digest == $d and .region == "yyz"
+              .image_ref.digest == $d and .region == "yyz" and .state == "started"
               and (.config.image | [scan("@sha256:")] | length) <= 1)' machines.json \
-            || { echo "::error::Fly is not running exactly one yyz Machine on $DIGEST"; exit 1; }
+            || { echo "::error::Fly is not running exactly one started yyz Machine on $DIGEST"; exit 1; }
           echo "Fly \`$APP\`: \`$(jq -r '.[0].image_ref.digest' machines.json)\`" >> "$GITHUB_STEP_SUMMARY"
 
   digitalocean:
