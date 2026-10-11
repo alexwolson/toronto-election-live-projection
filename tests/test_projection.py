@@ -2,6 +2,7 @@
 
 import dataclasses
 import json
+from itertools import combinations
 
 import numpy as np
 import pytest
@@ -9,12 +10,15 @@ import pytest
 from election_night.gates import load_preregistration
 from election_night.payload import build_payload, project
 from election_night.projection.count_extension import (
+    TURNOUT_GRID,
     Aggregate,
     Params,
     RaceInputs,
     WardInputs,
+    _grid,
     aggregate_posterior,
     bands,
+    counted_variance,
     draw_final_shares,
 )
 from election_night.projection.history import fold_projection, replay_bundle
@@ -224,16 +228,38 @@ def test_too_many_combinations_fail_closed():
     assert draws(30, inputs=aggregates_in(20)) is None  # 21^3 = 9,261 combinations
 
 
+@pytest.mark.parametrize("n", [2, 5, 9])
+def test_the_counted_units_are_drawn_without_replacement(n):
+    # The variance of the sum of k of a race's n fixed unit sizes, over every subset of k.
+    sizes = np.random.default_rng(n).gamma(10.0, 80.0, size=n)
+    for k in range(1, n + 1):
+        sums = [sum(c) for c in combinations(sizes, k)]
+        assert counted_variance(k, n, sizes.std()) == pytest.approx(np.var(sums), abs=1e-6)
+
+
+def test_a_count_of_every_election_day_unit_pins_the_turnout_level():
+    # All ten units in and no aggregates: the count is the election-day total, not a sample.
+    inputs = RaceInputs((WardInputs("1", 20_000.0, 10, ()),))
+    grid = _grid(inputs, PARAMS, received=10, counted=8_000.0)
+    weights = np.exp(grid.log_w[0] - grid.log_w[0].max())
+    assert TURNOUT_GRID[weights.argmax()] == pytest.approx(0.4)
+    assert weights.sum() == pytest.approx(1.0)
+
+
 def test_outstanding_aggregates_are_less_certain_when_fewer_units_were_counted():
     # Every election-day unit in and every aggregate out: the aggregates' split is centred on
-    # the counted shares, which two units pin down far less well than forty.
+    # the counted shares, which two units pin down far less well than forty. The aggregates'
+    # own split (omega 30) dominates both, so the gap is about 1.14x (#71).
     votes = np.array([3_000, 2_000, 1_000])
     width = {}
     for units in (2, 40):
-        final = draws(units, votes=votes, inputs=one_ward(units=units, spread=0.2))
+        inputs = one_ward(units=units, spread=0.2)
+        posterior = aggregate_posterior(inputs, PARAMS, received=units, counted=votes.sum())
+        assert posterior[((97, 0), (98, 0), (99, 0))] > 0.8
+        final = draws(units, votes=votes, inputs=inputs)
         low, high = np.percentile(final[:, 0], [5, 95])
         width[units] = high - low
-    assert width[2] > 1.5 * width[40]
+    assert width[2] > 1.1 * width[40]
 
 
 def test_skipping_races_never_changes_a_stub_race(replay_2022, nights):
