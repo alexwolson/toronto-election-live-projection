@@ -1,7 +1,9 @@
 # 0003 — A "Mathematically Eliminated" badge, read from the Possible Range
 
 **Status:** accepted (Alex, 2026-10-10) · **Tickets:** #62, #90 · **Amends:** ADR 0002's "no
-race-call wording", for this badge only
+race-call wording", for this badge only · **Amended by:** ADR 0004 (2026-10-11): the mayor's
+Possible Range, and so its badges, now stay while a ward's progress is hidden, and the
+French-language boards' contested races get a range and badges
 
 ## Decision
 

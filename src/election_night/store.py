@@ -2,7 +2,8 @@
 
 Key layout (docs/store.md): `payload` holds the payload bytes, `payload:seq` its "<a>,<w>" seq
 pair, `heartbeat:<pipeline>` the epoch milliseconds of that pipeline's last valid read, and
-`count_decreases` one JSON entry per count decrease a pipeline saw.
+`count_decreases` one JSON entry per count decrease a pipeline saw, and `check_notes` one field
+per contained fault (#97), "<race>|<reason>", holding when it was first seen.
 """
 
 import json
@@ -12,6 +13,7 @@ import redis
 PAYLOAD_KEY = "payload"
 SEQ_KEY = "payload:seq"
 DECREASES_KEY = "count_decreases"
+CHECK_NOTES_KEY = "check_notes"
 PIPELINES = ("fly", "do")
 
 # S7: a pair is newer only if neither seq is older and at least one is newer. Equal and mixed
@@ -49,6 +51,14 @@ class Store:
 
     def heartbeat(self, pipeline: str, ms: int) -> None:
         self.client.set(heartbeat_key(pipeline), ms)
+
+    def record_check_notes(self, entries: list[dict]) -> None:
+        """Keep each contained fault once, as first seen by either pipeline, for `night status`.
+        A fault seen on every tick costs one field, not one entry a minute."""
+        for entry in entries:
+            self.client.hsetnx(
+                CHECK_NOTES_KEY, f"{entry['race']}|{entry['reason']}", json.dumps(entry)
+            )
 
     def record_decreases(self, entries: list[dict]) -> None:
         """Append count decreases, one JSON entry each, for `night status`."""

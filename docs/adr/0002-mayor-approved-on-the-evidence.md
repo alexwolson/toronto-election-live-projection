@@ -1,7 +1,9 @@
 # 0002 — The mayor's projection is approved on the evidence, with a Possible Range beside it
 
 **Status:** accepted (Alex, 2026-10-09) · **Tickets:** #44, #45 · **Supersedes:** for the mayor
-only, #17's "no manual override" and the mayoral ladder's fall back to the tally
+only, #17's "no manual override" and the mayoral ladder's fall back to the tally ·
+**Amended by:** ADR 0004 (2026-10-11): a ward whose progress is hidden counts as not fully
+reported, and the French-language boards get a Possible Range from their own rows' `totalVoters`
 
 ## Decision
 

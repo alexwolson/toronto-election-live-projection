@@ -49,3 +49,12 @@ def test_seqs_compare_exactly_at_millisecond_scale(store):
     store.publish(payload(1793059260000, 1793059260000))
     assert store.publish(payload(1793059260001, 1793059260000))
     assert not store.publish(payload(1793059260000, 1793059260001))
+
+
+def test_a_check_note_is_kept_once_with_when_it_was_first_seen(store, redis_client):
+    first = {"race": "mayor", "reason": "ward_polls_zero", "pipeline": "fly", "ms": 1}
+    store.record_check_notes([first])
+    store.record_check_notes([{**first, "pipeline": "do", "ms": 2}])
+    stored = redis_client.hgetall("check_notes")
+    assert list(stored) == [b"mayor|ward_polls_zero"]
+    assert json.loads(stored[b"mayor|ward_polls_zero"]) == first

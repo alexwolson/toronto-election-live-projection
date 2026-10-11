@@ -18,7 +18,8 @@ This applies to Plumbing (#42) and the 48-hour real-feed poll (#47) as well.
 - [ ] **Reset the Rehearsal store's `seq` pair.** The Mock Feed stamps the same `seq`s every
   Rehearsal (the night clock from Oct 26 19:50), so after one Rehearsal the store rejects the
   next one's pairs as older. In the Upstash console, database `election-rehearsal`, CLI tab:
-  `DEL payload:seq` and `DEL count_decreases`. Keep `payload`: the route needs one.
+  `DEL payload:seq`, `DEL count_decreases` and `DEL check_notes`. Keep `payload`: the route needs
+  one.
   **Expect:** `GET payload:seq` returns nil, and the first pair the pipelines read is stored.
 - [ ] **Switches on, Night Close open.** **night status** → `rehearsal` (night status, switch and
   night close default to `night`: pick `rehearsal` every time).
@@ -125,16 +126,16 @@ action from the phone only. The fault times and payload details are in
   **Expect:** "Results from 8 p.m." and the Rehearsal bar, despite live-looking counts.
 - [ ] **Counting starts** (20:00). **Expect:** tallies and Reporting Progress appear.
 - [ ] **Per-race faults** (20:10–20:25). **Expect:** each race below as listed; every other race
-  unaffected; night status lists the Withdrawals with these reasons.
+  unaffected; night status lists each Withdrawal or check note with these reasons (#97).
   - [ ] `councillor-4`, a `"-"` vote: "No figures from the City for this race right now".
   - [ ] `tcdsb-3`, row missing: "No figures from the City for this race right now".
-  - [ ] `councillor-6`, `pollsReceived` above `polls`: tally, "Voting areas: not available", no
-    range; `polls_received_above_polls`.
-  - [ ] `tdsb-5`, `polls: 0` in a TDSB area: as above, and every other trustee race keeps its
-    range; `polls_zero`.
-  - [ ] `councillor-7`, `polls` differs from the bundle: as above; `polls_differ_from_bundle`.
-  - [ ] `councillor-8`, `votesReceived` one over the candidates' sum: tally, no range;
-    `votes_received_mismatch`.
+  - [ ] `councillor-6`, `pollsReceived` above `polls`: tally, "Voting areas: not available", the
+    ranges continue, wider; no Withdrawal; check note `polls_received_above_polls`.
+  - [ ] `tdsb-5`, `polls: 0` in a TDSB area: as above; check note `polls_zero`.
+  - [ ] `councillor-7`, `polls` differs from the bundle: as above; check note
+    `polls_differ_from_bundle`.
+  - [ ] `councillor-8`, `votesReceived` one over the candidates' sum: tally, the ranges continue;
+    no Withdrawal; check note `votes_received_mismatch`.
   - [ ] `councillor-10`, votes above the ward's electors: tally, no range; `count_above_expected`.
   - [ ] `councillor-12`, an unknown name: "Rehearsal Unknown" shown as written; the range
     continues; no Withdrawal.
@@ -142,8 +143,8 @@ action from the phone only. The fault times and payload details are in
     other names shown as written; the range continues; no Withdrawal; a `ward` row in night
     status; no sound.
   - [ ] `councillor-26`, a race not in the bundle: nothing shown.
-  - [ ] `mayor`, Ward 5's `votesCounted` off by one: mayor tally, no Estimated Range;
-    `ward_votes_counted_mismatch`.
+  - [ ] `mayor`, Ward 5's `votesCounted` off by one: mayor tally with its Estimated and Possible
+    Ranges as usual; no Withdrawal; check note `ward_votes_counted_mismatch`.
   - [ ] `councillor-14`, a count decrease: the lower count, as served; a `ward` row in night
     status; no sound.
 - [ ] **Faults lift** (20:25–20:30). **Expect:** every race back to normal; Withdrawals gone; a

@@ -6,7 +6,7 @@ Everything finer is read race by race, so one bad row can't sink the pair.
 """
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # Office ids are fixed in the City's spec: (race id prefix, office level).
 OFFICES = {
@@ -55,6 +55,9 @@ class Tally:
     polls_received: int
     votes: dict[str, int]  # Ballot Name -> votes, in the feed's order
     votes_received: int  # the row's own total, which the checks compare with the candidates'
+    # The race's own electors as the row gives them, if readable. It only bounds a range, so
+    # it is no part of the count's identity.
+    total_voters: int | None = field(default=None, compare=False)
 
 
 @dataclass(frozen=True)
@@ -83,7 +86,16 @@ class AllOffice:
             polls_received=count(row.get("pollsReceived")),
             votes=_votes(row["candidate"]),
             votes_received=count(row.get("votesReceived")),
+            total_voters=_optional_count(row.get("totalVoters")),
         )
+
+
+def _optional_count(value) -> int | None:
+    """A count that only bounds a range: unreadable is None, never an unreadable row."""
+    try:
+        return count(value)
+    except UnreadableRow:
+        return None
 
 
 @dataclass(frozen=True)

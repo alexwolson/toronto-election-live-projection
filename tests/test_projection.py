@@ -243,3 +243,20 @@ def test_skipping_races_never_changes_a_stub_race(replay_2022, nights):
     some, _ = project(snap.all_office, snap.ward_by_ward, bundle, only={"tdsb-3"})
     pick = {r["id"]: r["projection"] for r in some["races"]}
     assert pick["tdsb-3"] == next(r for r in full["races"] if r["id"] == "tdsb-3")["projection"]
+
+
+# --- Reporting Progress unknown (#97): the units in are enumerated, 0 to all of them ---------
+
+
+def test_a_race_whose_units_in_are_unknown_still_projects_and_is_wider():
+    votes = np.array([900, 600, 300])
+    known = draws(5, votes=votes)
+    unknown = draws(None, votes=votes)
+    assert unknown is not None and unknown.shape == known.shape
+    assert np.allclose(unknown.sum(axis=1), 100.0)
+
+    def width(d):
+        low, high = np.percentile(d[:, 0], [5, 95])
+        return high - low
+
+    assert width(unknown) > width(known)
