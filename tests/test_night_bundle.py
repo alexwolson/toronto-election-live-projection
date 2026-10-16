@@ -101,10 +101,13 @@ def test_the_french_boards_have_no_expected_totals(bundle):
     assert french and all("expected" not in r for r in french)
 
 
-def test_with_no_2026_advance_figure_the_ladders_fallback_is_used_and_recorded(bundle):
-    assert bundle["ward_aggregates"]["path"] == "historical_shares"
-    assert bundle["ward_aggregates"]["advance_voters"] is None
-    for ward in mayor(bundle)["expected"]["wards"]:
+def test_with_no_2026_advance_figure_the_ladders_fallback_is_used_and_recorded(inputs):
+    set_advance(inputs, advance_voters=None, wards=None)
+    b = build(inputs)
+
+    assert b["ward_aggregates"]["path"] == "historical_shares"
+    assert b["ward_aggregates"]["advance_voters"] is None
+    for ward in mayor(b)["expected"]["wards"]:
         for agg in ward["aggregates"]:
             assert agg["votes"] is None and 0 < agg["share"] < 1
 
@@ -250,7 +253,7 @@ def test_an_unmatched_forecast_on_a_forecast_only_rebuild_turns_the_variant_off(
 
 
 def test_a_released_advance_figure_without_its_source_fails_the_build(inputs):
-    set_advance(inputs, advance_voters=150_000)
+    set_advance(inputs, advance_voters=150_000, source_url=None, published_date=None)
 
     with pytest.raises(ValueError, match="source_url"):
         build(inputs)

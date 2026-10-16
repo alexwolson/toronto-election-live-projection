@@ -1,10 +1,10 @@
 {
  "election_year": 2026,
- "advance_voters": null,
+ "advance_voters": 222550,
  "wards": null,
- "published_date": null,
- "publisher": null,
- "source_title": null,
- "source_url": null,
- "note": "The City promises its 2026 advance-vote figure (citywide) on Tue Oct 13. Until it is recorded here, the S5 ladder's fallback is used: each Ward Aggregate is a historical share of its ward's total."
+ "published_date": "2026-10-13",
+ "publisher": "City of Toronto",
+ "source_title": "Turnout increases for advance voting in Toronto’s 2026 municipal election",
+ "source_url": "https://www.toronto.ca/news/turnout-increases-for-advance-voting-in-torontos-2026-municipal-election/",
+ "note": "Citywide only; the release has no ward table. Six days of advance voting, Oct 6-11: 36,743 + 31,018 + 28,666 + 33,579 + 39,181 + 53,363 = 222,550. Liaison Strategies' same-day analysis gives about 223,000."
 }
