@@ -3,10 +3,13 @@
 It prints both heartbeats, the stored `seq` pair, each switch and Night Close as the route reads
 them (#49, #51), the current Withdrawals with their machine reasons, and the count decreases the pipelines recorded
 (#17 § On the night). It reads with one MGET and one LRANGE and never writes. A malformed key
-spoils only its own section or row.
+spoils only its own section or row. With `--fly-app`, it also lists each Fly app's Machines
+(#111): a Machine on an unreachable host survives a deploy and comes back later on the old image.
 """
 
 import json
+import shutil
+import subprocess
 from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
@@ -177,3 +180,61 @@ def render_status(values: dict, now_ms: int) -> str:
             body = [UNREADABLE]
         lines += ["", f"## {title}", ""] + body
     return "\n".join(lines) + "\n"
+
+
+def list_machines(apps: list[str]) -> dict[str, list | str]:
+    """Each Fly app's Machines from `flyctl machine list --json` (#111), or why they couldn't be
+    listed. Read-only."""
+    if shutil.which("flyctl") is None:
+        return {app: "flyctl is not installed" for app in apps}
+    listed: dict[str, list | str] = {}
+    for app in apps:
+        try:
+            done = subprocess.run(
+                ["flyctl", "machine", "list", "-a", app, "--json"],
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            listed[app] = "flyctl timed out"
+            continue
+        if done.returncode != 0:
+            listed[app] = " ".join(done.stderr.split()) or f"flyctl exited {done.returncode}"
+            continue
+        try:
+            listed[app] = json.loads(done.stdout)
+        except ValueError:
+            listed[app] = "flyctl returned unreadable JSON"
+    return listed
+
+
+def _digest(m: dict) -> str:
+    return (m.get("image_ref") or {}).get("digest") or "?"
+
+
+def render_machines(apps: dict[str, list | str]) -> list[str]:
+    """The Machines section (#111): each app should run exactly one started Machine. A Machine on
+    an unreachable host survives a deploy and comes back later on the old image, beside the new one.
+    """
+    rows = []
+    for app, machines in apps.items():
+        if isinstance(machines, str):
+            rows.append([app, "", "", "", "", f"**Couldn't check:** {machines}"])
+            continue
+        if not machines:
+            rows.append([app, "", "", "", "", "**no Machines**"])
+            continue
+        count = "" if len(machines) == 1 else f"**{len(machines)} Machines, expected 1**"
+        mixed = len({_digest(m) for m in machines}) > 1
+        for m in machines:
+            flags = [count] if count else []
+            if m.get("state") != "started":
+                flags.append("**not started**")
+            if mixed:
+                flags.append("**images differ**")
+            digest = f"`{_digest(m)}`"
+            state, region = m.get("state", "?"), m.get("region", "?")
+            rows.append([app, m["id"], state, region, digest, ", ".join(flags)])
+    return _table(["App", "Machine", "State", "Region", "Digest", ""], rows)

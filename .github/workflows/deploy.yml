@@ -109,7 +109,9 @@ jobs:
           flyctl deploy --config "deploy/fly.${{ inputs.environment }}.toml" --image "$IMAGE" \
             --env FEED_BASE_URL="$FEED_BASE_URL" --env READER_PATH_URL="$READER_PATH_URL" \
             --env ARCHIVE_PREFIX="$ARCHIVE_PREFIX" \
-            --ha=false --strategy immediate --yes
+            --ha=false --strategy immediate --yes 2>&1 | tee deploy.log
+          # A Machine on an unreachable host is skipped and comes back later on the old image (#111).
+          deploy/unreachable-check.sh deploy.log "$APP"
       - name: Wait for the Machine to start
         run: |
           # The deploy can return while the Machine is still replacing (#99).
