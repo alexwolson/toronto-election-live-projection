@@ -22,7 +22,8 @@ actions are the switches, the page pause and Night Close.
 ## Before 08:30 KST
 
 1. Open the GitHub app: this repo → **Actions**.
-2. Run **night status** → `night`. Expect both heartbeats fresh and every switch `on`
+2. Run **night status** → `night`. Expect both heartbeats fresh, every switch `on`, and under
+   **Machines** one `started` Machine with nothing flagged
    (see [Reading night status](#reading-night-status)).
 3. Open Pushover: the night checks are quiet.
 4. Log in to the Upstash console with 2FA, so the fallback is one tap away.
@@ -107,6 +108,12 @@ tap **Summary**. Sections, top to bottom:
   - `projection_numerics`: the model produced a bad number.
 - **Count decreases.** Every decrease seen, newest first. `citywide` (bold) is the mayor race
   and sounded the alert; `ward` and `area` are silent.
+- **Machines.** The Fly app's Machines (#111). Expect one, `started`, on the deployed digest,
+  with nothing in the last column. A Machine on a host Fly couldn't reach during the deploy comes
+  back later on the old image and runs beside the new one. **Bold** flags: `2 Machines, expected
+  1`, `images differ`, `not started`, `no Machines`, or `Couldn't check:` with Fly's reason.
+  Remove the one not on the deployed digest from the laptop: `flyctl machine destroy <id> -a
+  toronto-election-night-fly --force`. This removes a stale copy; it deploys nothing.
 
 ## Switches
 

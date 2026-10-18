@@ -67,7 +67,9 @@ jobs:
         run: |
           flyctl deploy --config deploy/fly.mockfeed.toml --image "$IMAGE" \
             --env MOCK_FEED_START="$START" --env MOCK_FEED_SPEED="$SPEED" \
-            --env MOCK_FEED_FAULTS="$FAULTS" --ha=false --strategy immediate --yes
+            --env MOCK_FEED_FAULTS="$FAULTS" --ha=false --strategy immediate --yes 2>&1 | tee deploy.log
+          # A Machine on an unreachable host is skipped and comes back later on the old image (#111).
+          deploy/unreachable-check.sh deploy.log "$APP"
       - name: Wait for the Machine to start
         run: |
           # The deploy can return while the Machine is still replacing (#99). A Machine stopped after

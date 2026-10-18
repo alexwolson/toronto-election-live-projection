@@ -1,7 +1,8 @@
 name: night status
 
 # Read-only: prints both heartbeats, the stored seq pair, the switches, Night Close, current
-# Withdrawals and count decreases to the job summary (#50, #49, #51). Run it from the GitHub mobile app.
+# Withdrawals and count decreases to the job summary (#50, #49, #51), then each Fly app's Machines,
+# flagging anything but one started Machine (#111). Run it from the GitHub mobile app.
 on:
   workflow_dispatch:
     inputs:
@@ -24,14 +25,21 @@ jobs:
           enable-cache: true
           python-version: "3.14"
       - run: uv sync --locked
+      - uses: superfly/flyctl-actions/setup-flyctl@1.5
       - name: Night status (${{ inputs.store }})
         env:
           # Chooses the secret's name, not its value: an empty secret fails the run rather than
           # falling through to the other store.
           REDIS_URL: ${{ secrets[inputs.store == 'night' && 'NIGHT_REDIS_URL' || 'REHEARSAL_REDIS_URL'] }}
+          # Read-only here: only `flyctl machine list`.
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          # A Rehearsal also runs the Mock Feed.
+          FLY_APPS: ${{ inputs.store == 'night' && 'toronto-election-night-fly' || 'toronto-election-rehearsal-fly toronto-election-mock-feed' }}
         run: |
+          apps=()
+          for app in $FLY_APPS; do apps+=(--fly-app "$app"); done
           {
             echo "_Store: ${{ inputs.store }}_"
             echo
-            uv run election-night status
+            uv run election-night status "${apps[@]}"
           } >> "$GITHUB_STEP_SUMMARY"

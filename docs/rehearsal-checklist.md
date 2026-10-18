@@ -44,6 +44,12 @@ This applies to Plumbing (#42) and the 48-hour real-feed poll (#47) as well.
   **Expect:** `/results/` shows the "Rehearsal: not real results" bar and "Results from 8 p.m."
 - [ ] **Phone.** Logged in to GitHub, Upstash (2FA) and Pushover; the preview open on cellular,
   wifi off.
+- [ ] **One Machine per app,** after the last deploy and shortly before the start: **night
+  status** → `rehearsal`, section **Machines**. A Machine on an unreachable host survives a
+  deploy and comes back later on the old image (#111). **Expect:** `toronto-election-rehearsal-fly`
+  and `toronto-election-mock-feed` each list one `started` Machine on the recorded digest, and
+  nothing in the last column. A flagged extra Machine: `flyctl machine destroy <id> -a <app>
+  --force`, then run night status again.
 
 ## Plumbing (#42)
 

@@ -41,7 +41,7 @@ from election_night.projection.forecast_weighted import resolve_forecast
 from election_night.rehearsal_checks import check_archives as check_rehearsal_archives
 from election_night.replay.gate_result import write_gate_result
 from election_night.replay.run import LEVELS, PREREGISTRATION, run_replay
-from election_night.status import read_status, render_status
+from election_night.status import list_machines, read_status, render_machines, render_status
 from election_night.store import PIPELINES, Store
 from election_night.switches import STATES, SWITCHES, flip, switch_key
 
@@ -138,7 +138,10 @@ def cmd_pipeline(args) -> None:
 
 def cmd_status(args) -> None:
     client = _redis(_env("REDIS_URL"))
-    sys.stdout.write(render_status(read_status(client), now_ms()))
+    text = render_status(read_status(client), now_ms())
+    if args.fly_app:
+        text += "\n## Machines\n\n" + "\n".join(render_machines(list_machines(args.fly_app))) + "\n"
+    sys.stdout.write(text)
 
 
 def cmd_switch(args) -> None:
@@ -319,6 +322,12 @@ def main(argv: list[str] | None = None) -> None:
 
     status = commands.add_parser(
         "status", help="print night status from the store at REDIS_URL, as Markdown; read-only"
+    )
+    status.add_argument(
+        "--fly-app",
+        action="append",
+        default=[],
+        help="also list this Fly app's Machines and flag anything but one started (#111)",
     )
     status.set_defaults(run=cmd_status)
 
