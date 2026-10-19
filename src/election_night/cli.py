@@ -105,8 +105,8 @@ def _env(name: str) -> str:
     return value
 
 
-def _redis(url: str) -> redis.Redis:
-    return redis.Redis.from_url(url, socket_timeout=10, socket_connect_timeout=10)
+def _redis(url: str, timeout: float = 10) -> redis.Redis:
+    return redis.Redis.from_url(url, socket_timeout=timeout, socket_connect_timeout=10)
 
 
 def cmd_pipeline(args) -> None:
@@ -137,7 +137,8 @@ def cmd_pipeline(args) -> None:
 
 
 def cmd_status(args) -> None:
-    client = _redis(_env("REDIS_URL"))
+    # A phone or laptop on a poor link reads the payload slower than a pipeline does (#53).
+    client = _redis(_env("REDIS_URL"), timeout=30)
     text = render_status(read_status(client), now_ms())
     if args.fly_app:
         text += "\n## Machines\n\n" + "\n".join(render_machines(list_machines(args.fly_app))) + "\n"

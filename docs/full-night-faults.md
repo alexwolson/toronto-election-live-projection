@@ -51,7 +51,7 @@ no figures reads "No figures from the City for this race right now".
 | `votes-mismatch` | `councillor-8` | `votesReceived` one more than the candidates' sum | tally shown (shares from candidate votes), the ranges continue | check note `votes_received_mismatch`; no Withdrawal |
 | `above-expected` | `councillor-10` | the leader gains twice the ward's electors | tally shown, no range | `withdrawal: count_above_expected` |
 | `unknown-name` | `councillor-12` | the last-listed candidate is renamed "Rehearsal Unknown" | the feed name as written; the range continues | none |
-| `name-missing` | `councillor-16` | the last-listed candidate (Stacey Moffatt) is dropped, and the row's `votesReceived` lowered by their votes so it still adds up | the remaining names as written; the range continues | none. Their votes leave the race's count: a ward-scope entry in `count_decreases` at 20:10, badge only |
+| `name-missing` | `councillor-16` | the last-listed candidate (Didi Moffat) is dropped, and the row's `votesReceived` lowered by their votes so it still adds up | the remaining names as written; the range continues | none. Their votes leave the race's count: a ward-scope entry in `count_decreases` at 20:10, badge only |
 | `race-not-in-bundle` | `councillor-26` | an extra council row, "Rehearsal Ward" | nothing: the race is ignored | none |
 | `ward-votes-counted` | `mayor` | Ward 5's `votesCounted` is one more than its candidates' sum, in every repeat | mayor tally, Estimated and Possible Ranges as usual | check note `ward_votes_counted_mismatch`; no Withdrawal |
 | `count-decrease` | `councillor-14` | the race's count from 10 minutes earlier (zero at 20:10) | the lower count, as served | ward-scope entry in `count_decreases`, badge only, no sound |

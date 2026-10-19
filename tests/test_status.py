@@ -218,3 +218,27 @@ def test_check_notes_list_each_contained_fault_once_newest_first():
 def test_no_check_notes_say_none():
     text = render_status(stored(), NOW)
     assert text.split("## Check notes")[1].strip().startswith("None.")
+
+
+def test_the_status_command_waits_longer_for_the_store_than_the_pipeline(monkeypatch):
+    """A phone or laptop on a poor link reads the ~140 KB payload slower than a pipeline does: the
+    10 s pipeline timeout once ran out (#53). The pipeline keeps its own."""
+    from election_night import cli
+
+    opened = []
+
+    class Stop(Exception):
+        pass
+
+    def from_url(url, **kwargs):
+        opened.append(kwargs)
+        raise Stop
+
+    monkeypatch.setenv("REDIS_URL", "redis://example.invalid:6379/0")
+    monkeypatch.setattr(cli.redis.Redis, "from_url", from_url)
+    with pytest.raises(Stop):
+        cli.main(["status"])
+    assert opened[0]["socket_timeout"] == 30
+    with pytest.raises(Stop):
+        cli._redis("redis://example.invalid:6379/0")  # as the pipeline opens it
+    assert opened[1]["socket_timeout"] == 10
