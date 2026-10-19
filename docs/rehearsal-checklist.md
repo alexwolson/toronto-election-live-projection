@@ -223,7 +223,9 @@ Times are suggestions in the tail, clear of the faults.
   clock. **night close** → `rehearsal`, `close`. **Expect:** the `flag` job reads back
   `closed`; the `shutdown` job destroys both Rehearsal apps; within 90 s the page shows "Final
   unofficial count as of …", "Elected (unofficial)" on each fully reported race's leader, and
-  no Live line or banner. Then **night close** → `clear`, so the next Rehearsal starts open.
+  no Live line or banner; about 4 minutes after the shutdown, `reader-path` sounds once and both
+  `pipeline-*` badges go down (nothing pings them now; the next **deploy** brings them back up).
+  Then **night close** → `clear`, so the next Rehearsal starts open.
 
 ### Pass checklist
 

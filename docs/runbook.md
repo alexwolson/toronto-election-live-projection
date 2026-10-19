@@ -173,6 +173,9 @@ Declare it once **neither file has changed for 2 hours**. In night status, both 
 4. After about 90 s, reload `/results/`. Expect "Final unofficial count as of …", "Elected
    (unofficial)" on the leader of each race with every voting area in, and no Live status line or
    banner.
+5. About 4 minutes after the shutdown, `reader-path` sounds once and both `pipeline-*` badges go
+   down: nothing is left to ping them. Expected; no action. (Full night, Oct 19: shutdown 07:09:49,
+   alert 07:13.)
 
 **Declared by mistake:** run **night close** with action `clear`. The page goes back to live
 wording, but the Night apps stay destroyed and the count no longer updates. Only declare Night
