@@ -147,7 +147,7 @@ action from the phone only. The fault times and payload details are in
   - [ ] `councillor-10`, votes above the ward's electors: tally, no range; `count_above_expected`.
   - [ ] `councillor-12`, an unknown name: "Rehearsal Unknown" shown as written; the range
     continues; no Withdrawal.
-  - [ ] `councillor-16`, a Ballot Name missing from the feed (Stacey Moffatt dropped): the
+  - [ ] `councillor-16`, a Ballot Name missing from the feed (Didi Moffat dropped): the
     other names shown as written; the range continues; no Withdrawal; a `ward` row in night
     status; no sound.
   - [ ] `councillor-26`, a race not in the bundle: nothing shown.
