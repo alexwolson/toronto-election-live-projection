@@ -208,7 +208,7 @@ def build_night_bundle(
         trustee_wards=read_trustee_wards(trustee_wards_csv.read_text(encoding="utf-8")),
         forecast_only=forecast_only,
     )
-    bundle["gates"] = gate_records(gates / "results", gates / "approvals")
+    bundle["gates"] = gate_records(gates / "results", gates / "approvals", gates / "carryovers")
     bundle["model_version"] = model_version(gates.parent, model_files(gates.parent))
 
     nights = _history(gates)

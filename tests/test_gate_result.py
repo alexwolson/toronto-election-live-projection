@@ -167,3 +167,41 @@ def test_each_approval_of_a_level_counts_for_the_version_it_names(tmp_path):
         )
 
     assert gate_records(results, approvals)["mayor-forecast-weighted"]["approved"] is True
+
+
+def test_a_carryover_holds_a_levels_result_and_approval_for_the_version_it_names(tmp_path):
+    """A change no gate scores (ADR 0005): Alex's signed record carries run results forward
+    from one model version to the next, and only from the version it names."""
+    from election_night.replay.gate_result import gate_records
+
+    results, approvals, carry = (
+        tmp_path / "results",
+        tmp_path / "approvals",
+        tmp_path / "carryovers",
+    )
+    write(results / "council-run-004.json", {"pass": True, "model_version": "v1", "run": 4})
+    write(results / "trustee-run-004.json", {"pass": True, "model_version": "v0", "run": 4})
+    write(
+        results / "mayor-forecast-weighted-run-004.json",
+        {"pass": False, "model_version": "v1", "run": 4},
+    )
+    write(
+        approvals / "mayor-forecast-weighted-v1.json",
+        {"level": "mayor-forecast-weighted", "model_version": "v1"},
+    )
+    write(carry / "v1-to-v2.json", {"from_version": "v1", "to_version": "v2"})
+
+    records = gate_records(results, approvals, carry)
+
+    assert records["council"] == {
+        "pass": True,
+        "model_version": "v2",
+        "run": 4,
+        "approved": False,
+        "carried_from": "v1",
+    }
+    assert records["mayor-forecast-weighted"]["model_version"] == "v2"
+    assert records["mayor-forecast-weighted"]["approved"] is True
+    # A result at a version the record doesn't name stays where it was.
+    assert records["trustee"]["model_version"] == "v0"
+    assert "carried_from" not in records["trustee"]

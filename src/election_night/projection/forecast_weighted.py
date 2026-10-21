@@ -92,7 +92,7 @@ def kish_ess(weights: np.ndarray) -> float:
 def weighted_bands(
     shares: np.ndarray, weights: np.ndarray, keys: tuple[str, ...]
 ) -> dict[str, dict[str, float]]:
-    """Each candidate's weighted central 90% final-share range and middle tick."""
+    """Each candidate's weighted central 99% final-share range and middle tick."""
     return bands(shares, keys, weights)
 
 

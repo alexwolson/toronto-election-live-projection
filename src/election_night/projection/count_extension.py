@@ -36,7 +36,7 @@ DRAWS = 10_000
 # (#33, ADR 0030).
 TURNOUT_GRID = np.round(np.arange(0.20, 0.70 + 1e-9, 0.005), 3)
 PSEUDO_VOTES = 0.5  # per candidate, so a candidate at 0 keeps a proper Dirichlet
-BAND = (5.0, 50.0, 95.0)  # the central 90% range and its middle tick
+BAND = (0.5, 50.0, 99.5)  # the central 99% range and its middle tick (ADR 0005)
 MIN_CONCENTRATION = 1e-3
 # Combinations are counts per code: 216 for the largest 2026 areas (five City wards, three codes).
 # Beyond this many a race fails closed rather than slow the tick.
@@ -471,7 +471,7 @@ def draw_mayor_final_shares(
 def bands(
     draws: np.ndarray, keys: tuple[str, ...], weights: np.ndarray | None = None
 ) -> dict[str, dict[str, float]]:
-    """Each candidate's central 90% final-share range and middle tick, in points to 2 dp. With
+    """Each candidate’s central 99% final-share range and middle tick, in points to 2 dp. With
     `weights`, the inverse of the weighted empirical CDF."""
     if weights is None:
         low, mid, high = np.percentile(draws, BAND, axis=0)

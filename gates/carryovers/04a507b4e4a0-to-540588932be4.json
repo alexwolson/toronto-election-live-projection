@@ -1,0 +1,9 @@
+{
+ "from_version": "04a507b4e4a071ca586b31a331a46fcead32b0f2dbad01b7d26d51ff0f61f4e8",
+ "to_version": "540588932be4026389d257ad392212e7ce9c65263b30c54a49163f9bb67c8b03",
+ "change": "Estimated Range widened from the central 90% to the central 99% (count_extension.BAND = (0.5, 50.0, 99.5)). No gate reads BAND; G2 scores the pre-registered interval_mass 0.9 from the draws.",
+ "evidence": "Smoke replays of mayor-forecast-weighted and council at the 99% code with the model version pinned to 04a507b4 match the 90% code on every field but timing (2026-10-20).",
+ "adr": "docs/adr/0005-ninety-nine-percent-estimated-range.md",
+ "approved_by": "Alex Olson",
+ "date": "2026-10-21"
+}
