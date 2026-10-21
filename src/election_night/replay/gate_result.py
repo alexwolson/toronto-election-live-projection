@@ -60,10 +60,16 @@ def write_gate_result(result: dict, out_dir: Path, level: str) -> Path:
     return path
 
 
-def gate_records(results_dir: Path, approvals_dir: Path) -> dict[str, dict]:
+def gate_records(
+    results_dir: Path, approvals_dir: Path, carryovers_dir: Path | None = None
+) -> dict[str, dict]:
     """Each level's latest Gate Result as the Night Bundle carries it (#45): pass, model version
     and run, and whether Alex approved that run's model version (ADR 0002). Each approval names
-    one level and one version; an approval of any other version approves nothing."""
+    one level and one version; an approval of any other version approves nothing.
+
+    A carryover (ADR 0005) is Alex's signed record that a model change no gate scores leaves
+    the results unchanged: a result at its `from_version`, with any approval of it, holds for
+    its `to_version`, marked `carried_from`."""
     latest: dict[str, dict] = {}
     for path in sorted(Path(results_dir).glob("*-run-*.json")):
         level = path.name.rsplit("-run-", 1)[0]
@@ -74,12 +80,21 @@ def gate_records(results_dir: Path, approvals_dir: Path) -> dict[str, dict]:
     for path in sorted(Path(approvals_dir).glob("*.json")):
         approval = json.loads(path.read_text(encoding="utf-8"))
         approved.add((approval["level"], approval["model_version"]))
-    return {
-        level: {
+    carried: dict[str, str] = {}  # from version -> to version
+    if carryovers_dir is not None:
+        for path in sorted(Path(carryovers_dir).glob("*.json")):
+            record = json.loads(path.read_text(encoding="utf-8"))
+            carried[record["from_version"]] = record["to_version"]
+    records = {}
+    for level, r in sorted(latest.items()):
+        record = {
             "pass": bool(r["pass"]),
             "model_version": r["model_version"],
             "run": r["run"],
             "approved": (level, r["model_version"]) in approved,
         }
-        for level, r in sorted(latest.items())
-    }
+        if r["model_version"] in carried:
+            record["model_version"] = carried[r["model_version"]]
+            record["carried_from"] = r["model_version"]
+        records[level] = record
+    return records
