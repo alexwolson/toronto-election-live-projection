@@ -30,7 +30,7 @@ jobs:
         env:
           # Chooses the secret's name, not its value: an empty secret fails the run rather than
           # falling through to the other store.
-          REDIS_URL: ${{ secrets[inputs.store == 'night' && 'NIGHT_REDIS_URL' || 'REHEARSAL_REDIS_URL'] }}
+          REDIS_URL: ${{ inputs.store == 'night' && secrets.NIGHT_REDIS_URL || inputs.store != 'night' && secrets.REHEARSAL_REDIS_URL || '' }}
           # Read-only here: only `flyctl machine list`.
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           # A Rehearsal also runs the Mock Feed.

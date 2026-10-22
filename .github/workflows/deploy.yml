@@ -45,8 +45,8 @@ env:
   ARCHIVE_PREFIX: ${{ inputs.environment == 'night' && 'night/' || inputs.archive_prefix }}
   # Chooses the secret's name, not its value: an empty secret fails the run rather than falling
   # through to the other store.
-  REDIS_URL: ${{ secrets[inputs.environment == 'night' && 'NIGHT_REDIS_URL' || 'REHEARSAL_REDIS_URL'] }}
-  HC_PING_KEY: ${{ secrets[inputs.environment == 'night' && 'HC_NIGHT_PING_KEY' || 'HC_REHEARSAL_PING_KEY'] }}
+  REDIS_URL: ${{ inputs.environment == 'night' && secrets.NIGHT_REDIS_URL || inputs.environment != 'night' && secrets.REHEARSAL_REDIS_URL || '' }}
+  HC_PING_KEY: ${{ inputs.environment == 'night' && secrets.HC_NIGHT_PING_KEY || inputs.environment != 'night' && secrets.HC_REHEARSAL_PING_KEY || '' }}
   # Rehearsal previews have Deployment Protection, so the reader-path probe sends Vercel's
   # Protection Bypass for Automation (#92). The Night's reader path is public: none.
   READER_PATH_BYPASS: ${{ inputs.environment == 'rehearsal' && secrets.REHEARSAL_READER_PATH_BYPASS || '' }}
