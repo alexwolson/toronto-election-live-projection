@@ -1,11 +1,20 @@
 # Forecast-only release
 
-After the Deploy Freeze, one release may change the final Mayoral Forecast the site and the
-mayor's variant use (#17 § Rehearsal plan). Nothing else changes: not the code, not the page, and
-never the names (#16).
+After the Deploy Freeze, a forecast-only release brings a new poll into the final Mayoral
+Forecast that the site and the mayor's variant use. There can be as many as the polls need
+until the cutoff (Alex, 2026-10-23; this replaces #17 § Rehearsal plan's single release). Nothing
+else changes: not the code, not the page, and never the names (#16).
 
-**Hard stop: Sun Oct 25, 12:00 EDT (Mon Oct 26, 01:00 KST).** Anything not done by then is
-dropped, and the frozen state stands. Nothing deploys on Oct 26.
+**Cutoff: Mon Oct 26, 10:00 EDT (23:00 KST), when polls open.** The last release starts by
+08:30 EDT (21:30 KST), so it is live and checked, or rolled back, before voting begins. Anything
+not done by then is dropped, and the last completed release stands. Nothing deploys after polls
+open.
+
+**Ward polls only.** A release that adds only ward polls leaves the mayoral draws
+byte-identical (compare the new tag's `mayoral_forecast_draws.npz` sha256 with
+`data/night-bundle/inputs/sources.json`). It stops after step 2. The Night apps keep their
+draws, and the payloads keep naming the bundle's tag, so the freeze gate is run with the
+bundle's tag. A release that changes the mayoral forecast runs every step.
 
 It can be worked from Toronto, the plane or Korea: the image builds in GitHub Actions. The
 Frontend steps need the laptop.
@@ -14,9 +23,9 @@ The Dress runs this procedure once as a no-op, on the current tag (#55).
 
 ## Before you start
 
-- Note the frozen state, to roll back to: the production Vercel deployment URL, the Backend tag
-  it pins (`/data/source-manifest.json` on the site), and the Night apps' image tag and digest
-  (the Deploy Freeze's `deploy` run summary).
+- Note the previous state (§ At the cutoff), to roll back to: the production Vercel deployment
+  URL, the Backend tag it pins (`/data/source-manifest.json` on the site), and the Night apps'
+  image tag and digest (the last Night `deploy` run's summary).
 - The release is a new Backend tag from the same Results release. A forecast built from a
   different Results release fails step 3.
 
@@ -48,7 +57,7 @@ The same Frontend commit as production, with only `BACKEND_RELEASE_TAG` changed 
 
 ## 3. Image rebuild, draws only
 
-On a branch from the commit the frozen image was built from (its image tag is that SHA):
+On a branch from the commit the running Night image was built from (its image tag is that SHA):
 
 ```bash
 uv run election-night name-inputs --forecast-only --backend-release <tag>
@@ -71,7 +80,7 @@ jq '[.races[] | select(.id == "mayor") | .candidates[] | select(.candidate_id) |
 
 It should list two names: the new forecast's leader and challenger. Fewer means the variant is
 off, and the mayor will show no Estimated Range all night. Decide before going on: carry on with
-the variant off, or stop and keep the frozen state.
+the variant off, or stop and keep the previous state.
 
 The diff touches only `data/night-bundle/inputs/mayoral_forecast.json`, its draws,
 `sources.json` and `night-bundle.json`. Anything else: stop.
@@ -116,13 +125,17 @@ rejects every Mock Feed pair as older than the last Rehearsal's.
 **Done when:** both digest checks are green, **night status** → `night` shows both heartbeats
 fresh, and the production `/live/results.json` has `forecast_release_tag` equal to the new tag.
 
-## At the hard stop
+## At the cutoff
+
+"The previous state" below means the last completed release, or the frozen state if none has
+completed. Note its production deployment, Backend tag, and image tag and digest before each
+release.
 
 - **All five done:** the release stands.
-- **Stopped before step 2:** nothing has changed. The frozen state stands.
+- **Stopped before step 2:** nothing has changed. The previous state stands.
 - **Stopped after step 2, before step 5:** the site names the new forecast while the Night apps
-  still use the frozen draws. Roll the site back: promote the frozen production deployment in
-  Vercel and set the Production `BACKEND_RELEASE_TAG` back to the frozen tag. The frozen state
-  stands.
+  still use the previous draws. Roll the site back: promote the previous production deployment
+  in Vercel and set the Production `BACKEND_RELEASE_TAG` back to the previous tag. The previous
+  state stands.
 - **Step 5 failed partway** (one provider on the new digest, one on the old): rerun **deploy**
-  with the frozen tag and digest, then roll the site back as above.
+  with the previous tag and digest, then roll the site back as above.
