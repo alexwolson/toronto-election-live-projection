@@ -29,7 +29,7 @@ ROOT = Path(__file__).parent.parent
 CITY_2026 = ROOT / "tests" / "fixtures" / "feed" / "city-2026"
 NIGHT_BUNDLE = ROOT / "data" / "night-bundle"
 TRUSTEE_WARDS = ROOT / "data" / "mock-feed" / "trustee_wards_2026.csv"
-PINNED = "backend-2026-10-21.1"
+PINNED = "backend-2026-10-23.2"
 
 
 def build(
