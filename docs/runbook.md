@@ -17,7 +17,8 @@ hours.
 | evening | morning Tue | Night Close |
 
 **Nothing deploys on the night.** No image, no Frontend deploy, no `deploy` run. The only
-actions are the switches, the page pause and Night Close.
+actions are the switches, the page pause and Night Close. (The one exception, a Frontend
+rollback, is under [Page pause](#page-pause).)
 
 ## Before 08:30 KST
 
@@ -28,7 +29,13 @@ actions are the switches, the page pause and Night Close.
 3. Open Pushover: the night checks are quiet.
 4. Log in to the Upstash console with 2FA, so the fallback is one tap away.
 5. Open `https://projection.cityhallwatcher.com/results/`. Before 20:00 EDT it reads
-   "Results from 8 p.m.".
+   "Results from 8 p.m.". Each race also has its own page, linked from there: one per ward
+   (`/university-rosedale/`), `/tdsb/<n>/`, `/tcdsb/<n>/` and `/conseils-scolaires/` (ADR 0006).
+6. After the first results arrive, open `/live/results.json` and check that `model_version`
+   starts `540588` and `forecast_release_tag` is `backend-2026-10-24.1`. Until the City
+   publishes a newer file, the store holds the seed payload (`stub-v0`, no tag): the store
+   refuses a payload with the same `seq` pair, so the Night apps' own payload replaces it only
+   then. A stub after results start means the Night apps aren't storing: run night status.
 
 ## Alerts
 
@@ -161,6 +168,13 @@ are paused. See the City of Toronto's results: [link]".
 The page pause still needs a good payload in the store: the route keeps the last good copy
 whatever happens (docs/store.md § Switches).
 
+**If the page itself is broken** (it errors or renders blank even while paused): roll the
+Frontend back to the build from before the results redesign. In the Vercel dashboard, project
+`toronto-election-poll-tracker` → Deployments → `3hqk6q75k` → **Promote**. It builds nothing and
+takes seconds; from a laptop, `vercel promote
+toronto-election-poll-tracker-3hqk6q75k-alexwolsons-projects.vercel.app`. That build reads the
+same store, switches and Night Close. Not rehearsed on the night's store; Alex's call.
+
 ## Night Close
 
 Declare it once **neither file has changed for 2 hours**. In night status, both rows under
@@ -171,8 +185,12 @@ Declare it once **neither file has changed for 2 hours**. In night status, both 
 3. Run. The `flag` job reads back `closed`. Only then does the `shutdown` job destroy the two
    Night apps (`toronto-election-night-fly`, `toronto-election-night-do`) and check both are gone.
 4. After about 90 s, reload `/results/`. Expect "Final unofficial count as of …", "Elected
-   (unofficial)" on the leader of each race with every voting area in, and no Live status line or
-   banner.
+   (unofficial)" on the leader of each race with every voting area in ("Remporte le siège (non
+   officiel)" on the French page), and no Live status line or banner.
+
+Before Night Close, a race with every voting area in already reads as complete: "has N more
+votes than" instead of "leads", its other candidates greyed under "Candidates below are
+mathematically eliminated", and no winner named (ADR 0006).
 5. About 4 minutes after the shutdown, `reader-path` sounds once and both `pipeline-*` badges go
    down: nothing is left to ping them. Expected; no action. (Full night, Oct 19: shutdown 07:09:49,
    alert 07:13.)
@@ -217,6 +235,7 @@ Rehearsal store:
 - **night status:** run 38087286581 (Oct 10).
 - **switch,** each switch off then on: runs 38084223338 to 38084518577 (Oct 10, #49).
 - **night close,** `close` with the shutdown, then `clear`: runs 38093180402 and 38093261131
-  (Oct 10, #51).
+  (Oct 10, #51). `close` again on the results redesign's preview: run 40151000371 (Oct 24,
+  ADR 0006).
 - **Upstash console,** each switch and Night Close: not yet. The Full-night Rehearsal (#53) runs
   every switch each way from the console.
