@@ -25,12 +25,12 @@
  },
  "forecast": {
   "repository": "alexwolson/toronto-election-poll-tracker-backend",
-  "release": "backend-2026-10-26.1",
+  "release": "backend-2026-10-26.2",
   "asset": "mayoral_forecast.json",
-  "sha256": "4fcbd3aa2e59c4101d01aa7bf464d8983f1a8d9d544c089b74bbb3922c93c610",
+  "sha256": "a5624b494bf14b38f60b94d713f52cc190217f991fb79e416db3885e3aa7fd0b",
   "draws": {
    "asset": "mayoral_forecast_draws.npz",
-   "sha256": "decdc9d3e1a9530da75410233c871814259aebd5b24c02ae153a2fa45fa19519"
+   "sha256": "393d5f69cdeab15307d5d5b31c42df716bc5509fe71611b84fad88877b34c3e9"
   }
  }
 }
