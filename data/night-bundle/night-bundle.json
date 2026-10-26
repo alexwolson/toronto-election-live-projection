@@ -1,7 +1,7 @@
 {
  "bundle_version": 1,
  "model_version": "540588932be4026389d257ad392212e7ce9c65263b30c54a49163f9bb67c8b03",
- "forecast_release_tag": "backend-2026-10-24.1",
+ "forecast_release_tag": "backend-2026-10-25.1",
  "opening_time": "2026-10-26T20:00:00-04:00",
  "electors": {
   "1": 78411,
@@ -66,12 +66,12 @@
    },
    "forecast": {
     "repository": "alexwolson/toronto-election-poll-tracker-backend",
-    "release": "backend-2026-10-24.1",
+    "release": "backend-2026-10-25.1",
     "asset": "mayoral_forecast.json",
-    "sha256": "0eec5e9f66238bbaaee59dd5e0281769d4e21b9f5586441d9945b85e51969a2c",
+    "sha256": "3daa2642f591f7fbca87f9f74f7ab0c99eeb0a212d7680c7ea6d19429d2919c9",
     "draws": {
      "asset": "mayoral_forecast_draws.npz",
-     "sha256": "e20375149f58c1793a91f64ab860c0821bdd12dc025fd3bffd1674fdb7546dad"
+     "sha256": "1350ddc3e3224c55be5bef9ed293012be14d0fd90817e95409a1911d93f482cb"
     }
    },
    "vendored_sha256": {
@@ -79,7 +79,7 @@
     "registry/councilorCandidates_2026.json": "6e54e30ae7a6021047e97129e773f28e72753e88e7e31566a2ea8b24a7b016df",
     "registry/trusteeCandidates_2026.json": "7703d3857a5caa8a61b4077dbb6b3ce9d272188ba6344c6652dcffa0af8ce991",
     "canonical-2026.csv": "2be487c79d979d65b5d22e540221d0483e18305c8df37d3e605a7917d13b0c63",
-    "mayoral_forecast.json": "0eec5e9f66238bbaaee59dd5e0281769d4e21b9f5586441d9945b85e51969a2c"
+    "mayoral_forecast.json": "3daa2642f591f7fbca87f9f74f7ab0c99eeb0a212d7680c7ea6d19429d2919c9"
    }
   }
  },
@@ -5909,8 +5909,8 @@
   }
  },
  "forecast": {
-  "release_tag": "backend-2026-10-24.1",
+  "release_tag": "backend-2026-10-25.1",
   "npz": "inputs/mayoral_forecast_draws.npz",
-  "npz_sha256": "e20375149f58c1793a91f64ab860c0821bdd12dc025fd3bffd1674fdb7546dad"
+  "npz_sha256": "1350ddc3e3224c55be5bef9ed293012be14d0fd90817e95409a1911d93f482cb"
  }
 }
